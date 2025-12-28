@@ -1,4 +1,4 @@
-package example.backend;
+package example.backend.enums;
 
 public enum Brand {
     VISA,

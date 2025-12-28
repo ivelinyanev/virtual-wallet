@@ -1,6 +1,6 @@
 package example.backend.models;
 
-import example.backend.Brand;
+import example.backend.enums.Brand;
 import jakarta.persistence.*;
 import lombok.*;
 
