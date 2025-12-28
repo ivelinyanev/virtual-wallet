@@ -1,0 +1,28 @@
+package example.backend.services;
+
+import example.backend.models.User;
+
+import java.util.List;
+
+public interface UserService {
+
+    List<User> getAll();
+
+    User getById(Long id);
+
+    User getByUsername(String username);
+
+    User getByEmail(String email);
+
+    User getByPhoneNumber(String phoneNumber);
+
+    User create(User user);
+
+    User edit(User user);
+
+    void delete();
+
+    void block(Long id);
+
+    void unblock(Long id);
+}

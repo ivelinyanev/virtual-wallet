@@ -53,4 +53,10 @@ public class User {
             uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "role_id"})
     )
     private Set<Role> roles = new LinkedHashSet<>();
+
+    @Column(name = "is_blocked")
+    private boolean isBlocked = Boolean.FALSE;
+
+    @Column(name = "is_verified")
+    private boolean isVerified = Boolean.FALSE;
 }
