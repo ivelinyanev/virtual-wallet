@@ -29,7 +29,7 @@ public class Card {
     @Column(name = "token", nullable = false, unique = true)
     private String token;
 
-    @Column(name = "fingerprint", nullable = false, unique = true)
+    @Column(name = "fingerprint", nullable = false)
     private String fingerprint;
 
     @Column(name = "brand")

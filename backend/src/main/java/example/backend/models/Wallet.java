@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "wallet")
@@ -23,19 +24,20 @@ public class Wallet {
     @Column(name = "wallet_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User owner;
 
     @Column(name = "name")
     private String name;
 
-    @Column(name = "balance")
-    private BigDecimal balance;
+    @Column(name = "balance", precision = 2, nullable = false)
+    private BigDecimal balance = BigDecimal.valueOf(0);
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "currency")
+    @Column(name = "currency", updatable = false, nullable = false)
     private Currency currency;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "transaction_id")
-    List<Transaction> transactions;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "wallet")
+    Set<Transaction> transactions = new LinkedHashSet<>();
 }

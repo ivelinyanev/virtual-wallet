@@ -42,8 +42,16 @@ public class User {
     @Column(name = "photo_url")
     private String photoUrl;
 
-    @OneToMany(mappedBy = "cardHolder", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "cardHolder",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private Set<Card> cards = new LinkedHashSet<>();
+
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "owner")
+    private Wallet wallet;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
