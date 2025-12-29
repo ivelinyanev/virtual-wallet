@@ -29,14 +29,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<User> getAll() {
         return userRepository.findAll();
     }
 
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public User getById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User", "id", String.valueOf(id)));
@@ -66,6 +66,9 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new EntityNotFoundException("User", "phone number", phoneNumber));
     }
 
+    /*
+        Public registration endpoint
+     */
     @Override
     @Transactional
     public User create(User user) {
@@ -87,7 +90,7 @@ public class UserServiceImpl implements UserService {
     public User edit(User user) {
         User actingUser = authUtils.getAuthenticatedUser();
 
-        emailPhoneNumberValidation(actingUser, user.getEmail(), user.getPhoneNumber());
+        validateEmailAndPhoneUniqueness(actingUser, user.getEmail(), user.getPhoneNumber());
 
         if (user.getPassword() != null) actingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         if (user.getEmail() != null) actingUser.setEmail(user.getEmail());
@@ -114,6 +117,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new EntityNotFoundException("User", "id", String.valueOf(id)));
 
         user.setBlocked(true);
+        userRepository.save(user);
     }
 
     @Override
@@ -124,13 +128,14 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new EntityNotFoundException("User", "id", String.valueOf(id)));
 
         user.setBlocked(false);
+        userRepository.save(user);
     }
 
     private boolean existsByUsernameOrEmailOrPhoneNumber(String username, String email, String phoneNumber) {
         return userRepository.existsByUsernameOrEmailOrPhoneNumber(username, email, phoneNumber);
     }
 
-    private void emailPhoneNumberValidation(User actingUser, String newEmail, String newPhoneNumber) {
+    private void validateEmailAndPhoneUniqueness(User actingUser, String newEmail, String newPhoneNumber) {
         if (newEmail != null && !newEmail.equals(actingUser.getEmail())) {
             if (userRepository.existsByEmail(newEmail)) {
                 throw new DuplicateException(EMAIL_ALREADY_IN_USE);

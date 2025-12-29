@@ -1,11 +1,18 @@
 package example.backend.models;
 
-import example.backend.enums.Brand;
+import example.backend.enums.CardBrand;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "cards")
+@Table(
+        name = "cards",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {
+                        "fingerprint", "user_id"
+                })
+        }
+)
 @Getter
 @Setter
 @AllArgsConstructor
@@ -22,9 +29,12 @@ public class Card {
     @Column(name = "token", nullable = false, unique = true)
     private String token;
 
+    @Column(name = "fingerprint", nullable = false, unique = true)
+    private String fingerprint;
+
     @Column(name = "brand")
     @Enumerated(EnumType.STRING)
-    private Brand brand;
+    private CardBrand cardBrand;
 
     @Column(name = "last4", nullable = false)
     private String last4;
