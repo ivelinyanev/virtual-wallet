@@ -1,7 +1,7 @@
 package example.backend.services;
 
-import example.backend.dtos.CardCreateReq;
-import example.backend.dtos.CardMetaData;
+import example.backend.dtos.card.CardCreateReq;
+import example.backend.dtos.card.CardMetaData;
 import example.backend.exceptions.AuthorizationException;
 import example.backend.exceptions.DuplicateException;
 import example.backend.exceptions.EntityNotFoundException;

@@ -1,6 +1,6 @@
 package example.backend.mappers;
 
-import example.backend.dtos.CardMetaData;
+import example.backend.dtos.card.CardMetaData;
 import example.backend.models.Card;
 import org.springframework.stereotype.Component;
 

@@ -1,4 +1,4 @@
-package example.backend.dtos;
+package example.backend.dtos.card;
 
 public record CardCreateReq(
         String cardNumber,

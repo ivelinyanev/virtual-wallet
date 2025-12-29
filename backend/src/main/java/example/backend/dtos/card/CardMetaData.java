@@ -1,4 +1,4 @@
-package example.backend.dtos;
+package example.backend.dtos.card;
 
 import example.backend.enums.CardBrand;
 
