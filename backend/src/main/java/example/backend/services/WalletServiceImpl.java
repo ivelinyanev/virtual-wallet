@@ -1,10 +1,7 @@
 package example.backend.services;
 
 import example.backend.enums.Currency;
-import example.backend.exceptions.AccountNotVerifiedException;
-import example.backend.exceptions.AuthorizationException;
-import example.backend.exceptions.EntityNotFoundException;
-import example.backend.exceptions.UserBlockedException;
+import example.backend.exceptions.*;
 import example.backend.models.User;
 import example.backend.models.Wallet;
 import example.backend.repositories.WalletRepository;
@@ -68,6 +65,8 @@ public class WalletServiceImpl implements WalletService {
             wallet.setCurrency(Currency.EUR);
         }
 
+        enforceOneWalletPerCurrency(wallet.getCurrency(), wallet.getOwner());
+
         return walletRepository.save(wallet);
     }
 
@@ -91,6 +90,10 @@ public class WalletServiceImpl implements WalletService {
         walletRepository.delete(wallet);
     }
 
+    /*
+        Helpers
+     */
+
     private boolean isOwner(Wallet wallet) {
         return wallet.getOwner().equals(authUtils.getAuthenticatedUser());
     }
@@ -102,6 +105,12 @@ public class WalletServiceImpl implements WalletService {
 
         if (!actingUser.isVerified()) {
             throw new AccountNotVerifiedException(ACCOUNT_NOT_VERIFIED);
+        }
+    }
+
+    private void enforceOneWalletPerCurrency(Currency currency, User owner) {
+        if (walletRepository.existsByCurrencyAndOwner(currency, owner)) {
+            throw new ImpossibleOperationException(String.format(WALLET_DUPLICATE, currency));
         }
     }
 }

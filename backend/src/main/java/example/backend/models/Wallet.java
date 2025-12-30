@@ -12,7 +12,14 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "wallet")
+@Table(
+        name = "wallet",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        columnNames = {"user_id", "currency"}
+                )
+        }
+)
 @Getter
 @Setter
 @AllArgsConstructor
@@ -24,18 +31,27 @@ public class Wallet {
     @Column(name = "wallet_id")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User owner;
 
     @Column(name = "name")
     private String name;
 
-    @Column(name = "balance", precision = 2, nullable = false)
-    private BigDecimal balance = BigDecimal.valueOf(0);
+    @Column(
+            name = "balance",
+            precision = 19,
+            scale = 2,
+            nullable = false
+    )
+    private BigDecimal balance = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "currency", updatable = false, nullable = false)
+    @Column(
+            name = "currency",
+            updatable = false,
+            nullable = false
+    )
     private Currency currency;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "wallet")

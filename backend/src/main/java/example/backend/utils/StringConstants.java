@@ -12,4 +12,5 @@ public class StringConstants {
     public static final String CANNOT_DELETE_WALLET_YOU_ARE_NOT_OWNER_OF = "Oh, oh. Seems like you are trying to delete someone else's wallet. Not possible!";
     public static final String USER_BLOCKED = "You are blocked. Your actions in the app are limited. Please contact customer support to get that resolved!";
     public static final String ACCOUNT_NOT_VERIFIED = "Account is not verified. To proceed please verify your account!";
+    public static final String WALLET_DUPLICATE = "You already own a %s wallet! You either did not specify currency and it sets the default to EUR and you own a EUR wallet or you simply have a wallet of the specified currency";
 }

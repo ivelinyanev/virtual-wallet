@@ -50,8 +50,8 @@ public class User {
     )
     private Set<Card> cards = new LinkedHashSet<>();
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "owner")
-    private Wallet wallet;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
+    private Set<Wallet> wallets = new LinkedHashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
