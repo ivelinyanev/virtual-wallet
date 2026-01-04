@@ -1,4 +1,4 @@
-package example.backend.services;
+package example.backend.services.implementations;
 
 import example.backend.dtos.card.CardCreateReq;
 import example.backend.dtos.card.CardMetaData;
@@ -9,6 +9,8 @@ import example.backend.mappers.CardMapper;
 import example.backend.models.Card;
 import example.backend.models.User;
 import example.backend.repositories.CardRepository;
+import example.backend.services.protocols.CardService;
+import example.backend.services.protocols.PaymentService;
 import example.backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;

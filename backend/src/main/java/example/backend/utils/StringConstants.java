@@ -14,4 +14,8 @@ public class StringConstants {
     public static final String ACCOUNT_NOT_VERIFIED = "Account is not verified. To proceed please verify your account!";
     public static final String WALLET_DUPLICATE = "You already own a %s wallet! You either did not specify currency and it sets the default to EUR and you own a EUR wallet or you simply have a wallet of the specified currency!";
     public static final String YOU_DO_NOT_OWN_THAT_TRANSACTION = "You can only view your own transactions!";
+    public static final String INSUFFICIENT_FUNDS = "Insufficient funds!";
+    public static final String SAME_WALLET_TRANSACTION_IMPOSSIBLE = "You cannot transfer from one wallet to the same one!";
+    public static final String TRANSFER_AMOUNT_CANNOT_BE_NEGATIVE = "Transfer amount cannot be negative or zero!";
+    public static final String WALLET_IDS_NOT_FOUND = "Wallet ids inconsistent, therefore not found!";
 }

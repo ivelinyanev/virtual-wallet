@@ -1,4 +1,4 @@
-package example.backend.services;
+package example.backend.services.protocols;
 
 import example.backend.models.Transaction;
 
@@ -13,7 +13,5 @@ public interface TransactionService {
     Transaction getMyTransactionById(Long id);
 
     Transaction getAnyTransactionById(Long id);
-
-    Transaction createTransaction(Transaction transaction);
 
 }

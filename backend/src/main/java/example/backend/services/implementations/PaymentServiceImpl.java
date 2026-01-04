@@ -1,9 +1,10 @@
-package example.backend.services;
+package example.backend.services.implementations;
 
 import example.backend.dtos.card.CardCreateReq;
 import example.backend.dtos.card.CardMetaData;
 import example.backend.enums.CardBrand;
 import example.backend.exceptions.InvalidCardException;
+import example.backend.services.protocols.PaymentService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Service;
 

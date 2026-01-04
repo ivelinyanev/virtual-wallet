@@ -1,10 +1,11 @@
-package example.backend.services;
+package example.backend.services.implementations;
 
 import example.backend.enums.Currency;
 import example.backend.exceptions.*;
 import example.backend.models.User;
 import example.backend.models.Wallet;
 import example.backend.repositories.WalletRepository;
+import example.backend.services.protocols.WalletService;
 import example.backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
