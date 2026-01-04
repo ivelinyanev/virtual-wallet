@@ -1,4 +1,4 @@
-package example.backend.services;
+package example.backend.services.implementations;
 
 import example.backend.enums.ERole;
 import example.backend.exceptions.DuplicateException;
@@ -7,6 +7,7 @@ import example.backend.models.Role;
 import example.backend.models.User;
 import example.backend.repositories.RoleRepository;
 import example.backend.repositories.UserRepository;
+import example.backend.services.protocols.UserService;
 import example.backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;

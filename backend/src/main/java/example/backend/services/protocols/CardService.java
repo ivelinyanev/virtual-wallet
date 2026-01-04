@@ -1,4 +1,4 @@
-package example.backend.services;
+package example.backend.services.protocols;
 
 import example.backend.dtos.card.CardCreateReq;
 import example.backend.models.Card;

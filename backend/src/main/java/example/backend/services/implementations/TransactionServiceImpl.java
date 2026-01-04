@@ -1,16 +1,21 @@
-package example.backend.services;
+package example.backend.services.implementations;
 
+import example.backend.enums.TransactionStatus;
+import example.backend.enums.TransactionType;
 import example.backend.exceptions.EntityNotFoundException;
 import example.backend.exceptions.ImpossibleOperationException;
 import example.backend.models.Transaction;
 import example.backend.models.User;
+import example.backend.models.Wallet;
 import example.backend.repositories.TransactionRepository;
+import example.backend.services.protocols.TransactionService;
 import example.backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static example.backend.utils.StringConstants.YOU_DO_NOT_OWN_THAT_TRANSACTION;
@@ -62,9 +67,21 @@ public class TransactionServiceImpl implements TransactionService {
                 .orElseThrow(() -> new EntityNotFoundException("Transaction", "id", String.valueOf(id)));
     }
 
-    @Override
-    public Transaction createTransaction(Transaction transaction) {
-        return null;
+    @Transactional
+    void recordTransaction(
+            Wallet wallet,
+            Wallet counterparty,
+            BigDecimal amount,
+            TransactionType type
+    ) {
+        Transaction transaction = new Transaction();
+        transaction.setWallet(wallet);
+        transaction.setCounterpartyWallet(counterparty);
+        transaction.setAmount(amount);
+        transaction.setType(type);
+        transaction.setStatus(TransactionStatus.SUCCESSFUL);
+
+        transactionRepository.save(transaction);
     }
 
 }
