@@ -1,5 +1,5 @@
 ### API Keys ###
-./src/main/resources/application-secrets.properties
+application-secrets.properties
 
 HELP.md
 .gradle

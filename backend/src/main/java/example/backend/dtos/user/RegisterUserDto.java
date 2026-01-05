@@ -1,5 +1,6 @@
 package example.backend.dtos.user;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 
 import static example.backend.utils.StringConstants.*;
