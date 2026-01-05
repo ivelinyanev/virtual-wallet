@@ -24,4 +24,5 @@ public class StringConstants {
     public static final String PHONE_NUMBER_MUST_BE_VALID = "Phone number must be in international format (e.g. +359888123456)";
     public static final String PHOTO_URL_MUST_BE_VALID = "Photo URL must be a valid URL!";
     public static final String FAILED_TO_SEND_EMAIL = "Failed to send email. ";
+    public static final String VERIFICATION_CODE_VALIDATION = "Verification code must be 6 digits!";
 }
