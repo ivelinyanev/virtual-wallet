@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     @Transactional
-    public User create(User user) {
+    public User registerUnverified(User user) {
         if (existsByUsernameOrEmailOrPhoneNumber(user.getUsername(), user.getEmail(), user.getPhoneNumber())) {
             throw new DuplicateException(USER_WITH_USERNAME_EMAIL_NUMBER_ALREADY_EXISTS);
         }
@@ -83,6 +83,23 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
+    public User createByAdmin(User user) {
+        if (existsByUsernameOrEmailOrPhoneNumber(user.getUsername(), user.getEmail(), user.getPhoneNumber())) {
+            throw new DuplicateException(USER_WITH_USERNAME_EMAIL_NUMBER_ALREADY_EXISTS);
+        }
+
+        Role roleUser = roleRepository.findByName(ERole.ROLE_USER);
+        user.getRoles().add(roleUser);
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setVerified(true);
+
+        return null;
     }
 
     @Override

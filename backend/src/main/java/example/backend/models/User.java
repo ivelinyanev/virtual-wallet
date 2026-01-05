@@ -3,6 +3,7 @@ package example.backend.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -42,6 +43,15 @@ public class User {
     @Column(name = "photo_url")
     private String photoUrl;
 
+    @Column(name = "verification_code")
+    private String verificationCode;
+
+    @Column(name = "verification_code_expires_at")
+    private LocalDateTime verificationCodeExpiresAt;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
     @OneToMany(
             mappedBy = "cardHolder",
             fetch = FetchType.LAZY,
@@ -63,8 +73,13 @@ public class User {
     private Set<Role> roles = new LinkedHashSet<>();
 
     @Column(name = "is_blocked")
-    private boolean isBlocked = Boolean.FALSE;
+    private boolean isBlocked = false;
 
     @Column(name = "is_verified")
-    private boolean isVerified = Boolean.FALSE;
+    private boolean isVerified = false;
+
+    @PrePersist
+    void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }

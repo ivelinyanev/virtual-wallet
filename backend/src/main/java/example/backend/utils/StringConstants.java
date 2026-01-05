@@ -18,4 +18,10 @@ public class StringConstants {
     public static final String SAME_WALLET_TRANSACTION_IMPOSSIBLE = "You cannot transfer from one wallet to the same one!";
     public static final String TRANSFER_AMOUNT_CANNOT_BE_NEGATIVE = "Transfer amount cannot be negative or zero!";
     public static final String WALLET_IDS_NOT_FOUND = "Wallet ids inconsistent, therefore not found!";
+    public static final String EMAIL_MUST_BE_VALID = "Email must be a valid email address!";
+    public static final String FIELD_CANNOT_BE_BLANK = "Field cannot be blank!";
+    public static final String FIELD_MUST_BE_IN_RANGE = "Field must be between 1 and 50 characters!";
+    public static final String PHONE_NUMBER_MUST_BE_VALID = "Phone number must be in international format (e.g. +359888123456)";
+    public static final String PHOTO_URL_MUST_BE_VALID = "Photo URL must be a valid URL!";
+    public static final String FAILED_TO_SEND_EMAIL = "Failed to send email. ";
 }
