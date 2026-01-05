@@ -16,7 +16,9 @@ public interface UserService {
 
     User getByPhoneNumber(String phoneNumber);
 
-    User create(User user);
+    User registerUnverified(User user);
+
+    User createByAdmin(User user);
 
     User edit(User user);
 
