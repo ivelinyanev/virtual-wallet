@@ -19,7 +19,6 @@ public class EmailConfig {
     @Value("${email.password}")
     private String emailPassword;
 
-    @Profile("!test")
     @Bean
     public JavaMailSender getJavaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
