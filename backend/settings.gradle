@@ -1,7 +1,9 @@
+rootProject.name = 'backend'
+
 pluginManagement {
     repositories {
-        maven { url "https://repo.maven.apache.org/maven2" }
         gradlePluginPortal()
+        mavenCentral()
     }
 }
 
@@ -10,5 +12,3 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-
-rootProject.name = 'backend'
