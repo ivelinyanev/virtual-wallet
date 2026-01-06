@@ -29,4 +29,4 @@ jobs:
 
       - name: Build and test backend
         working-directory: backend
-        run: ./gradlew clean build
+        run: ./gradlew clean build --refresh-dependencies --stacktrace
