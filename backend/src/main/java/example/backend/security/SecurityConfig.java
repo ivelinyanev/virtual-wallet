@@ -28,7 +28,7 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration config
-    ) {
+    ) throws Exception {
         return config.getAuthenticationManager();
     }
 
@@ -37,7 +37,8 @@ public class SecurityConfig {
             UserDetailsService service,
             PasswordEncoder encoder
     ) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(service);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(service);
         provider.setPasswordEncoder(encoder);
         return provider;
     }
