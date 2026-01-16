@@ -7,11 +7,14 @@ import example.backend.repositories.UserRepository;
 import example.backend.services.protocols.EmailService;
 import example.backend.services.protocols.VerificationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.ThreadLocalRandom;
+
+import static example.backend.utils.StringConstants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +36,12 @@ public class VerificationServiceImpl implements VerificationService {
 
     @Override
     public void resendVerification(User user) {
+        String code = generateCode();
+        user.setVerificationCode(code);
+        user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(5));
+        userRepository.save(user);
 
+        emailService.sendVerificationEmail(user.getEmail(), code);
     }
 
     @Override
@@ -43,15 +51,15 @@ public class VerificationServiceImpl implements VerificationService {
                 .orElseThrow(() -> new EntityNotFoundException("User", "email", email));
 
         if (user.isVerified()) {
-            throw new ImpossibleOperationException("User already verified!");
+            throw new ImpossibleOperationException(USER_ALREADY_VERIFIED);
         }
 
         if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new ImpossibleOperationException("Verification code expired!");
+            throw new ImpossibleOperationException(VERIFICATION_CODE_EXPIRED);
         }
 
         if (!user.getVerificationCode().equals(code)) {
-            throw new ImpossibleOperationException("Verification code does not match!");
+            throw new ImpossibleOperationException(VERIFICATION_CODE_DOES_NOT_MATCH);
         }
 
         user.setVerified(true);
