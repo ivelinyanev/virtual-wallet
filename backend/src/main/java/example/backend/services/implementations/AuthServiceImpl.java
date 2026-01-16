@@ -2,6 +2,7 @@ package example.backend.services.implementations;
 
 import example.backend.dtos.user.RegisterUserDto;
 import example.backend.dtos.user.VerifyUserDto;
+import example.backend.mappers.UserMapper;
 import example.backend.models.User;
 import example.backend.services.protocols.AuthService;
 import example.backend.services.protocols.UserService;
@@ -16,16 +17,12 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserService userService;
     private final VerificationService verificationService;
+    private final UserMapper userMapper;
 
     @Override
     @Transactional
     public User register(RegisterUserDto dto) {
-        User user = new User();
-
-        user.setUsername(dto.username());
-        user.setEmail(dto.email());
-        user.setPhoneNumber(dto.phoneNumber());
-        user.setPassword(dto.password());
+        User user = userMapper.toUser(dto);
 
         User savedUser = userService.registerUnverified(user);
 

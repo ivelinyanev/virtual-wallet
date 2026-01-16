@@ -28,4 +28,5 @@ public class StringConstants {
     public static final String USER_ALREADY_VERIFIED = "User already verified!";
     public static final String VERIFICATION_CODE_EXPIRED = "Verification code expired!";
     public static final String VERIFICATION_CODE_DOES_NOT_MATCH = "Verification code does not match!";
+    public static final String CONFIRMATION_EMAIL_SENT = "A confirmation code has been sent to %s. If you don't find it, please check spam.";
 }
