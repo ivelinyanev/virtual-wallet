@@ -25,4 +25,7 @@ public class StringConstants {
     public static final String PHOTO_URL_MUST_BE_VALID = "Photo URL must be a valid URL!";
     public static final String FAILED_TO_SEND_EMAIL = "Failed to send email. ";
     public static final String VERIFICATION_CODE_VALIDATION = "Verification code must be 6 digits!";
+    public static final String USER_ALREADY_VERIFIED = "User already verified!";
+    public static final String VERIFICATION_CODE_EXPIRED = "Verification code expired!";
+    public static final String VERIFICATION_CODE_DOES_NOT_MATCH = "Verification code does not match!";
 }
