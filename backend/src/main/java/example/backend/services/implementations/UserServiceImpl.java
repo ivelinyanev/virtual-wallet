@@ -3,6 +3,7 @@ package example.backend.services.implementations;
 import example.backend.enums.ERole;
 import example.backend.exceptions.DuplicateException;
 import example.backend.exceptions.EntityNotFoundException;
+import example.backend.exceptions.UserNotVerifiedException;
 import example.backend.models.Role;
 import example.backend.models.User;
 import example.backend.repositories.RoleRepository;
@@ -10,6 +11,8 @@ import example.backend.repositories.UserRepository;
 import example.backend.services.protocols.UserService;
 import example.backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,8 +34,15 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ADMIN')")
-    public List<User> getAll() {
-        return userRepository.findAll();
+    public Page<User> getAll(Pageable pageable) {
+        return userRepository.findAll(pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('USER')")
+    public Page<User> search(String query, Pageable pageable) {
+        return userRepository.search(query, pageable);
     }
 
     @Override
@@ -53,7 +63,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasRole('USER')")
     public User getByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User", "email", email));
@@ -164,6 +173,12 @@ public class UserServiceImpl implements UserService {
             if (userRepository.existsByPhoneNumber(newPhoneNumber)) {
                 throw new DuplicateException(PHONE_NUMBER_ALREADY_IN_USE);
             }
+        }
+    }
+
+    private void validateUserVerified(User actingUser) {
+        if (!actingUser.isVerified()) {
+            throw new UserNotVerifiedException(USER_NOT_VERIFIED);
         }
     }
 }

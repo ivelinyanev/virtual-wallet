@@ -1,12 +1,14 @@
 package example.backend.services.protocols;
 
 import example.backend.models.User;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface UserService {
 
-    List<User> getAll();
+    Page<User> getAll(Pageable pageable);
+
+    Page<User> search(String query, Pageable pageable);
 
     User getById(Long id);
 
