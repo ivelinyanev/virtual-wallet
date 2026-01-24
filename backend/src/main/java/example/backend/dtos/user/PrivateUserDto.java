@@ -5,7 +5,7 @@ import example.backend.models.Role;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-public record ResponseUserDto(
+public record PrivateUserDto(
         Long id,
         String firstName,
         String lastName,

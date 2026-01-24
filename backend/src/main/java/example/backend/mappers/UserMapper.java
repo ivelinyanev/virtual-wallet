@@ -1,7 +1,9 @@
 package example.backend.mappers;
 
+import example.backend.dtos.user.PublicUserDto;
 import example.backend.dtos.user.RegisterUserDto;
-import example.backend.dtos.user.ResponseUserDto;
+import example.backend.dtos.user.PrivateUserDto;
+import example.backend.dtos.user.UpdateUserDto;
 import example.backend.models.Role;
 import example.backend.models.User;
 import org.springframework.stereotype.Component;
@@ -27,8 +29,20 @@ public class UserMapper {
         return user;
     }
 
-    public ResponseUserDto toResponseUserDto(User user) {
-        ResponseUserDto response = new ResponseUserDto(
+    public User toUser(UpdateUserDto updateUserDto) {
+        User user = new User();
+
+        user.setPassword(updateUserDto.password());
+        user.setEmail(updateUserDto.email());
+        user.setPhoneNumber(updateUserDto.phoneNumber());
+        user.setPhotoUrl(updateUserDto.photoUrl());
+
+        return user;
+    }
+
+    public PrivateUserDto toPrivateUserDto(User user) {
+
+        return new PrivateUserDto(
                 user.getId(),
                 user.getFirstName(),
                 user.getLastName(),
@@ -43,7 +57,13 @@ public class UserMapper {
                         .map(Enum::toString)
                         .collect(Collectors.toSet())
         );
+    }
 
-        return response;
+    public PublicUserDto toPublicUserDto(User user) {
+        return new PublicUserDto(
+                user.getId(),
+                user.getUsername(),
+                user.getPhotoUrl()
+        );
     }
 }
