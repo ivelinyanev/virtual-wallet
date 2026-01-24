@@ -26,61 +26,90 @@ public class TransferServiceImpl implements TransferService {
     @Override
     @Transactional
     public void transfer(Long fromId, Long toId, BigDecimal amount) {
-        if (fromId.equals(toId)) {
-            throw new ImpossibleOperationException(SAME_WALLET_TRANSACTION_IMPOSSIBLE);
-        }
 
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ImpossibleOperationException(TRANSFER_AMOUNT_CANNOT_BE_NEGATIVE);
-        }
+        validateTransferRequest(fromId, toId, amount);
 
         Wallet from = walletRepository.findByIdForUpdate(fromId);
         Wallet to = walletRepository.findByIdForUpdate(toId);
 
+        validateWalletState(from, to, amount);
+
+        BigDecimal creditAmount = convertIfNeeded(from, to, amount);
+
+        debit(from, amount);
+        credit(to, creditAmount);
+
+        recordTransaction(from, to, amount, creditAmount);
+    }
+
+    private void validateTransferRequest(Long fromId, Long toId, BigDecimal amount) {
+        validateDifferentWallets(fromId, toId);
+        validatePositiveAmount(amount);
+    }
+
+    private void validateWalletState(Wallet from, Wallet to, BigDecimal amount) {
+        validateBothWalletsFound(from, to);
+        validateSufficientAmount(from, amount);
+    }
+
+    private void validateDifferentWallets(Long fromId, Long toId) {
+        if (fromId.equals(toId)) {
+            throw new ImpossibleOperationException(SAME_WALLET_TRANSACTION_IMPOSSIBLE);
+        }
+    }
+
+    private void validatePositiveAmount(BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ImpossibleOperationException(TRANSFER_AMOUNT_CANNOT_BE_NEGATIVE);
+        }
+    }
+
+    private void validateBothWalletsFound(Wallet from, Wallet to) {
         if (from == null || to == null) {
             throw new EntityNotFoundException(WALLET_IDS_NOT_FOUND);
         }
+    }
 
+    private void validateSufficientAmount(Wallet from, BigDecimal amount) {
         if (from.getBalance().compareTo(amount) < 0) {
             throw new ImpossibleOperationException(INSUFFICIENT_FUNDS);
         }
+    }
 
+    private void debit(Wallet from, BigDecimal amount) {
         from.setBalance(from.getBalance().subtract(amount));
+    }
 
-        /*
-            If wallet currencies differ, convert and work with the converted amount
-         */
-        if (!from.getCurrency().equals(to.getCurrency())) {
-            BigDecimal convertedAmount = conversionService.convert(
-                    from.getCurrency(),
-                    to.getCurrency(),
-                    amount
-            );
+    private void credit(Wallet to, BigDecimal amount) {
+        to.setBalance(to.getBalance().add(amount));
+    }
 
-            to.setBalance(to.getBalance().add(convertedAmount));
-
-            transactionService.recordTransaction(
-                    to,
-                    from,
-                    convertedAmount,
-                    TransactionType.TRANSFER_IN
-            );
-        } else {
-            to.setBalance(to.getBalance().add(amount));
-
-            transactionService.recordTransaction(
-                    to,
-                    from,
-                    amount,
-                    TransactionType.TRANSFER_IN
-            );
+    private BigDecimal convertIfNeeded(Wallet from, Wallet to, BigDecimal amount) {
+        if (from.getCurrency().equals(to.getCurrency())) {
+            return amount;
         }
 
+        return conversionService.convert(
+                from.getCurrency(),
+                to.getCurrency(),
+                amount
+        );
+    }
+
+    private void recordTransaction(Wallet from, Wallet to, BigDecimal debitAmount, BigDecimal creditAmount) {
         transactionService.recordTransaction(
                 from,
                 to,
-                amount.negate(),
+                debitAmount.negate(),
                 TransactionType.TRANSFER_OUT
         );
+
+        transactionService.recordTransaction(
+                to,
+                from,
+                creditAmount,
+                TransactionType.TRANSFER_IN
+        );
     }
+
 }
