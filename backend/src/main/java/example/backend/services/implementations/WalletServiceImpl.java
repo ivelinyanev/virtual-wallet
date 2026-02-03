@@ -71,6 +71,18 @@ public class WalletServiceImpl implements WalletService {
         return walletRepository.save(wallet);
     }
 
+    @Override
+    @Transactional
+    public void createBaseWalletUponVerification(User user) {
+        Wallet wallet = new Wallet();
+
+        wallet.setOwner(user);
+        wallet.setCurrency(Currency.EUR);
+        wallet.setName("Your EUR Wallet");
+
+        walletRepository.save(wallet);
+    }
+
     /*
         TODO: maybe add check for user to not be able to delete a wallet if the balance is positive
      */
@@ -90,10 +102,6 @@ public class WalletServiceImpl implements WalletService {
 
         walletRepository.delete(wallet);
     }
-
-    /*
-        Helpers
-     */
 
     private boolean isOwner(Wallet wallet) {
         return wallet.getOwner().equals(authUtils.getAuthenticatedUser());
