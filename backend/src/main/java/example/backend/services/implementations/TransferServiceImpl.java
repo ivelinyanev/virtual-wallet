@@ -3,11 +3,14 @@ package example.backend.services.implementations;
 import example.backend.enums.TransactionType;
 import example.backend.exceptions.EntityNotFoundException;
 import example.backend.exceptions.ImpossibleOperationException;
+import example.backend.models.User;
 import example.backend.models.Wallet;
 import example.backend.repositories.WalletRepository;
 import example.backend.services.protocols.ConversionService;
 import example.backend.services.protocols.TransferService;
+import example.backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,9 +25,11 @@ public class TransferServiceImpl implements TransferService {
     private final WalletRepository walletRepository;
     private final TransactionServiceImpl transactionService;
     private final ConversionService conversionService;
+    private final AuthUtils authUtils;
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('USER')")
     public void transfer(Long fromId, Long toId, BigDecimal amount) {
 
         validateTransferRequest(fromId, toId, amount);
@@ -33,6 +38,7 @@ public class TransferServiceImpl implements TransferService {
         Wallet to = walletRepository.findByIdForUpdate(toId);
 
         validateWalletState(from, to, amount);
+        validateWalletOwner(from);
 
         BigDecimal creditAmount = convertIfNeeded(from, to, amount);
 
@@ -50,6 +56,14 @@ public class TransferServiceImpl implements TransferService {
     private void validateWalletState(Wallet from, Wallet to, BigDecimal amount) {
         validateBothWalletsFound(from, to);
         validateSufficientAmount(from, amount);
+    }
+
+    private void validateWalletOwner(Wallet from) {
+        User user = authUtils.getAuthenticatedUser();
+
+        if (!from.getOwner().equals(user)) {
+            throw new ImpossibleOperationException(YOU_ARE_NOT_THE_WALLET_OWNER);
+        }
     }
 
     private void validateDifferentWallets(Long fromId, Long toId) {
