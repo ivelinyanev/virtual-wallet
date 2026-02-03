@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     /*
-        TODO: add sorting
+        TODO: check sorting
      */
     private final UserService userService;
     private final UserMapper userMapper;
