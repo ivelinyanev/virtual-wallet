@@ -29,19 +29,7 @@ public class StringConstants {
     public static final String VERIFICATION_CODE_EXPIRED = "Verification code expired!";
     public static final String VERIFICATION_CODE_DOES_NOT_MATCH = "Verification code does not match!";
     public static final String CONFIRMATION_EMAIL_SENT = "A confirmation code has been sent to %s. If you don't find it, please check spam.";
-<<<<<<< Updated upstream
-=======
     public static final String USER_NOT_VERIFIED = "Action not possible since account is not verified!";
     public static final String WRONG_PASSWORD = "Wrong password!";
     public static final String YOU_ARE_NOT_THE_WALLET_OWNER = "You are not owner of this wallet!";
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 }
