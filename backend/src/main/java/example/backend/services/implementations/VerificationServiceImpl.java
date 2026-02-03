@@ -1,10 +1,8 @@
 package example.backend.services.implementations;
 
-import example.backend.enums.Currency;
 import example.backend.exceptions.EntityNotFoundException;
 import example.backend.exceptions.ImpossibleOperationException;
 import example.backend.models.User;
-import example.backend.models.Wallet;
 import example.backend.repositories.UserRepository;
 import example.backend.services.protocols.EmailService;
 import example.backend.services.protocols.VerificationService;
@@ -71,7 +69,7 @@ public class VerificationServiceImpl implements VerificationService {
 
         userRepository.save(user);
 
-        walletService.createBaseWalletUponRegistration(user);
+        walletService.createBaseWalletUponVerification(user);
     }
 
     private String generateCode() {
