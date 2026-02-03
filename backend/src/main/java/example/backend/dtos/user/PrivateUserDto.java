@@ -1,6 +1,5 @@
 package example.backend.dtos.user;
 
-import example.backend.models.Role;
 
 import java.time.LocalDateTime;
 import java.util.Set;
