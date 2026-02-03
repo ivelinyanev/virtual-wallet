@@ -6,6 +6,7 @@ import example.backend.models.User;
 import example.backend.repositories.UserRepository;
 import example.backend.services.protocols.EmailService;
 import example.backend.services.protocols.VerificationService;
+import example.backend.services.protocols.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class VerificationServiceImpl implements VerificationService {
 
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final WalletService walletService;
 
     @Override
     @Transactional
@@ -67,6 +69,8 @@ public class VerificationServiceImpl implements VerificationService {
         user.setVerificationCodeExpiresAt(null);
 
         userRepository.save(user);
+
+        walletService.createBaseWalletUponVerification(user);
     }
 
     private String generateCode() {
