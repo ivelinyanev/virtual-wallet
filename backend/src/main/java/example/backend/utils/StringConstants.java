@@ -34,5 +34,8 @@ public class StringConstants {
     public static final String USER_NOT_VERIFIED = "Action not possible since account is not verified!";
     public static final String WRONG_PASSWORD = "Wrong password!";
     public static final String YOU_ARE_NOT_THE_WALLET_OWNER = "You are not owner of this wallet!";
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 }
