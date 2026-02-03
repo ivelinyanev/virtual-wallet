@@ -5,6 +5,8 @@ import example.backend.services.protocols.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import static example.backend.utils.StringConstants.FAILED_TO_SEND_EMAIL;
 
 @Service
+@Profile("!test")
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
 
