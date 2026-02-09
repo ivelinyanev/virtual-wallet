@@ -1,5 +1,6 @@
 package example.backend.services.implementations;
 
+import example.backend.annotations.RequiresVerifiedAccount;
 import example.backend.enums.TransactionType;
 import example.backend.exceptions.EntityNotFoundException;
 import example.backend.exceptions.ImpossibleOperationException;
@@ -27,8 +28,12 @@ public class TransferServiceImpl implements TransferService {
     private final ConversionService conversionService;
     private final AuthUtils authUtils;
 
+    /*
+        TODO: transfers should check the receiving person as well (whether he is verified)
+     */
     @Override
     @Transactional
+    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public void transfer(Long fromId, Long toId, BigDecimal amount) {
 

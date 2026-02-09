@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import static example.backend.utils.StringConstants.CONFIRMATION_EMAIL_SENT;
 
 @RestController
-@RequestMapping("api/auth")
+@RequestMapping("api/v0/auth")
 @RequiredArgsConstructor
 public class AuthController {
 

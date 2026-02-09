@@ -1,5 +1,6 @@
 package example.backend.services.implementations;
 
+import example.backend.annotations.RequiresVerifiedAccount;
 import example.backend.enums.ERole;
 import example.backend.exceptions.DuplicateException;
 import example.backend.exceptions.EntityNotFoundException;
@@ -33,6 +34,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('ADMIN')")
     public Page<User> getAll(Pageable pageable) {
         return userRepository.findAll(pageable);
@@ -40,6 +42,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public Page<User> search(String query, Pageable pageable) {
         return userRepository.search(query, pageable);
@@ -47,6 +50,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('ADMIN')")
     public User getById(Long id) {
         return userRepository.findById(id)
@@ -55,6 +59,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public User getByUsername(String username) {
         return userRepository.findByUsername(username)
@@ -96,6 +101,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('ADMIN')")
     public User createByAdmin(User user) {
         if (existsByUsernameOrEmailOrPhoneNumber(user.getUsername(), user.getEmail(), user.getPhoneNumber())) {
@@ -113,6 +119,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public User edit(User user) {
         User actingUser = authUtils.getAuthenticatedUser();
@@ -138,6 +145,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('ADMIN')")
     public void block(Long id) {
         User user = userRepository.findById(id)
@@ -149,6 +157,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('ADMIN')")
     public void unblock(Long id) {
         User user = userRepository.findById(id)
@@ -173,12 +182,6 @@ public class UserServiceImpl implements UserService {
             if (userRepository.existsByPhoneNumber(newPhoneNumber)) {
                 throw new DuplicateException(PHONE_NUMBER_ALREADY_IN_USE);
             }
-        }
-    }
-
-    private void validateUserVerified(User actingUser) {
-        if (!actingUser.isVerified()) {
-            throw new UserNotVerifiedException(USER_NOT_VERIFIED);
         }
     }
 }

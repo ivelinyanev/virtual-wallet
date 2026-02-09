@@ -1,5 +1,6 @@
 package example.backend.services.implementations;
 
+import example.backend.annotations.RequiresVerifiedAccount;
 import example.backend.dtos.card.CardCreateReq;
 import example.backend.dtos.card.CardMetaData;
 import example.backend.exceptions.AuthorizationException;
@@ -33,6 +34,7 @@ public class CardServiceImpl implements CardService {
 
     @Override
     @Transactional(readOnly = true)
+    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('ADMIN')")
     public List<Card> getCards() {
         return cardRepository.findAll();
@@ -40,6 +42,7 @@ public class CardServiceImpl implements CardService {
 
     @Override
     @Transactional(readOnly = true)
+    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public List<Card> getMyCards() {
         User actingUser = authUtils.getAuthenticatedUser();
@@ -49,6 +52,7 @@ public class CardServiceImpl implements CardService {
 
     @Override
     @Transactional(readOnly = true)
+    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('ADMIN')")
     public Card getById(Long id) {
         return cardRepository.findById(id)
@@ -57,6 +61,7 @@ public class CardServiceImpl implements CardService {
 
     @Override
     @Transactional
+    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public Card create(CardCreateReq request) {
         User actingUser = authUtils.getAuthenticatedUser();
@@ -75,6 +80,7 @@ public class CardServiceImpl implements CardService {
 
     @Override
     @Transactional
+    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public void delete(Long id) {
         User actingUser = authUtils.getAuthenticatedUser();

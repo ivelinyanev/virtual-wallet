@@ -3,6 +3,7 @@ package example.backend.services.protocols;
 import example.backend.models.User;
 import example.backend.models.Wallet;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface WalletService {
@@ -16,4 +17,6 @@ public interface WalletService {
     void createBaseWalletUponVerification(User user);
 
     void deleteWallet(Long id);
+
+    void topUp(Long walletId, String token, BigDecimal amount);
 }

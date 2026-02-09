@@ -1,5 +1,6 @@
 package example.backend.services.implementations;
 
+import example.backend.annotations.RequiresVerifiedAccount;
 import example.backend.enums.TransactionStatus;
 import example.backend.enums.TransactionType;
 import example.backend.exceptions.EntityNotFoundException;
@@ -29,6 +30,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional(readOnly = true)
+    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('ADMIN')")
     public List<Transaction> getAllTransactions() {
         return transactionRepository.findAll();
@@ -36,6 +38,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional(readOnly = true)
+    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public List<Transaction> getMyTransactions(Long id) {
         User actingUser = authUtils.getAuthenticatedUser();
@@ -45,6 +48,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional(readOnly = true)
+    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public Transaction getMyTransactionById(Long id) {
         User actingUser = authUtils.getAuthenticatedUser();
@@ -61,6 +65,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional(readOnly = true)
+    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('ADMIN')")
     public Transaction getAnyTransactionById(Long id) {
         return transactionRepository.findById(id)

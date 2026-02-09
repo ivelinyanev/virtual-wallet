@@ -8,6 +8,7 @@ import example.backend.services.protocols.PaymentService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import static example.backend.utils.StringConstants.CARD_NUMBER_MUST_CONTAIN_ONLY_DIGITS;
@@ -40,9 +41,17 @@ public class PaymentServiceImpl implements PaymentService {
         );
     }
 
+    @Override
+    public void charge(String token, BigDecimal amount) {
+        /*
+            Simulates top up charge. For now
+            always successful.
+         */
+    }
+
     /*
-        Token is used to perform transactions
-     */
+            Token is used to perform transactions
+         */
     private String generateToken() {
         return "tok_" + UUID.randomUUID();
     }
