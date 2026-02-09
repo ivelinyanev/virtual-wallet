@@ -1,6 +1,7 @@
 package example.backend.services.implementations;
 
 import example.backend.annotations.RequiresVerifiedAccount;
+import example.backend.dtos.wallet.TopUpRequest;
 import example.backend.enums.Currency;
 import example.backend.enums.TransactionType;
 import example.backend.exceptions.*;
@@ -113,7 +114,12 @@ public class WalletServiceImpl implements WalletService {
     @Transactional
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
-    public void topUp(Long walletId, String token, BigDecimal amount) {
+//    Long walletId, String token, BigDecimal amount
+    public void topUp(TopUpRequest request) {
+        Long walletId = request.walletId();
+        String token = request.token();
+        BigDecimal amount = request.amount();
+
         Wallet wallet = walletRepository.findByIdForUpdate(walletId);
 
         if (wallet == null) {

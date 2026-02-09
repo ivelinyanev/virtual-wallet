@@ -1,9 +1,74 @@
 package example.backend.controllers;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import example.backend.dtos.wallet.PrivateWalletDto;
+import example.backend.dtos.wallet.TopUpRequest;
+import example.backend.dtos.wallet.WalletCreateReq;
+import example.backend.mappers.WalletMapper;
+import example.backend.services.protocols.WalletService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("api/v0/wallets")
 public class WalletController {
+
+    private final WalletService walletService;
+    private final WalletMapper walletMapper;
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PrivateWalletDto> getById(@PathVariable Long id) {
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(walletMapper.toPrivateWalletDto(walletService.getWalletById(id)));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<PrivateWalletDto>> getMyWallets() {
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(
+                        walletService
+                                .getMyWallets()
+                                .stream()
+                                .map(walletMapper::toPrivateWalletDto)
+                                .toList()
+                );
+    }
+
+    @PostMapping
+    public ResponseEntity<PrivateWalletDto> create(@RequestBody WalletCreateReq request) {
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(
+                        walletMapper.toPrivateWalletDto(
+                                walletService.createWallet(walletMapper.toWallet(request))
+                        )
+                );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        walletService.deleteWallet(id);
+
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
+    }
+
+    @PostMapping("/top-up")
+    public ResponseEntity<?> topUp(@RequestBody TopUpRequest request) {
+        walletService.topUp(request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .build();
+    }
 }
