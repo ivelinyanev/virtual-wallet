@@ -1,6 +1,8 @@
 package example.backend.services.implementations;
 
 import example.backend.annotations.RequiresVerifiedAccount;
+import example.backend.dtos.transfer.TransferReq;
+import example.backend.enums.Currency;
 import example.backend.enums.TransactionType;
 import example.backend.exceptions.EntityNotFoundException;
 import example.backend.exceptions.ImpossibleOperationException;
@@ -26,6 +28,7 @@ public class TransferServiceImpl implements TransferService {
     private final WalletRepository walletRepository;
     private final TransactionServiceImpl transactionService;
     private final ConversionService conversionService;
+    private final UserServiceImpl userService;
     private final AuthUtils authUtils;
 
     /*
@@ -35,22 +38,30 @@ public class TransferServiceImpl implements TransferService {
     @Transactional
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
-    public void transfer(Long fromId, Long toId, BigDecimal amount) {
+    public void transfer(TransferReq request) {
+        // source wallet
+        Wallet from = walletRepository.findByIdForUpdate(request.fromWalletId());
+        if (from == null) throw new EntityNotFoundException("Wallet", "id", request.fromWalletId().toString());
 
-        validateTransferRequest(fromId, toId, amount);
-
-        Wallet from = walletRepository.findByIdForUpdate(fromId);
-        Wallet to = walletRepository.findByIdForUpdate(toId);
-
-        validateWalletState(from, to, amount);
         validateWalletOwner(from);
 
-        BigDecimal creditAmount = convertIfNeeded(from, to, amount);
+        // recipient wallet
+        User toUser = userService.getByUsername(request.toUsername());
+        Wallet toWallet = walletRepository
+                .findByOwnerAndCurrency(toUser, from.getCurrency())
+                .orElseThrow(() -> new ImpossibleOperationException("Recipient has no " + from.getCurrency() + " wallet"));
+
+        BigDecimal amount = request.amount();
+
+        validateTransferRequest(from.getId(), toWallet.getId(), amount);
+        validateWalletState(from, toWallet, amount);
+
+        BigDecimal creditAmount = convertIfNeeded(from, toWallet, amount);
 
         debit(from, amount);
-        credit(to, creditAmount);
+        credit(toWallet, creditAmount);
 
-        recordTransaction(from, to, amount, creditAmount);
+        recordTransaction(from, toWallet, amount, creditAmount);
     }
 
     private void validateTransferRequest(Long fromId, Long toId, BigDecimal amount) {
