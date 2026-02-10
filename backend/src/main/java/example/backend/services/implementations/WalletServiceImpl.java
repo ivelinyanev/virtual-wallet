@@ -142,7 +142,7 @@ public class WalletServiceImpl implements WalletService {
 
         walletRepository.save(wallet);
 
-        transactionService.recordTransaction(
+         transactionService.recordTransaction(
                 wallet,
                 null,
                 amount,

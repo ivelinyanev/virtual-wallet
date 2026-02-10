@@ -85,6 +85,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setAmount(amount);
         transaction.setType(type);
         transaction.setStatus(TransactionStatus.SUCCESSFUL);
+        transaction.setCurrency(wallet.getCurrency());
 
         transactionRepository.save(transaction);
     }

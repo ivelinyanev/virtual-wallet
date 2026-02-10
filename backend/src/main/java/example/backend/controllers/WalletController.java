@@ -5,6 +5,7 @@ import example.backend.dtos.wallet.TopUpRequest;
 import example.backend.dtos.wallet.WalletCreateReq;
 import example.backend.mappers.WalletMapper;
 import example.backend.services.protocols.WalletService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +44,7 @@ public class WalletController {
     }
 
     @PostMapping
-    public ResponseEntity<PrivateWalletDto> create(@RequestBody WalletCreateReq request) {
+    public ResponseEntity<PrivateWalletDto> create(@RequestBody @Valid WalletCreateReq request) {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -64,7 +65,7 @@ public class WalletController {
     }
 
     @PostMapping("/top-up")
-    public ResponseEntity<?> topUp(@RequestBody TopUpRequest request) {
+    public ResponseEntity<?> topUp(@RequestBody @Valid TopUpRequest request) {
         walletService.topUp(request);
 
         return ResponseEntity
