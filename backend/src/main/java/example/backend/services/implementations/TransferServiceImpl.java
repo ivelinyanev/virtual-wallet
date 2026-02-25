@@ -4,6 +4,7 @@ import example.backend.annotations.RequiresVerifiedAccount;
 import example.backend.dtos.transfer.TransferReq;
 import example.backend.enums.Currency;
 import example.backend.enums.TransactionType;
+import example.backend.exceptions.AccountNotVerifiedException;
 import example.backend.exceptions.EntityNotFoundException;
 import example.backend.exceptions.ImpossibleOperationException;
 import example.backend.models.User;
@@ -47,9 +48,14 @@ public class TransferServiceImpl implements TransferService {
 
         // recipient wallet
         User toUser = userService.getByUsername(request.toUsername());
+
+        if (!toUser.isVerified()) {
+            throw new AccountNotVerifiedException(RECIPIENT_NOT_VERIFIED);
+        }
         Wallet toWallet = walletRepository
                 .findByOwnerAndCurrency(toUser, from.getCurrency())
-                .orElseThrow(() -> new ImpossibleOperationException("Recipient has no " + from.getCurrency() + " wallet"));
+                .or(() -> walletRepository.findByOwnerAndCurrency(toUser, Currency.EUR))
+                .orElseThrow(() -> new ImpossibleOperationException(RECIPIENT_HAS_NO_SUITABLE_WALLET));
 
         BigDecimal amount = request.amount();
 
