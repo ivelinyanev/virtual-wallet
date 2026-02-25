@@ -7,8 +7,6 @@ Core features are implemented, but the architecture and feature set are expandin
 
 I decided to make it public early to document the development process and showcase the system design as it grows.
 
----
-
 ## Overview
 
 Virtual Wallet is a backend application that simulates a digital wallet system with:
@@ -30,8 +28,6 @@ Built with:
 - MySQL
 - Mockito (unit testing)
 
----
-
 ## Current Focus
 
 - Improving service-layer architecture
@@ -40,16 +36,12 @@ Built with:
 - Refining transaction logic
 - Improving API design consistency
 
----
-
 ## Planned Improvements
 
 - Transaction history pagination & filtering
 - Global exception handling refactor
 - Testcontainers integration
 - API documentation (Swagger)
-
----
 
 ## Note
 
