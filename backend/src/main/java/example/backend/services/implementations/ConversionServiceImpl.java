@@ -4,6 +4,7 @@ import example.backend.dtos.ExchangeRateApiResponseDto;
 import example.backend.enums.Currency;
 import example.backend.exceptions.ExchangeRateApiException;
 import example.backend.services.protocols.ConversionService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -18,8 +19,9 @@ public class ConversionServiceImpl implements ConversionService {
 
     private final RestClient client;
 
-    public ConversionServiceImpl() {
-        this.client = RestClient.create();
+    @Autowired
+    public ConversionServiceImpl(RestClient client) {
+        this.client = client;
     }
 
     @Override

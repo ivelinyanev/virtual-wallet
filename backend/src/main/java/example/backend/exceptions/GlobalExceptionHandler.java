@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
 
+import static example.backend.utils.StringConstants.CARD_BRAND_UNSUPPORTED;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -85,5 +87,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", ex.getMessage() + " Review logs for more information."));
+    }
+
+    @ExceptionHandler({IllegalArgumentException.class})
+    public ResponseEntity<?> handleIllegalArgument(IllegalArgumentException ex) {
+        if (ex.getMessage().equals(CARD_BRAND_UNSUPPORTED)) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(Map.of("error", "Unsupported card brand."));
+        }
+
+        // Fallback for other IllegalArgumentExceptions
+        return ResponseEntity
+                .badRequest()
+                .body(Map.of("error", ex.getMessage()));
     }
 }
