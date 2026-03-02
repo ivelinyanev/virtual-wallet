@@ -7,9 +7,12 @@ import java.util.List;
 
 public interface CardService {
 
-    List<Card> getCards();
-
     List<Card> getMyCards();
+
+    /*
+        For support and audit uses only
+     */
+    List<Card> getCardsByUserId(Long userId);
 
     Card getById(Long id);
 

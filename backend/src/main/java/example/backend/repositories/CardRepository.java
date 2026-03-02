@@ -14,4 +14,6 @@ public interface CardRepository extends JpaRepository<Card, Long> {
     List<Card> findAllByCardHolder(User cardHolder);
 
     boolean existsByFingerprintAndCardHolder(String fingerprint, User cardHolder);
+
+    List<Card> findAllByCardHolderId(Long id);
 }

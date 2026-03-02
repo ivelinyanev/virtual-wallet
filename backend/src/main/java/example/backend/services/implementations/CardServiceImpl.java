@@ -35,14 +35,6 @@ public class CardServiceImpl implements CardService {
     @Override
     @Transactional(readOnly = true)
     @RequiresVerifiedAccount
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<Card> getCards() {
-        return cardRepository.findAll();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public List<Card> getMyCards() {
         User actingUser = authUtils.getAuthenticatedUser();
@@ -54,9 +46,17 @@ public class CardServiceImpl implements CardService {
     @Transactional(readOnly = true)
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('ADMIN')")
-    public Card getById(Long id) {
-        return cardRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Card", "id", String.valueOf(id)));
+    public List<Card> getCardsByUserId(Long userId) {
+        return cardRepository.findAllByCardHolderId(userId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @RequiresVerifiedAccount
+    @PreAuthorize("hasRole('ADMIN')")
+    public Card getById(Long cardId) {
+        return cardRepository.findById(cardId)
+                .orElseThrow(() -> new EntityNotFoundException("Card", "id", String.valueOf(cardId)));
     }
 
     @Override
@@ -82,11 +82,11 @@ public class CardServiceImpl implements CardService {
     @Transactional
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
-    public void delete(Long id) {
+    public void delete(Long cardId) {
         User actingUser = authUtils.getAuthenticatedUser();
 
-        Card card = cardRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Card", "id", String.valueOf(id)));
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new EntityNotFoundException("Card", "id", String.valueOf(cardId)));
 
         if (!actingUser.equals(card.getCardHolder())) {
             throw new AuthorizationException(NOT_ALLOWED_TO_DELETE_CARD);

@@ -47,18 +47,6 @@ public class CardServiceTests {
     private CardServiceImpl cardService;
 
     @Test
-    void getCards_Should_ReturnAllCards() {
-        List<Card> cards = List.of(new Card(), new Card());
-
-        when(cardRepository.findAll()).thenReturn(cards);
-
-        List<Card> actualCards = cardService.getCards();
-
-        assertEquals(2, actualCards.size());
-        verify(cardRepository, Mockito.times(1)).findAll();
-    }
-
-    @Test
     void getMyCards_Should_ReturnMyCards() {
         User user = new User();
         List<Card> cards = List.of(new Card(), new Card());
