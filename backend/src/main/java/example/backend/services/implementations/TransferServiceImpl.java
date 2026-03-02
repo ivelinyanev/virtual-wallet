@@ -32,9 +32,6 @@ public class TransferServiceImpl implements TransferService {
     private final UserServiceImpl userService;
     private final AuthUtils authUtils;
 
-    /*
-        TODO: transfers should check the receiving person as well (whether he is verified)
-     */
     @Override
     @Transactional
     @RequiresVerifiedAccount

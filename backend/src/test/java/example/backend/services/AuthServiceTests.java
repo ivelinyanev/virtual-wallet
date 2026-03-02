@@ -38,9 +38,6 @@ public class AuthServiceTests {
     private VerificationService verificationService;
 
     @Mock
-    private UserMapper userMapper;
-
-    @Mock
     private AuthUtils authUtils;
 
     @Mock
@@ -91,17 +88,19 @@ public class AuthServiceTests {
     @Test
     void register_ShouldCreateUser_And_SendVerification() {
         RegisterUserDto dto = mock(RegisterUserDto.class);
-        User mappedUser = new User();
         User savedUser = new User();
 
-        when(userMapper.toUser(dto)).thenReturn(mappedUser);
-        when(userService.registerUnverified(mappedUser)).thenReturn(savedUser);
+        when(userService.registerUnverified(any(User.class)))
+                .thenReturn(savedUser);
 
         authService.register(dto);
 
-        verify(userMapper).toUser(dto);
-        verify(userService).registerUnverified(mappedUser);
-        verify(verificationService).createAndSendVerification(savedUser);
+        // verify user was registered
+        verify(userService).registerUnverified(any(User.class));
+
+        // verify verification email was sent
+        verify(verificationService)
+                .createAndSendVerification(savedUser);
     }
 
     @Test

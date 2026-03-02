@@ -29,7 +29,6 @@ public class CardServiceImpl implements CardService {
 
     private final CardRepository cardRepository;
     private final PaymentService paymentService;
-    private final CardMapper cardMapper;
     private final AuthUtils authUtils;
 
     @Override
@@ -72,7 +71,7 @@ public class CardServiceImpl implements CardService {
             throw new DuplicateException(CARD_ALREADY_ADDED);
         }
 
-        Card card = cardMapper.toCard(metaData);
+        Card card = CardMapper.toCard(metaData);
         card.setCardHolder(actingUser);
 
         return cardRepository.save(card);

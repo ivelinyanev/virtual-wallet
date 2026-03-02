@@ -27,7 +27,6 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserService userService;
     private final VerificationService verificationService;
-    private final UserMapper userMapper;
     private final AuthUtils authUtils;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
@@ -49,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void register(RegisterUserDto dto) {
-        User user = userMapper.toUser(dto);
+        User user = UserMapper.toUser(dto);
 
         User savedUser = userService.registerUnverified(user);
 

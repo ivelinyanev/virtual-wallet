@@ -38,9 +38,6 @@ public class CardServiceTests {
     private PaymentService paymentService;
 
     @Mock
-    private CardMapper cardMapper;
-
-    @Mock
     private AuthUtils authUtils;
 
     @InjectMocks
@@ -137,8 +134,8 @@ public class CardServiceTests {
         when(paymentService.tokenize(request)).thenReturn(cardMetaData);
         when(cardRepository.existsByFingerprintAndCardHolder(cardMetaData.fingerprint(), actingUser))
                 .thenReturn(false);
-        when(cardMapper.toCard(cardMetaData)).thenReturn(cardEntity);
-        when(cardRepository.save(cardEntity)).thenReturn(cardEntity);
+        when(cardRepository.save(any(Card.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         Card actualCard = cardService.create(request);
 
