@@ -23,27 +23,26 @@ public class UserController {
         TODO: check sorting
      */
     private final UserService userService;
-    private final UserMapper userMapper;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PrivateUserDto> getById(@PathVariable Long id) {
+    @GetMapping("/{userId}")
+    public ResponseEntity<PrivateUserDto> getById(@PathVariable Long userId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userMapper.toPrivateUserDto(userService.getById(id)));
+                .body(UserMapper.toPrivateUserDto(userService.getById(userId)));
     }
 
     @GetMapping
     public ResponseEntity<Page<PrivateUserDto>> getAll(Pageable pageable) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userService.getAll(pageable).map(userMapper::toPrivateUserDto));
+                .body(userService.getAll(pageable).map(UserMapper::toPrivateUserDto));
     }
 
     @GetMapping("/search/")
     public ResponseEntity<Page<PublicUserDto>> search(@RequestParam("q") String query, Pageable pageable) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userService.search(query, pageable).map(userMapper::toPublicUserDto));
+                .body(userService.search(query, pageable).map(UserMapper::toPublicUserDto));
     }
 
     @PostMapping
@@ -51,8 +50,8 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(
-                        userMapper.toPrivateUserDto(
-                                userService.createByAdmin(userMapper.toUser(registerUserDto))
+                        UserMapper.toPrivateUserDto(
+                                userService.createByAdmin(UserMapper.toUser(registerUserDto))
                         )
                 );
     }
@@ -62,8 +61,8 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(
-                        userMapper.toPrivateUserDto(
-                                userService.edit(userMapper.toUser(updateUserDto))
+                        UserMapper.toPrivateUserDto(
+                                userService.edit(UserMapper.toUser(updateUserDto))
                         )
                 );
     }

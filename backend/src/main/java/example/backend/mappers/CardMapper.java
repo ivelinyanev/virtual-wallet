@@ -5,10 +5,9 @@ import example.backend.dtos.card.PrivateCardDto;
 import example.backend.models.Card;
 import org.springframework.stereotype.Component;
 
-@Component
 public class CardMapper {
 
-    public Card toCard(CardMetaData cardMetaData) {
+    public static Card toCard(CardMetaData cardMetaData) {
         Card card = new Card();
         card.setToken(cardMetaData.token());
         card.setFingerprint(cardMetaData.fingerprint());
@@ -21,7 +20,7 @@ public class CardMapper {
     }
 
 
-    public PrivateCardDto toPrivateCardDto(Card card) {
+    public static PrivateCardDto toPrivateCardDto(Card card) {
 
         return new PrivateCardDto(
                 card.getId(),

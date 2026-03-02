@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v0/transfer")
+@RequestMapping("api/v0/transfers")
 public class TransferController {
 
     private final TransferService transferService;

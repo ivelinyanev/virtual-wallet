@@ -18,9 +18,8 @@ import java.util.List;
 public class CardController {
 
     private final CardService cardService;
-    private final CardMapper cardMapper;
 
-    @GetMapping("/{userId}")
+    @GetMapping("/users/{userId}")
     public ResponseEntity<List<PrivateCardDto>> getCardsByUserId(@PathVariable Long userId) {
 
         return ResponseEntity
@@ -29,7 +28,7 @@ public class CardController {
                         cardService
                                 .getCardsByUserId(userId)
                                 .stream()
-                                .map(cardMapper::toPrivateCardDto)
+                                .map(CardMapper::toPrivateCardDto)
                                 .toList()
                 );
     }
@@ -43,17 +42,17 @@ public class CardController {
                         cardService
                                 .getMyCards()
                                 .stream()
-                                .map(cardMapper::toPrivateCardDto)
+                                .map(CardMapper::toPrivateCardDto)
                                 .toList()
                 );
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PrivateCardDto> getCardById(@PathVariable Long id) {
+    @GetMapping("/{cardId}")
+    public ResponseEntity<PrivateCardDto> getCardById(@PathVariable Long cardId) {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(cardMapper.toPrivateCardDto(cardService.getById(id)));
+                .body(CardMapper.toPrivateCardDto(cardService.getById(cardId)));
     }
 
     @PostMapping
@@ -61,12 +60,12 @@ public class CardController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(cardMapper.toPrivateCardDto(cardService.create(request)));
+                .body(CardMapper.toPrivateCardDto(cardService.create(request)));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        cardService.delete(id);
+    @DeleteMapping("/{cardId}")
+    public ResponseEntity<Void> delete(@PathVariable Long cardId) {
+        cardService.delete(cardId);
 
         return ResponseEntity
                 .noContent()

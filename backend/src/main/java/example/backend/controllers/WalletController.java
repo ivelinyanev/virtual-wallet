@@ -19,14 +19,13 @@ import java.util.List;
 public class WalletController {
 
     private final WalletService walletService;
-    private final WalletMapper walletMapper;
 
     @GetMapping("/{id}")
     public ResponseEntity<PrivateWalletDto> getById(@PathVariable Long id) {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(walletMapper.toPrivateWalletDto(walletService.getWalletById(id)));
+                .body(WalletMapper.toPrivateWalletDto(walletService.getWalletById(id)));
     }
 
     @GetMapping
@@ -38,7 +37,7 @@ public class WalletController {
                         walletService
                                 .getMyWallets()
                                 .stream()
-                                .map(walletMapper::toPrivateWalletDto)
+                                .map(WalletMapper::toPrivateWalletDto)
                                 .toList()
                 );
     }
@@ -49,8 +48,8 @@ public class WalletController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(
-                        walletMapper.toPrivateWalletDto(
-                                walletService.createWallet(walletMapper.toWallet(request))
+                        WalletMapper.toPrivateWalletDto(
+                                walletService.createWallet(WalletMapper.toWallet(request))
                         )
                 );
     }

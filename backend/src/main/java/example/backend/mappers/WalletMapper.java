@@ -5,10 +5,9 @@ import example.backend.dtos.wallet.WalletCreateReq;
 import example.backend.models.Wallet;
 import org.springframework.stereotype.Component;
 
-@Component
 public class WalletMapper {
 
-    public Wallet toWallet(WalletCreateReq request) {
+    public static Wallet toWallet(WalletCreateReq request) {
         Wallet wallet = new Wallet();
 
         wallet.setName(request.name());
@@ -17,7 +16,7 @@ public class WalletMapper {
         return wallet;
     }
 
-    public PrivateWalletDto toPrivateWalletDto(Wallet wallet) {
+    public static PrivateWalletDto toPrivateWalletDto(Wallet wallet) {
 
         return new PrivateWalletDto(
                 wallet.getId(),

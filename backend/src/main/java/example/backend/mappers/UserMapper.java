@@ -10,9 +10,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
 
-@Component
 public class UserMapper {
-    public User toUser(RegisterUserDto registerUserDto) {
+    public static User toUser(RegisterUserDto registerUserDto) {
         User user = new User();
 
         user.setFirstName(registerUserDto.firstName());
@@ -29,7 +28,7 @@ public class UserMapper {
         return user;
     }
 
-    public User toUser(UpdateUserDto updateUserDto) {
+    public static User toUser(UpdateUserDto updateUserDto) {
         User user = new User();
 
         user.setPassword(updateUserDto.password());
@@ -40,7 +39,7 @@ public class UserMapper {
         return user;
     }
 
-    public PrivateUserDto toPrivateUserDto(User user) {
+    public static PrivateUserDto toPrivateUserDto(User user) {
 
         return new PrivateUserDto(
                 user.getId(),
@@ -59,7 +58,7 @@ public class UserMapper {
         );
     }
 
-    public PublicUserDto toPublicUserDto(User user) {
+    public static PublicUserDto toPublicUserDto(User user) {
         return new PublicUserDto(
                 user.getId(),
                 user.getUsername(),
