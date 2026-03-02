@@ -63,6 +63,30 @@ public class CardServiceTests {
     }
 
     @Test
+    void getCardsByUserId_Should_ReturnCardsByUserId() {
+        Long userId = 10L;
+
+        User user = new User();
+        user.setId(userId);
+
+        Card card1 = new Card();
+        Card card2 = new Card();
+
+        card1.setCardHolder(user);
+        card2.setCardHolder(user);
+
+        List<Card> cards = List.of(card1, card2);
+
+        when(cardRepository.findAllByCardHolderId(userId)).thenReturn(cards);
+
+        List<Card> actualCards = cardService.getCardsByUserId(userId);
+
+        assertEquals(2, actualCards.size());
+        assertTrue(actualCards.contains(card1));
+        assertTrue(actualCards.contains(card2));
+    }
+
+    @Test
     void getById_Should_ReturnCardById() {
         Card card = new Card();
         card.setId(5L);

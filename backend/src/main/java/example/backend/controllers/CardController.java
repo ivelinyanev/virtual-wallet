@@ -20,26 +20,20 @@ public class CardController {
     private final CardService cardService;
     private final CardMapper cardMapper;
 
-    /*
-        TODO: Must be pageable + needs search
-     */
-    @GetMapping("/all")
-    public ResponseEntity<List<PrivateCardDto>> getCards() {
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<PrivateCardDto>> getCardsByUserId(@PathVariable Long userId) {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(
                         cardService
-                                .getCards()
+                                .getCardsByUserId(userId)
                                 .stream()
                                 .map(cardMapper::toPrivateCardDto)
                                 .toList()
                 );
     }
 
-    /*
-        TODO: Must be pageable + needs search
-     */
     @GetMapping
     public ResponseEntity<List<PrivateCardDto>> getMyCards() {
 
