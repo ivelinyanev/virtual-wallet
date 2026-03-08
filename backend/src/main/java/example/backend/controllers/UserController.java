@@ -19,9 +19,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
 
-    /*
-        TODO: check sorting
-     */
     private final UserService userService;
 
     @GetMapping("/{userId}")

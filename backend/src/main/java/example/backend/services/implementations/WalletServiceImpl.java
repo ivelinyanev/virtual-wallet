@@ -93,9 +93,6 @@ public class WalletServiceImpl implements WalletService {
         walletRepository.save(wallet);
     }
 
-    /*
-        TODO: maybe add check for user to not be able to delete a wallet if the balance is positive
-     */
     @Override
     @Transactional
     @RequiresVerifiedAccount
@@ -104,6 +101,9 @@ public class WalletServiceImpl implements WalletService {
         Wallet wallet = walletRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Wallet", "id", String.valueOf(id)));
 
+        if (wallet.getBalance().compareTo(BigDecimal.ZERO) > 0) {
+            throw new ImpossibleOperationException(CANNOT_DELETE_WALLET_WITH_POSITIVE_BALANCE);
+        }
         if (!isOwner(wallet)) {
             throw new AuthorizationException(CANNOT_DELETE_WALLET_YOU_ARE_NOT_OWNER_OF);
         }
@@ -111,9 +111,6 @@ public class WalletServiceImpl implements WalletService {
         walletRepository.delete(wallet);
     }
 
-    /*
-        TODO: Missing checks for ownership, amount must be positive, etc.
-     */
     @Override
     @Transactional
     @RequiresVerifiedAccount
