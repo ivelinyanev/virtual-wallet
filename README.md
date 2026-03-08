@@ -152,11 +152,11 @@ Testing tools used:
 
 For easier testing, the application automatically seeds **three users** when the database is empty.
 
-| Role | Username | Password | Status |
-|-----|-----|-----|-----|
-Admin | `admin` | `admin` | Verified |
-User | `user` | `user` | Verified |
-User | `unverified` | `unverified` | Not Verified |
+| Role | Email | Username | Password | Status |
+|-----|-----|-----|-----|-----|
+Admin | admin@example.com | `admin` | `admin` | Verified |
+User | user@example.com | `user` | `user` | Verified |
+User | unverified@example.com | `unverified` | `unverified` | Not Verified |
 
 This allows quick testing of:
 
@@ -166,6 +166,10 @@ This allows quick testing of:
 
 ## Author
 
-Developed by Ivelin Yanev
+Developed by Me
 
 Backend project built as part of my journey toward building secure, production-style backend systems with Spring Boot.
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
