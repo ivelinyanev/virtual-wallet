@@ -15,12 +15,11 @@ import org.springframework.web.bind.annotation.*;
 import static example.backend.utils.StringConstants.CONFIRMATION_EMAIL_SENT;
 
 @RestController
-@RequestMapping("api/v0/auth")
+@RequestMapping("/api/v0/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
-    private final UserMapper userMapper;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginUserDto loginUserDto) {
@@ -53,6 +52,6 @@ public class AuthController {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userMapper.toPrivateUserDto(authService.getMe()));
+                .body(UserMapper.toPrivateUserDto(authService.getMe()));
     }
 }

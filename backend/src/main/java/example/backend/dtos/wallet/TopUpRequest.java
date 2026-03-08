@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public record TopUpRequest(
         Long walletId,
-        String token,
+        Long cardId,
         BigDecimal amount
 ) {
 }

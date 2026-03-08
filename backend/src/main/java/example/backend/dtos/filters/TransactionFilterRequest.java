@@ -13,4 +13,7 @@ public record TransactionFilterRequest(
         LocalDateTime from,
         LocalDateTime to
 ) {
+    public static TransactionFilterRequest empty() {
+        return new TransactionFilterRequest(null, null, null, null, null, null);
+    }
 }

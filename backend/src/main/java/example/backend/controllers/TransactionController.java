@@ -13,11 +13,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/v0/transactions")
+@RequestMapping("/api/v0/transactions")
 @RequiredArgsConstructor
 public class TransactionController {
 
-    public TransactionService transactionService;
+    public final TransactionService transactionService;
 
     @GetMapping("/all")
     ResponseEntity<Page<TransactionResponse>> getAllTransactions(
@@ -35,9 +35,17 @@ public class TransactionController {
 
     @GetMapping
     ResponseEntity<Page<TransactionResponse>> getMyTransactions(
-            @RequestParam(required = false) TransactionFilterRequest request,
-            @RequestParam(required = false) Pageable pageable
+            @ModelAttribute TransactionFilterRequest request,
+            Pageable pageable
     ) {
+//        request = request == null
+//                ? TransactionFilterRequest.empty()
+//                : request;
+
+        pageable = pageable == null
+                ? Pageable.unpaged()
+                : pageable;
+
         Page<Transaction> page = transactionService.getMyTransactions(request, pageable);
 
         Page<TransactionResponse> response = page.map(TransactionMapper::toTransactionResponse);

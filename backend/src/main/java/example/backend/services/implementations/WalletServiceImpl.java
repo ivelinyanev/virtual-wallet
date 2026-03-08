@@ -5,9 +5,12 @@ import example.backend.dtos.wallet.TopUpRequest;
 import example.backend.enums.Currency;
 import example.backend.enums.TransactionType;
 import example.backend.exceptions.*;
+import example.backend.models.Card;
 import example.backend.models.User;
 import example.backend.models.Wallet;
+import example.backend.repositories.CardRepository;
 import example.backend.repositories.WalletRepository;
+import example.backend.services.protocols.CardService;
 import example.backend.services.protocols.PaymentService;
 import example.backend.services.protocols.TransactionService;
 import example.backend.services.protocols.WalletService;
@@ -30,6 +33,7 @@ public class WalletServiceImpl implements WalletService {
     private final AuthUtils authUtils;
     private final PaymentService paymentService;
     private final TransactionServiceImpl transactionService;
+    private final CardRepository cardRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -114,13 +118,14 @@ public class WalletServiceImpl implements WalletService {
     @Transactional
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
-//    Long walletId, String token, BigDecimal amount
     public void topUp(TopUpRequest request) {
         Long walletId = request.walletId();
-        String token = request.token();
+        Long cardId = request.cardId();
         BigDecimal amount = request.amount();
 
         Wallet wallet = walletRepository.findByIdForUpdate(walletId);
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new EntityNotFoundException("Card", "id", String.valueOf(cardId)));
 
         if (wallet == null) {
             throw new EntityNotFoundException("Wallet", "id", String.valueOf(walletId));
@@ -136,7 +141,7 @@ public class WalletServiceImpl implements WalletService {
 
         // try catch block for top up simulation should catch failed top-ups
         // for now no fail conditions have been added
-        paymentService.charge(token, amount);
+        paymentService.charge(card.getToken(), amount);
 
         wallet.setBalance(wallet.getBalance().add(amount));
 
