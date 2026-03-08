@@ -21,9 +21,14 @@ public class TransactionController {
 
     @GetMapping("/all")
     ResponseEntity<Page<TransactionResponse>> getAllTransactions(
-            @RequestParam(required = false) TransactionFilterRequest request,
-            @RequestParam(required = false) Pageable pageable
+            @ModelAttribute TransactionFilterRequest request,
+            Pageable pageable
     ) {
+
+        pageable = pageable == null
+                ? Pageable.unpaged()
+                : pageable;
+
         Page<Transaction> page = transactionService.getAllTransactions(request, pageable);
 
         Page<TransactionResponse> response = page.map(TransactionMapper::toTransactionResponse);
@@ -38,9 +43,6 @@ public class TransactionController {
             @ModelAttribute TransactionFilterRequest request,
             Pageable pageable
     ) {
-//        request = request == null
-//                ? TransactionFilterRequest.empty()
-//                : request;
 
         pageable = pageable == null
                 ? Pageable.unpaged()
