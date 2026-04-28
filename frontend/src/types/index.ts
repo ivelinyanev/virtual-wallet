@@ -51,7 +51,8 @@ export type Currency = 'EUR' | 'USD' | 'GBP'
 
 export interface PrivateWalletDto {
   id: number
-  name: string
+  owner_name: string
+  wallet_name: string
   balance: number
   currency: Currency
 }
@@ -70,24 +71,26 @@ export interface TopUpRequest {
 
 export interface PrivateCardDto {
   id: number
-  brand: string
+  card_brand: string
   last4: string
   expiration_month: number
   expiration_year: number
+  card_holder: string
 }
 
 export interface CardCreateReq {
   card_number: string
-  expiration_month: number
-  expiration_year: number
+  first_name: string
+  last_name: string
+  exp_month: number
+  exp_year: number
   cvv: string
-  card_holder_name: string
 }
 
 // ─── Transactions ────────────────────────────────────────────────────────────
 
 export type TransactionType = 'TOP_UP' | 'TRANSFER_IN' | 'TRANSFER_OUT'
-export type TransactionStatus = 'COMPLETED' | 'PENDING' | 'FAILED'
+export type TransactionStatus = 'SUCCESSFUL' | 'PENDING' | 'FAILED'
 
 export interface TransactionResponse {
   id: number
@@ -97,7 +100,9 @@ export interface TransactionResponse {
   status: TransactionStatus
   timestamp: string
   wallet_id: number
-  counterparty_username: string | null
+  wallet_owner_username: string | null
+  counterparty_wallet_id: number | null
+  counterparty_wallet_username: string | null
 }
 
 export interface TransactionFilterRequest {
