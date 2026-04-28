@@ -4,8 +4,8 @@
       <h1>Sign In</h1>
       <form @submit.prevent="handleSubmit">
         <div class="field">
-          <label>Username</label>
-          <input v-model="form.email" type="text" required autocomplete="email" />
+          <label>Email</label>
+          <input v-model="form.email" type="email" required autocomplete="email" />
         </div>
         <div class="field">
           <label>Password</label>

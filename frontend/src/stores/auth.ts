@@ -25,9 +25,6 @@ export const useAuthStore = defineStore(
 
     async function verify(payload: VerifyUserDto) {
       await authApi.verify(payload)
-      // Refresh user state after verification
-      const { data } = await authApi.me()
-      user.value = data
     }
 
     async function fetchMe() {

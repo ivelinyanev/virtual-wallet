@@ -37,7 +37,7 @@ async function handleSubmit() {
   try {
     await auth.verify({ verification_code: code.value })
     success.value = true
-    setTimeout(() => router.push('/'), 1500)
+    setTimeout(() => router.push('/login'), 1500)
   } catch (e: any) {
     error.value = e.response?.data?.message ?? 'Invalid code. Please try again.'
   } finally {

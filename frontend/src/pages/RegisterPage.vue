@@ -63,7 +63,7 @@ async function handleSubmit() {
   loading.value = true
   try {
     await auth.register(form.value)
-    router.push('/login')
+    router.push('/verify')
   } catch (e: any) {
     error.value = e.response?.data?.message ?? 'Registration failed. Please try again.'
   } finally {

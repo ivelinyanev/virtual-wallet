@@ -29,7 +29,6 @@ const router = createRouter({
       path: '/verify',
       name: 'verify',
       component: () => import('@/pages/VerifyPage.vue'),
-      meta: { requiresAuth: true },
     },
 
     // Authenticated routes (wrapped in DashboardLayout)
