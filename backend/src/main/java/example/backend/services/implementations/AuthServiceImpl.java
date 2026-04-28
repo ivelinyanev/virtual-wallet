@@ -1,8 +1,6 @@
 package example.backend.services.implementations;
 
-import example.backend.dtos.user.LoginUserDto;
-import example.backend.dtos.user.RegisterUserDto;
-import example.backend.dtos.user.VerifyUserDto;
+import example.backend.dtos.user.*;
 import example.backend.mappers.UserMapper;
 import example.backend.models.User;
 import example.backend.security.JwtUtils;
@@ -31,10 +29,12 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
 
-    public String login(LoginUserDto loginUserDto) {
+    public AuthResponseDto login(LoginUserDto loginUserDto) {
         User user = userService.getByEmail(loginUserDto.email());
 
         validatePassword(loginUserDto.password(), user.getPassword());
+
+        PrivateUserDto userResponse = UserMapper.toPrivateUserDto(user);
 
         String token = jwtUtils.generateToken(
                 user.getUsername(),
@@ -42,7 +42,7 @@ public class AuthServiceImpl implements AuthService {
                         .map(role -> role.getName().name())
                         .collect(Collectors.toSet()));
 
-        return token;
+        return new AuthResponseDto(token, userResponse);
     }
 
     @Override

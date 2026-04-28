@@ -1,9 +1,6 @@
 package example.backend.controllers;
 
-import example.backend.dtos.user.LoginUserDto;
-import example.backend.dtos.user.RegisterUserDto;
-import example.backend.dtos.user.PrivateUserDto;
-import example.backend.dtos.user.VerifyUserDto;
+import example.backend.dtos.user.*;
 import example.backend.mappers.UserMapper;
 import example.backend.services.protocols.AuthService;
 import jakarta.validation.Valid;
@@ -22,7 +19,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid LoginUserDto loginUserDto) {
+    public ResponseEntity<AuthResponseDto> login(@RequestBody @Valid LoginUserDto loginUserDto) {
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(authService.login(loginUserDto));

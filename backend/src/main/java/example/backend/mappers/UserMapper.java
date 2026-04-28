@@ -54,7 +54,8 @@ public class UserMapper {
                         .stream()
                         .map(Role::getName)
                         .map(Enum::toString)
-                        .collect(Collectors.toSet())
+                        .collect(Collectors.toSet()),
+                user.isVerified()
         );
     }
 

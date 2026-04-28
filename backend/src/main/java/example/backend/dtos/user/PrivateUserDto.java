@@ -13,6 +13,7 @@ public record PrivateUserDto(
         String phoneNumber,
         String photoUrl,
         LocalDateTime createdAt,
-        Set<String> roles
+        Set<String> roles,
+        Boolean is_verified
 ) {
 }
