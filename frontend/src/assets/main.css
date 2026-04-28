@@ -1,35 +1,85 @@
 @import './base.css';
+@import 'sweetalert2/dist/sweetalert2.min.css';
 
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
+/* ── SweetAlert2 custom theme ─────────────────────────────── */
+.vw-popup {
+  border-radius: 20px !important;
+  padding: 1.75rem !important;
+  font-family: inherit !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.15) !important;
+  max-width: 400px !important;
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
+.vw-title {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  padding: 0 !important;
+  margin-bottom: 0.4rem !important;
 }
 
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
+.vw-html {
+  font-size: 0.875rem !important;
+  color: #64748b !important;
+  margin: 0 !important;
 }
+
+.vw-icon {
+  margin-bottom: 1.25rem !important;
+  border: none !important;
+  width: 56px !important;
+  height: 56px !important;
+}
+
+.swal2-actions {
+  gap: 0.5rem !important;
+  margin-top: 1.5rem !important;
+}
+
+.vw-btn-confirm,
+.vw-btn-cancel {
+  padding: 0.6rem 1.25rem !important;
+  border-radius: 10px !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  border: none !important;
+  transition: background 0.15s, transform 0.1s !important;
+}
+.vw-btn-confirm:active,
+.vw-btn-cancel:active {
+  transform: scale(0.98) !important;
+}
+
+.vw-btn-confirm {
+  background: #6366f1 !important;
+  color: white !important;
+}
+.vw-btn-confirm:hover { background: #4f52e0 !important; }
+
+/* Red confirm for destructive actions */
+.swal2-icon-warning ~ .swal2-actions .vw-btn-confirm,
+.swal2-icon-error ~ .swal2-actions .vw-btn-confirm {
+  background: #ef4444 !important;
+}
+.swal2-icon-warning ~ .swal2-actions .vw-btn-confirm:hover,
+.swal2-icon-error ~ .swal2-actions .vw-btn-confirm:hover {
+  background: #dc2626 !important;
+}
+
+.vw-btn-cancel {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+}
+.vw-btn-cancel:hover { background: #e2e8f0 !important; }
+
+.swal2-timer-progress-bar {
+  background: #6366f1 !important;
+}
+
