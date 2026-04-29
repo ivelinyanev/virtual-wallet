@@ -13,9 +13,9 @@ public class TransactionMapper {
                 tx.getType(),
                 tx.getStatus(),
                 tx.getTimestamp(),
-                tx.getWallet() != null ? tx.getWallet().getId() : null,
+                tx.getWallet() != null ? tx.getWallet().getName() : null,
                 tx.getWallet() != null ? tx.getWallet().getOwner().getUsername() : null,
-                tx.getCounterpartyWallet() != null ? tx.getCounterpartyWallet().getId() : null,
+                tx.getCounterpartyWallet() != null ? tx.getCounterpartyWallet().getName() : null,
                 tx.getCounterpartyWallet() != null ? tx.getCounterpartyWallet().getOwner().getUsername() : null
         );
     }

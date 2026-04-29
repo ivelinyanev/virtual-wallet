@@ -15,10 +15,12 @@ public record TransactionResponse(
     TransactionStatus status,
     LocalDateTime timestamp,
 
-    Long walletId,
+//    Long walletId,
+    String walletName,
     String walletOwnerUsername,
 
-    Long counterpartyWalletId,
-    String counterpartyWalletUsername
+//    Long counterpartyWalletId,
+    String counterPartyWalletName,
+    String counterpartyWalletOwnerUsername
 ) {
 }
