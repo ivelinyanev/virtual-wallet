@@ -93,7 +93,18 @@ export interface CardCreateReq {
 export type TransactionType = 'TOP_UP' | 'TRANSFER_IN' | 'TRANSFER_OUT'
 export type TransactionStatus = 'SUCCESSFUL' | 'PENDING' | 'FAILED'
 
-export interface TransactionResponse {
+export interface UserTransactionResponse {
+  id: number
+  amount: number
+  currency: Currency
+  type: TransactionType
+  status: TransactionStatus
+  timestamp: string
+  wallet_name: string | null
+  counterparty_username: string | null
+}
+
+export interface AdminTransactionResponse {
   id: number
   amount: number
   currency: Currency
@@ -105,6 +116,9 @@ export interface TransactionResponse {
   counter_party_wallet_name: string | null
   counterparty_wallet_owner_username: string | null
 }
+
+// Alias kept for backwards compat within user-facing pages
+export type TransactionResponse = UserTransactionResponse
 
 export interface TransactionFilterRequest {
   type?: TransactionType

@@ -28,9 +28,8 @@ export const useWalletStore = defineStore('wallet', () => {
   }
 
   async function topUp(payload: TopUpRequest) {
-    const { data } = await walletsApi.topUp(payload)
-    const idx = wallets.value.findIndex((w) => w.id === payload.wallet_id)
-    if (idx !== -1) wallets.value[idx] = data
+    await walletsApi.topUp(payload)
+    await fetchWallets()
   }
 
   return { wallets, loading, fetchWallets, createWallet, deleteWallet, topUp }

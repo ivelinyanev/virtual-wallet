@@ -1,12 +1,36 @@
 package example.backend.mappers;
 
-import example.backend.dtos.transaction.TransactionResponse;
+import example.backend.dtos.transaction.AdminTransactionResponse;
+import example.backend.dtos.transaction.UserTransactionResponse;
+import example.backend.enums.TransactionType;
 import example.backend.models.Transaction;
+import example.backend.models.Wallet;
 
 public class TransactionMapper {
 
-    public static TransactionResponse toTransactionResponse(Transaction tx) {
-        return new TransactionResponse(
+    public static UserTransactionResponse toUserTransactionResponse(Transaction tx) {
+        // For TRANSFER_IN the record stores sender as `wallet` and recipient as
+        // `counterpartyWallet`. Swap perspective so `userWallet` is always the
+        // querying user's wallet and `otherWallet` is always the counterparty.
+        boolean incoming = tx.getType() == TransactionType.TRANSFER_IN;
+
+        Wallet userWallet  = incoming ? tx.getCounterpartyWallet() : tx.getWallet();
+        Wallet otherWallet = incoming ? tx.getWallet()             : tx.getCounterpartyWallet();
+
+        return new UserTransactionResponse(
+                tx.getId(),
+                tx.getAmount(),
+                tx.getCurrency(),
+                tx.getType(),
+                tx.getStatus(),
+                tx.getTimestamp(),
+                userWallet  != null ? userWallet.getName()                  : null,
+                otherWallet != null ? otherWallet.getOwner().getUsername()   : null
+        );
+    }
+
+    public static AdminTransactionResponse toAdminTransactionResponse(Transaction tx) {
+        return new AdminTransactionResponse(
                 tx.getId(),
                 tx.getAmount(),
                 tx.getCurrency(),
@@ -19,5 +43,4 @@ public class TransactionMapper {
                 tx.getCounterpartyWallet() != null ? tx.getCounterpartyWallet().getOwner().getUsername() : null
         );
     }
-
 }

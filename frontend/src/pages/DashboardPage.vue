@@ -77,7 +77,7 @@
               </span>
               <div class="tx-info">
                 <span class="tx-type-label">{{ txLabel(tx.type) }}</span>
-                <span class="tx-counterparty">{{ tx.counterparty_wallet_owner_username ?? 'Virtual Wallet' }}</span>
+                <span class="tx-counterparty">{{ tx.counterparty_username ?? 'Virtual Wallet' }}</span>
               </div>
             </div>
             <div class="tx-right">
@@ -109,7 +109,7 @@
                   <span class="detail-value">{{ formatCurrency(Math.abs(details[tx.id]?.amount ?? 0), details[tx.id]?.currency) }}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-label">Wallet</span>
+                  <span class="detail-label">Your wallet</span>
                   <span class="detail-value">{{ details[tx.id]?.wallet_name ?? '—' }}</span>
                 </div>
                 <div class="detail-item">
@@ -117,12 +117,8 @@
                   <span class="detail-value">{{ details[tx.id]?.type ? txLabel(details[tx.id]!.type) : '' }}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-label">Owner</span>
-                  <span class="detail-value">{{ details[tx.id]?.wallet_owner_username ?? '—' }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">Counterparty</span>
-                  <span class="detail-value">{{ details[tx.id]?.counterparty_wallet_owner_username ?? '—' }}</span>
+                  <span class="detail-label">{{ details[tx.id]?.type === 'TRANSFER_OUT' ? 'Sent to' : details[tx.id]?.type === 'TRANSFER_IN' ? 'Received from' : 'Source' }}</span>
+                  <span class="detail-value">{{ details[tx.id]?.counterparty_username ?? '—' }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">Date & Time</span>
@@ -145,7 +141,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useWalletStore } from '@/stores/wallet'
 import { transactionsApi } from '@/api/transactions'
 import { cardsApi } from '@/api/cards'
-import type { TransactionResponse, TransactionType } from '@/types'
+import type { UserTransactionResponse, TransactionType } from '@/types'
 import {
   CircleDollarSignIcon,
   LandmarkIcon,
@@ -159,10 +155,10 @@ import {
 const auth = useAuthStore()
 const walletStore = useWalletStore()
 
-const recentTransactions = ref<TransactionResponse[]>([])
+const recentTransactions = ref<UserTransactionResponse[]>([])
 const cardCount = ref(0)
 const expandedId = ref<number | null>(null)
-const details = ref<Record<number, TransactionResponse>>({})
+const details = ref<Record<number, UserTransactionResponse>>({})
 const loadingDetail = ref(false)
 
 const totalBalance = computed(() =>

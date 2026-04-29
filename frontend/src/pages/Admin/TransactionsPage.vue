@@ -5,7 +5,7 @@
     <table v-else class="table">
       <thead>
         <tr>
-          <th>ID</th><th>Date</th><th>Type</th><th>Amount</th><th>Status</th><th>Counterparty</th>
+          <th>ID</th><th>Date</th><th>Type</th><th>Amount</th><th>Status</th><th>Counterparty</th><th>Counterparty Wallet</th><th>Owner</th>
         </tr>
       </thead>
       <tbody>
@@ -16,6 +16,8 @@
           <td>{{ formatCurrency(tx.amount, tx.currency) }}</td>
           <td>{{ tx.status }}</td>
           <td>{{ tx.counterparty_wallet_owner_username ?? '—' }}</td>
+          <td>{{ tx.counter_party_wallet_name ?? '—' }}</td>
+          <td>{{ tx.wallet_owner_username ?? '—' }}</td>
         </tr>
         <tr v-if="!transactions.length"><td colspan="6" class="empty">No transactions.</td></tr>
       </tbody>
@@ -31,9 +33,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { transactionsApi } from '@/api/transactions'
-import type { TransactionResponse } from '@/types'
+import type { AdminTransactionResponse } from '@/types'
 
-const transactions = ref<TransactionResponse[]>([])
+const transactions = ref<AdminTransactionResponse[]>([])
 const loading = ref(false)
 const page = ref(0)
 const totalPages = ref(1)

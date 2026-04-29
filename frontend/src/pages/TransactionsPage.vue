@@ -98,7 +98,7 @@
 
           <div class="tx-info">
             <span class="tx-type">{{ txLabel(tx.type) }}</span>
-            <span class="tx-counterparty">{{ tx.counterparty_wallet_owner_username ?? 'Virtual Wallet' }}</span>
+            <span class="tx-counterparty">{{ tx.counterparty_username ?? 'Virtual Wallet' }}</span>
           </div>
 
           <div class="tx-meta">
@@ -121,20 +121,12 @@
                 <span class="detail-value mono">#{{ tx.id }}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">Wallet</span>
+                <span class="detail-label">Your wallet</span>
                 <span class="detail-value">{{ tx.wallet_name ?? '—' }}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">Owner</span>
-                <span class="detail-value">{{ tx.wallet_owner_username ?? '—' }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Counterparty wallet</span>
-                <span class="detail-value">{{ tx.counter_party_wallet_name ?? '—' }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Counterparty</span>
-                <span class="detail-value">{{ tx.counterparty_wallet_owner_username ?? '—' }}</span>
+                <span class="detail-label">{{ tx.type === 'TRANSFER_OUT' ? 'Sent to' : tx.type === 'TRANSFER_IN' ? 'Received from' : 'Source' }}</span>
+                <span class="detail-value">{{ tx.counterparty_username ?? '—' }}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label">Amount</span>
@@ -178,7 +170,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
 import { transactionsApi } from '@/api/transactions'
-import type { TransactionResponse, TransactionType, TransactionStatus } from '@/types'
+import type { UserTransactionResponse, TransactionType, TransactionStatus } from '@/types'
 import {
   ArrowDownCircleIcon,
   ArrowUpCircleIcon,
@@ -190,7 +182,7 @@ import {
   CalendarIcon,
 } from 'lucide-vue-next'
 
-const transactions = ref<TransactionResponse[]>([])
+const transactions = ref<UserTransactionResponse[]>([])
 const loading = ref(false)
 const page = ref(0)
 const totalPages = ref(1)

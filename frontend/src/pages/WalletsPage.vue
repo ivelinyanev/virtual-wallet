@@ -163,6 +163,30 @@
                 <span class="balance-preview-value">{{ formatCurrency(topUpWallet.balance, topUpWallet.currency) }}</span>
               </div>
 
+              <!-- Card selector -->
+              <div class="field">
+                <label>Pay with card</label>
+                <div v-if="!cards.length" class="no-cards">
+                  <CreditCardIcon :size="14" />
+                  No cards linked. <RouterLink to="/cards">Add one first</RouterLink>.
+                </div>
+                <div v-else class="card-options">
+                  <button
+                    v-for="card in cards"
+                    :key="card.id"
+                    type="button"
+                    class="card-option"
+                    :class="{ selected: topUpCardId === card.id }"
+                    @click="topUpCardId = card.id"
+                  >
+                    <CreditCardIcon :size="16" />
+                    <span class="card-option-brand">{{ card.card_brand }}</span>
+                    <span class="card-option-num">•••• {{ card.last4 }}</span>
+                    <span class="card-option-exp">{{ String(card.expiration_month).padStart(2,'0') }}/{{ card.expiration_year }}</span>
+                  </button>
+                </div>
+              </div>
+
               <!-- Amount input -->
               <div class="field">
                 <label for="topup-amount">Amount to add</label>
@@ -209,7 +233,7 @@
 
               <div class="modal-actions">
                 <button type="button" class="btn-ghost" @click="topUpWallet = null">Cancel</button>
-                <button type="submit" class="btn-success" :disabled="topUpLoading || topUpAmount <= 0">
+                <button type="submit" class="btn-success" :disabled="topUpLoading || topUpAmount <= 0 || !topUpCardId">
                   <LoaderCircleIcon v-if="topUpLoading" :size="16" class="spinner" />
                   <ArrowDownCircleIcon v-else :size="16" />
                   <span>{{ topUpLoading ? 'Processing…' : 'Confirm Top Up' }}</span>
@@ -227,7 +251,8 @@
 import { ref, onMounted } from 'vue'
 import { useWalletStore } from '@/stores/wallet'
 import { useDialog } from '@/composables/useDialog'
-import type { PrivateWalletDto, Currency } from '@/types'
+import { cardsApi } from '@/api/cards'
+import type { PrivateWalletDto, PrivateCardDto, Currency } from '@/types'
 import {
   PlusIcon,
   PlusCircleIcon,
@@ -239,6 +264,7 @@ import {
   ArrowDownCircleIcon,
   AlertCircleIcon,
   LoaderCircleIcon,
+  CreditCardIcon,
 } from 'lucide-vue-next'
 
 const walletStore = useWalletStore()
@@ -251,8 +277,10 @@ const createLoading = ref(false)
 
 const topUpWallet = ref<PrivateWalletDto | null>(null)
 const topUpAmount = ref(0)
+const topUpCardId = ref<number | null>(null)
 const topUpError = ref('')
 const topUpLoading = ref(false)
+const cards = ref<PrivateCardDto[]>([])
 
 const quickAmounts = [10, 50, 100, 500]
 
@@ -280,10 +308,15 @@ function openCreate() {
   showCreate.value = true
 }
 
-function openTopUp(wallet: PrivateWalletDto) {
+async function openTopUp(wallet: PrivateWalletDto) {
   topUpWallet.value = wallet
   topUpAmount.value = 0
+  topUpCardId.value = null
   topUpError.value = ''
+  if (!cards.value.length) {
+    const { data } = await cardsApi.getMyCards()
+    cards.value = data
+  }
 }
 
 async function confirmDelete(id: number) {
@@ -318,7 +351,7 @@ async function handleTopUp() {
   topUpError.value = ''
   topUpLoading.value = true
   try {
-    await walletStore.topUp({ wallet_id: topUpWallet.value.id, amount: topUpAmount.value })
+    await walletStore.topUp({ wallet_id: topUpWallet.value.id, card_id: topUpCardId.value!, amount: topUpAmount.value })
     topUpWallet.value = null
   } catch (e: any) {
     topUpError.value = e.response?.data?.message ?? 'Top-up failed.'
@@ -616,6 +649,41 @@ label { font-size: 0.8rem; font-weight: 600; color: #475569; }
 .currency-name { font-size: 0.65rem; color: #94a3b8; }
 .currency-option.selected .currency-symbol,
 .currency-option.selected .currency-code { color: #4f46e5; }
+
+/* Card selector */
+.no-cards {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.825rem;
+  color: #94a3b8;
+  padding: 0.5rem 0;
+}
+.no-cards a { color: #6366f1; text-decoration: none; }
+
+.card-options { display: flex; flex-direction: column; gap: 0.4rem; }
+
+.card-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.875rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+  width: 100%;
+}
+.card-option:hover { border-color: #a5b4fc; background: #f5f3ff; }
+.card-option.selected { border-color: #6366f1; background: #ede9fe; }
+.card-option :deep(svg) { color: #94a3b8; flex-shrink: 0; }
+.card-option.selected :deep(svg) { color: #6366f1; }
+.card-option-brand { font-size: 0.78rem; font-weight: 700; color: #475569; text-transform: uppercase; }
+.card-option.selected .card-option-brand { color: #4f46e5; }
+.card-option-num { font-size: 0.85rem; font-weight: 600; color: #0f172a; flex: 1; }
+.card-option-exp { font-size: 0.75rem; color: #94a3b8; }
 
 /* Top-up specifics */
 .balance-preview {
