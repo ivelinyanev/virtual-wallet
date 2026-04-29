@@ -64,6 +64,7 @@ export interface WalletCreateReq {
 
 export interface TopUpRequest {
   wallet_id: number
+  card_id: number
   amount: number
 }
 
@@ -99,17 +100,17 @@ export interface TransactionResponse {
   type: TransactionType
   status: TransactionStatus
   timestamp: string
-  wallet_id: number
+  wallet_name: string | null
   wallet_owner_username: string | null
-  counterparty_wallet_id: number | null
-  counterparty_wallet_username: string | null
+  counter_party_wallet_name: string | null
+  counterparty_wallet_owner_username: string | null
 }
 
 export interface TransactionFilterRequest {
-  start_date?: string
-  end_date?: string
-  direction?: 'IN' | 'OUT'
-  counterparty?: string
+  type?: TransactionType
+  status?: TransactionStatus
+  from?: string      // ISO datetime, maps to backend `from` (LocalDateTime)
+  to?: string        // ISO datetime, maps to backend `to` (LocalDateTime)
   page?: number
   size?: number
 }

@@ -15,7 +15,7 @@
           <td>{{ tx.type }}</td>
           <td>{{ formatCurrency(tx.amount, tx.currency) }}</td>
           <td>{{ tx.status }}</td>
-          <td>{{ tx.counterparty_username ?? '—' }}</td>
+          <td>{{ tx.counterparty_wallet_owner_username ?? '—' }}</td>
         </tr>
         <tr v-if="!transactions.length"><td colspan="6" class="empty">No transactions.</td></tr>
       </tbody>

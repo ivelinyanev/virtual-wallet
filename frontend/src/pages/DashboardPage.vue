@@ -77,12 +77,12 @@
               </span>
               <div class="tx-info">
                 <span class="tx-type-label">{{ txLabel(tx.type) }}</span>
-                <span class="tx-counterparty">{{ tx.counterparty_wallet_username ?? 'Virtual Wallet' }}</span>
+                <span class="tx-counterparty">{{ tx.counterparty_wallet_owner_username ?? 'Virtual Wallet' }}</span>
               </div>
             </div>
             <div class="tx-right">
               <span class="tx-amount" :class="amountClass(tx.type)">
-                {{ tx.type === 'TRANSFER_OUT' ? '−' : '+' }}{{ formatCurrency(tx.amount, tx.currency) }}
+                {{ tx.type === 'TRANSFER_OUT' ? '−' : '+' }}{{ formatCurrency(Math.abs(tx.amount), tx.currency) }}
               </span>
               <span class="tx-date">{{ formatDate(tx.timestamp) }}</span>
             </div>
@@ -90,47 +90,47 @@
           </div>
 
           <!-- Detail panel -->
-          <Transition name="expand">
-            <div v-if="expandedId === tx.id" class="tx-detail">
+          <div class="tx-detail-outer" :class="{ expanded: expandedId === tx.id }">
+            <div class="tx-detail">
               <div v-if="loadingDetail && !details[tx.id]" class="detail-loading">Loading…</div>
               <div v-else-if="details[tx.id]" class="detail-grid">
                 <div class="detail-item">
                   <span class="detail-label">Transaction ID</span>
-                  <span class="detail-value">#{{ details[tx.id].id }}</span>
+                  <span class="detail-value">#{{ details[tx.id]?.id }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">Status</span>
-                  <span class="detail-value status-badge" :class="details[tx.id].status.toLowerCase()">
-                    {{ details[tx.id].status }}
+                  <span class="detail-value status-badge" :class="details[tx.id]?.status.toLowerCase()">
+                    {{ details[tx.id]?.status }}
                   </span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">Amount</span>
-                  <span class="detail-value">{{ formatCurrency(details[tx.id].amount, details[tx.id].currency) }}</span>
+                  <span class="detail-value">{{ formatCurrency(Math.abs(details[tx.id]?.amount ?? 0), details[tx.id]?.currency) }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">Wallet</span>
-                  <span class="detail-value">{{ walletLabel(details[tx.id].wallet_id) }}</span>
+                  <span class="detail-value">{{ details[tx.id]?.wallet_name ?? '—' }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">Type</span>
-                  <span class="detail-value">{{ txLabel(details[tx.id].type) }}</span>
+                  <span class="detail-value">{{ details[tx.id]?.type ? txLabel(details[tx.id]!.type) : '' }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">Owner</span>
-                  <span class="detail-value">{{ details[tx.id].wallet_owner_username ?? '—' }}</span>
+                  <span class="detail-value">{{ details[tx.id]?.wallet_owner_username ?? '—' }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">Counterparty</span>
-                  <span class="detail-value">{{ details[tx.id].counterparty_wallet_username ?? '—' }}</span>
+                  <span class="detail-value">{{ details[tx.id]?.counterparty_wallet_owner_username ?? '—' }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">Date & Time</span>
-                  <span class="detail-value">{{ formatDateTime(details[tx.id].timestamp) }}</span>
+                  <span class="detail-value">{{ details[tx.id]?.timestamp ? formatDateTime(details[tx.id]!.timestamp) : '' }}</span>
                 </div>
               </div>
             </div>
-          </Transition>
+          </div>
         </div>
       </div>
 
@@ -188,10 +188,6 @@ function txLabel(type: TransactionType) {
   return type === 'TOP_UP' ? 'Top Up' : type === 'TRANSFER_IN' ? 'Received' : 'Sent'
 }
 
-function walletLabel(walletId: number) {
-  const wallet = walletStore.wallets.find((w) => w.id === walletId)
-  return wallet ? `${wallet.wallet_name} (${wallet.currency})` : `Wallet #${walletId}`
-}
 
 function amountClass(type: TransactionType) {
   return type === 'TRANSFER_OUT' ? 'debit' : 'credit'
@@ -377,7 +373,18 @@ h2 {
 .chevron.open { transform: rotate(90deg); }
 
 /* Detail panel */
+.tx-detail-outer {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+}
+.tx-detail-outer.expanded {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
 .tx-detail {
+  overflow: hidden;
   padding: 1rem 1.25rem 1.25rem;
   border-top: 1px solid #f1f5f9;
   background: #fafafa;
@@ -409,17 +416,6 @@ h2 {
 .status-badge.successful { background: #dcfce7; color: #166534; }
 .status-badge.pending { background: #fef9c3; color: #854d0e; }
 .status-badge.failed { background: #fee2e2; color: #991b1b; }
-
-/* Expand animation */
-.expand-enter-active, .expand-leave-active {
-  transition: max-height 0.28s ease, opacity 0.2s ease;
-  max-height: 400px;
-  overflow: hidden;
-}
-.expand-enter-from, .expand-leave-to {
-  max-height: 0;
-  opacity: 0;
-}
 
 .empty { color: #94a3b8; font-size: 0.9rem; }
 .empty a { color: #6366f1; text-decoration: none; }

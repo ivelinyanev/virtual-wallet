@@ -36,7 +36,7 @@
         <select v-model="senderWalletId">
           <option disabled value="">— choose —</option>
           <option v-for="w in walletStore.wallets" :key="w.id" :value="w.id">
-            {{ w.name }} ({{ formatCurrency(w.balance, w.currency) }})
+            {{ w.wallet_name }} ({{ formatCurrency(w.balance, w.currency) }})
           </option>
         </select>
       </div>
