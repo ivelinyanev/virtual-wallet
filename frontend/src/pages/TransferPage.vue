@@ -118,7 +118,7 @@ async function handleTransfer() {
       amount: Number(amount.value),
     })
     success.value = true
-    await walletStore.fetchWallets()
+    await walletStore.fetchWallets({ force: true })
     // Reset
     recipientQuery.value = ''
     selectedRecipient.value = null

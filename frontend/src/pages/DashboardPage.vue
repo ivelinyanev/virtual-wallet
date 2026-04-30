@@ -13,8 +13,17 @@
       <div class="stat-card accent">
         <div class="stat-icon accent-icon"><CircleDollarSignIcon :size="26" /></div>
         <div>
-          <span class="label">Total Balance</span>
-          <span class="value">{{ formatCurrency(totalBalance) }}</span>
+          <span class="label">{{ isSingleCurrency ? 'Total Balance' : 'Balances' }}</span>
+          <!-- Single currency: show normal total -->
+          <span v-if="isSingleCurrency" class="value">
+            {{ formatCurrency([...balanceByCurrency.entries()][0]?.[1] ?? 0, [...balanceByCurrency.entries()][0]?.[0]) }}
+          </span>
+          <!-- Multi-currency: show per-currency breakdown -->
+          <span v-else class="value multi-balance">
+            <span v-for="[currency, amount] in balanceByCurrency" :key="currency" class="balance-line">
+              {{ formatCurrency(amount, currency) }}
+            </span>
+          </span>
         </div>
       </div>
       <div class="stat-card">
@@ -161,9 +170,15 @@ const expandedId = ref<number | null>(null)
 const details = ref<Record<number, UserTransactionResponse>>({})
 const loadingDetail = ref(false)
 
-const totalBalance = computed(() =>
-  walletStore.wallets.reduce((sum, w) => sum + w.balance, 0),
-)
+const balanceByCurrency = computed(() => {
+  const map = new Map<string, number>()
+  for (const w of walletStore.wallets) {
+    map.set(w.currency, (map.get(w.currency) ?? 0) + w.balance)
+  }
+  return map
+})
+
+const isSingleCurrency = computed(() => balanceByCurrency.value.size <= 1)
 
 function formatCurrency(amount: number, currency = 'EUR') {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount)
@@ -271,6 +286,17 @@ h2 {
 .stat-card > div { display: flex; flex-direction: column; gap: 0.2rem; }
 .label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
 .value { font-size: 1.5rem; font-weight: 700; color: #0f172a; }
+
+.multi-balance {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.balance-line {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
 
 /* Section */
 .section { margin-bottom: 2.5rem; }
