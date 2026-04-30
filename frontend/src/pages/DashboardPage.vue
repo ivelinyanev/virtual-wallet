@@ -145,12 +145,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { useWalletStore } from '@/stores/wallet'
-import { transactionsApi } from '@/api/transactions'
-import { cardsApi } from '@/api/cards'
-import type { UserTransactionResponse, TransactionType } from '@/types'
+import { useDashboard } from '@/composables/useDashboard'
+import { useTransactionDetail } from '@/composables/useTransactionDetail'
+import { useFormatters } from '@/composables/useFormatters'
 import {
   CircleDollarSignIcon,
   LandmarkIcon,
@@ -162,74 +161,11 @@ import {
 } from 'lucide-vue-next'
 
 const auth = useAuthStore()
-const walletStore = useWalletStore()
+const { walletStore, recentTransactions, cardCount, balanceByCurrency, isSingleCurrency, loadDashboard } = useDashboard()
+const { expandedId, details, loadingDetail, toggle } = useTransactionDetail()
+const { formatCurrency, formatDate, formatDateTime, txLabel, amountClass } = useFormatters()
 
-const recentTransactions = ref<UserTransactionResponse[]>([])
-const cardCount = ref(0)
-const expandedId = ref<number | null>(null)
-const details = ref<Record<number, UserTransactionResponse>>({})
-const loadingDetail = ref(false)
-
-const balanceByCurrency = computed(() => {
-  const map = new Map<string, number>()
-  for (const w of walletStore.wallets) {
-    map.set(w.currency, (map.get(w.currency) ?? 0) + w.balance)
-  }
-  return map
-})
-
-const isSingleCurrency = computed(() => balanceByCurrency.value.size <= 1)
-
-function formatCurrency(amount: number, currency = 'EUR') {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount)
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
-
-function formatDateTime(iso: string) {
-  return new Date(iso).toLocaleString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  })
-}
-
-function txLabel(type: TransactionType) {
-  return type === 'TOP_UP' ? 'Top Up' : type === 'TRANSFER_IN' ? 'Received' : 'Sent'
-}
-
-
-function amountClass(type: TransactionType) {
-  return type === 'TRANSFER_OUT' ? 'debit' : 'credit'
-}
-
-async function toggle(id: number) {
-  if (expandedId.value === id) {
-    expandedId.value = null
-    return
-  }
-  expandedId.value = id
-  if (!details.value[id]) {
-    loadingDetail.value = true
-    try {
-      const res = await transactionsApi.getById(id)
-      details.value[id] = res.data
-    } finally {
-      loadingDetail.value = false
-    }
-  }
-}
-
-onMounted(async () => {
-  await walletStore.fetchWallets()
-  const [txRes, cardRes] = await Promise.allSettled([
-    transactionsApi.getMyTransactions({ page: 0, size: 5 }),
-    cardsApi.getMyCards(),
-  ])
-  if (txRes.status === 'fulfilled') recentTransactions.value = txRes.value.data.content
-  if (cardRes.status === 'fulfilled') cardCount.value = cardRes.value.data.length
-})
+onMounted(loadDashboard)
 </script>
 
 <style scoped>
