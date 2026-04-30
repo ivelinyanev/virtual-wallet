@@ -38,8 +38,8 @@ public class TransferServiceImpl implements TransferService {
     @PreAuthorize("hasRole('USER')")
     public void transfer(TransferReq request) {
         // source wallet
-        Wallet from = walletRepository.findByIdForUpdate(request.fromWalletId());
-        if (from == null) throw new EntityNotFoundException("Wallet", "id", request.fromWalletId().toString());
+        Wallet from = walletRepository.findWalletByName(request.fromWalletName())
+                .orElseThrow(() -> new EntityNotFoundException("Wallet", "name", request.fromWalletName()));
 
         validateWalletOwner(from);
 
@@ -49,6 +49,7 @@ public class TransferServiceImpl implements TransferService {
         if (!toUser.isVerified()) {
             throw new AccountNotVerifiedException(RECIPIENT_NOT_VERIFIED);
         }
+
         Wallet toWallet = walletRepository
                 .findByOwnerAndCurrency(toUser, from.getCurrency())
                 .or(() -> walletRepository.findByOwnerAndCurrency(toUser, Currency.EUR))

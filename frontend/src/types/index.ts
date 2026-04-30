@@ -132,8 +132,8 @@ export interface TransactionFilterRequest {
 // ─── Transfers ───────────────────────────────────────────────────────────────
 
 export interface TransferReq {
-  sender_wallet_id: number
-  recipient_wallet_id: number
+  from_wallet_name: string
+  to_username: string
   amount: number
 }
 
