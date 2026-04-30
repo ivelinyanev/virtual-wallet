@@ -83,3 +83,210 @@
   background: #6366f1 !important;
 }
 
+/* ── Buttons ───────────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--c-primary);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-primary:hover    { background: var(--c-primary-hover); }
+.btn-primary:active   { transform: scale(0.98); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--c-border);
+  color: var(--c-text-muted);
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+.btn-ghost:hover { background: var(--c-surface-soft); }
+
+.btn-success {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--c-success);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+.btn-success:hover    { background: var(--c-success-hover); }
+.btn-success:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── Spinner ───────────────────────────────────────────────── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner { animation: spin 0.8s linear infinite; }
+
+/* ── Loading & empty states ────────────────────────────────── */
+.loading-state {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--c-text-subtle);
+  padding: 3rem 0;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--c-text-subtle);
+}
+.empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-xl);
+  background: var(--c-surface-mute);
+  color: var(--c-text-subtle);
+  margin-bottom: 1rem;
+}
+.empty-title { font-size: 1.1rem; font-weight: 600; color: var(--c-text-secondary); margin: 0 0 0.4rem; }
+.empty-sub   { font-size: 0.875rem; margin: 0 0 1.5rem; }
+
+/* ── Form fields ───────────────────────────────────────────── */
+.field { display: flex; flex-direction: column; gap: 0.4rem; }
+.field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--c-text-secondary);
+}
+
+.input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--c-surface-soft);
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+.input-wrap:focus-within,
+.input-wrap.focused {
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+  background: var(--c-surface);
+}
+.input-icon { color: var(--c-text-subtle); padding: 0 0.75rem; flex-shrink: 0; }
+.input-wrap input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 0.65rem 0.75rem 0.65rem 0;
+  font-size: 0.95rem;
+  background: transparent;
+  color: var(--c-text);
+  width: 100%;
+}
+.input-wrap:not(:has(.input-icon)) input { padding-left: 0.75rem; }
+.input-wrap input::placeholder { color: var(--c-text-subtle); }
+
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--c-danger);
+  font-size: 0.825rem;
+  margin: 0;
+}
+
+/* ── Modal ─────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 1rem;
+}
+
+.modal {
+  background: var(--c-surface);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow-modal);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem 1.5rem 0;
+}
+.modal-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--c-primary-light);
+  color: var(--c-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.modal-icon-wrap.green { background: var(--c-success-light); color: var(--c-success); }
+.modal-header > div:nth-child(2) { flex: 1; min-width: 0; }
+.modal-header h3 { margin: 0 0 0.15rem; font-size: 1.05rem; font-weight: 700; color: var(--c-text); }
+.modal-sub { margin: 0; font-size: 0.8rem; color: var(--c-text-subtle); }
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--c-text-subtle);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  transition: background 0.15s, color 0.15s;
+}
+.modal-close:hover { background: var(--c-surface-mute); color: var(--c-text-secondary); }
+
+.modal-body {
+  padding: 1.25rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding-top: 0.25rem;
+}
+
+/* ── Modal transition ──────────────────────────────────────── */
+.modal-enter-active,
+.modal-leave-active { transition: opacity 0.2s ease; }
+.modal-enter-active .modal,
+.modal-leave-active .modal { transition: transform 0.2s ease, opacity 0.2s ease; }
+.modal-enter-from,
+.modal-leave-to { opacity: 0; }
+.modal-enter-from .modal,
+.modal-leave-to .modal { transform: scale(0.96) translateY(8px); opacity: 0; }
+

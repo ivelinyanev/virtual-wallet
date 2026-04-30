@@ -145,20 +145,9 @@ input:focus, select:focus { border-color: #7c83fd; }
   margin-top: 0.25rem;
 }
 
-.btn-primary {
-  background: #7c83fd;
-  color: white;
-  border: none;
-  padding: 0.85rem;
-  border-radius: 10px;
-  font-size: 1rem;
-  cursor: pointer;
-  font-weight: 600;
-  margin-top: 0.5rem;
-}
+/* .btn-primary comes from global — only override layout specifics */
+.btn-primary { width: 100%; justify-content: center; padding: 0.85rem; margin-top: 0.5rem; font-size: 1rem; }
 
-.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.error { color: #e53e3e; font-size: 0.875rem; }
-.success { color: #38a169; font-size: 0.875rem; }
+.error   { color: var(--c-danger); font-size: 0.875rem; }
+.success { color: var(--c-success); font-size: 0.875rem; }
 </style>

@@ -289,84 +289,8 @@ onMounted(() => walletStore.fetchWallets())
   align-items: flex-start;
   margin-bottom: 2rem;
 }
-h2 { margin: 0 0 0.2rem; font-size: 1.75rem; font-weight: 700; color: #0f172a; }
-.subtitle { margin: 0; color: #64748b; font-size: 0.9rem; }
-
-/* ── Buttons ───────────────────────────────────────────────── */
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: #6366f1;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.1rem;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 600;
-  transition: background 0.15s, transform 0.1s;
-}
-.btn-primary:hover { background: #4f52e0; }
-.btn-primary:active { transform: scale(0.98); }
-.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-
-.btn-ghost {
-  background: transparent;
-  border: 1px solid #e2e8f0;
-  color: #64748b;
-  padding: 0.6rem 1.1rem;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: background 0.15s;
-}
-.btn-ghost:hover { background: #f8fafc; }
-
-.btn-success {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: #16a34a;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.1rem;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 600;
-  transition: background 0.15s;
-}
-.btn-success:hover { background: #15803d; }
-.btn-success:disabled { opacity: 0.6; cursor: not-allowed; }
-
-/* ── States ────────────────────────────────────────────────── */
-.loading-state {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: #94a3b8;
-  padding: 3rem 0;
-}
-.empty-state {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: #94a3b8;
-}
-.empty-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  border-radius: 20px;
-  background: #f1f5f9;
-  color: #cbd5e1;
-  margin-bottom: 1rem;
-}
-.empty-title { font-size: 1.1rem; font-weight: 600; color: #475569; margin: 0 0 0.4rem; }
-.empty-sub { font-size: 0.875rem; margin: 0 0 1.5rem; }
+h2 { margin: 0 0 0.25rem; font-size: 1.75rem; font-weight: 700; color: var(--c-text); }
+.subtitle { margin: 0; color: var(--c-text-muted); font-size: 0.9rem; }
 
 /* ── Wallet grid ───────────────────────────────────────────── */
 .wallet-grid {
@@ -452,95 +376,7 @@ h2 { margin: 0 0 0.2rem; font-size: 1.75rem; font-weight: 700; color: #0f172a; }
 .delete-btn { background: rgba(239,68,68,0.25); color: #fca5a5; padding: 0.4rem 0.6rem; }
 .delete-btn:hover { background: rgba(239,68,68,0.4); }
 
-/* ── Modal ─────────────────────────────────────────────────── */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15,23,42,0.55);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 200;
-  padding: 1rem;
-}
-
-.modal {
-  background: white;
-  border-radius: 20px;
-  width: 100%;
-  max-width: 420px;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.18);
-  overflow: hidden;
-}
-
-.modal-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 1.5rem 1.5rem 0;
-}
-.modal-icon-wrap {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: #ede9fe;
-  color: #6366f1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.modal-icon-wrap.green { background: #dcfce7; color: #16a34a; }
-.modal-header > div:nth-child(2) { flex: 1; min-width: 0; }
-.modal-header h3 { margin: 0 0 0.15rem; font-size: 1.05rem; font-weight: 700; color: #0f172a; }
-.modal-sub { margin: 0; font-size: 0.8rem; color: #94a3b8; }
-.modal-close {
-  background: transparent;
-  border: none;
-  color: #94a3b8;
-  cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  transition: background 0.15s, color 0.15s;
-}
-.modal-close:hover { background: #f1f5f9; color: #475569; }
-
-.modal-body { padding: 1.25rem 1.5rem 1.5rem; display: flex; flex-direction: column; gap: 1.1rem; }
-
-/* Fields */
-.field { display: flex; flex-direction: column; gap: 0.4rem; }
-label { font-size: 0.8rem; font-weight: 600; color: #475569; }
-
-.input-wrap {
-  display: flex;
-  align-items: center;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 10px;
-  overflow: hidden;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  background: #f8fafc;
-}
-.input-wrap:focus-within {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
-  background: white;
-}
-.input-icon { color: #94a3b8; padding: 0 0.75rem; flex-shrink: 0; }
-.input-wrap input {
-  flex: 1;
-  border: none;
-  outline: none;
-  padding: 0.65rem 0.75rem 0.65rem 0;
-  font-size: 0.95rem;
-  background: transparent;
-  color: #0f172a;
-}
-.input-wrap input::placeholder { color: #cbd5e1; }
-
-/* Currency selector */
+/* ── Currency selector ─────────────────────────────────────── */
 .currency-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -665,29 +501,4 @@ label { font-size: 0.8rem; font-weight: 600; color: #475569; }
 }
 .after-value { font-weight: 700; }
 
-.form-error {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  color: #dc2626;
-  font-size: 0.825rem;
-  margin: 0;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.6rem;
-  padding-top: 0.25rem;
-}
-
-/* Spinner */
-@keyframes spin { to { transform: rotate(360deg); } }
-.spinner { animation: spin 0.8s linear infinite; }
-
-/* Modal transition */
-.modal-enter-active, .modal-leave-active { transition: opacity 0.2s ease; }
-.modal-enter-active .modal, .modal-leave-active .modal { transition: transform 0.2s ease, opacity 0.2s ease; }
-.modal-enter-from, .modal-leave-to { opacity: 0; }
-.modal-enter-from .modal, .modal-leave-to .modal { transform: scale(0.96) translateY(8px); opacity: 0; }
 </style>

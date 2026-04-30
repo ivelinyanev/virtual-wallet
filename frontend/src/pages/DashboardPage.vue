@@ -182,11 +182,11 @@ h2 {
   margin: 0 0 0.25rem;
   font-size: 1.75rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--c-text);
 }
 .subtitle {
   margin: 0;
-  color: #64748b;
+  color: var(--c-text-muted);
   font-size: 0.95rem;
 }
 
