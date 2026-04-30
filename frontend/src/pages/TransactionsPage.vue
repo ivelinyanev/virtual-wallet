@@ -38,12 +38,12 @@
       <div class="filter-divider" />
 
       <!-- Date range popover -->
-      <Popover class="date-popover-wrap" v-slot="{ open }">
-        <PopoverButton class="date-trigger" :class="{ active: open || hasDateFilter }">
+      <div ref="dateWrapRef" class="date-popover-wrap">
+        <button class="date-trigger" :class="{ active: dateOpen || hasDateFilter }" @click="dateOpen = !dateOpen">
           <CalendarIcon :size="14" />
           <span>{{ dateRangeLabel }}</span>
-          <ChevronDownIcon :size="13" :class="['date-chevron', { rotated: open }]" />
-        </PopoverButton>
+          <ChevronDownIcon :size="13" :class="['date-chevron', { rotated: dateOpen }]" />
+        </button>
 
         <transition
           enter-active-class="popover-enter-active"
@@ -51,7 +51,7 @@
           leave-active-class="popover-leave-active"
           leave-to-class="popover-leave-to"
         >
-          <PopoverPanel class="date-panel" v-slot="{ close }">
+          <div v-if="dateOpen" class="date-panel" @click.stop>
             <div class="date-fields">
               <div class="date-field">
                 <label>From</label>
@@ -63,12 +63,12 @@
               </div>
             </div>
             <div class="date-panel-footer">
-              <button class="panel-clear-btn" @click="clearDates(); close()">Clear dates</button>
-              <button class="panel-apply-btn" @click="close()">Apply</button>
+              <button class="panel-clear-btn" @click="clearDates(); dateOpen = false">Clear dates</button>
+              <button class="panel-apply-btn" @click="dateOpen = false">Apply</button>
             </div>
-          </PopoverPanel>
+          </div>
         </transition>
-      </Popover>
+      </div>
 
       <button v-if="hasActiveFilters" class="clear-all-btn" @click="clearFilters">
         <XIcon :size="13" /> Reset
@@ -167,8 +167,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useTransactionCache } from '@/composables/useTransactionCache'
 import { transactionsApi } from '@/api/transactions'
 import type { UserTransactionResponse, TransactionType, TransactionStatus } from '@/types'
 import {
@@ -187,6 +187,14 @@ const loading = ref(false)
 const page = ref(0)
 const totalPages = ref(1)
 const expandedId = ref<number | null>(null)
+const dateOpen = ref(false)
+const dateWrapRef = ref<HTMLElement | null>(null)
+
+function onClickOutside(e: MouseEvent) {
+  if (dateWrapRef.value && !dateWrapRef.value.contains(e.target as Node)) {
+    dateOpen.value = false
+  }
+}
 
 const filters = ref<{
   type: TransactionType | ''
@@ -223,6 +231,7 @@ const dateRangeLabel = computed(() => {
   return `Until ${fmt(filters.value.to!)}`
 })
 
+
 const visiblePages = computed(() => {
   const total = totalPages.value
   const current = page.value
@@ -234,21 +243,40 @@ const visiblePages = computed(() => {
   return range
 })
 
+const { get: cacheGet, set: cacheSet } = useTransactionCache()
+
+function buildParams(p: number) {
+  return {
+    page: p,
+    size: 10,
+    ...(filters.value.type   && { type:   filters.value.type }),
+    ...(filters.value.status && { status: filters.value.status }),
+    ...(filters.value.from   && { from:   filters.value.from }),
+    ...(filters.value.to     && { to:     filters.value.to }),
+  }
+}
+
+function cacheKey(p: number) {
+  return JSON.stringify(buildParams(p))
+}
+
 async function load() {
-  loading.value = true
   expandedId.value = null
+  const key = cacheKey(page.value)
+  const hit = cacheGet(key)
+
+  if (hit) {
+    transactions.value = hit.content
+    totalPages.value = hit.totalPages
+    return
+  }
+
+  loading.value = true
   try {
-    const params = {
-      page: page.value,
-      size: 15,
-      ...(filters.value.type && { type: filters.value.type }),
-      ...(filters.value.status && { status: filters.value.status }),
-      ...(filters.value.from && { from: filters.value.from }),
-      ...(filters.value.to && { to: filters.value.to }),
-    }
-    const { data } = await transactionsApi.getMyTransactions(params)
+    const { data } = await transactionsApi.getMyTransactions(buildParams(page.value))
     transactions.value = data.content
     totalPages.value = data.total_pages
+    cacheSet(key, data.content, data.total_pages)
   } finally {
     loading.value = false
   }
@@ -316,7 +344,14 @@ function formatDateTime(iso: string) {
   })
 }
 
-onMounted(load)
+onMounted(() => {
+  load()
+  document.addEventListener('click', onClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', onClickOutside)
+})
 </script>
 
 <style scoped>
@@ -677,7 +712,6 @@ h2 {
   margin-top: 1.5rem;
   flex-wrap: wrap;
 }
-
 .page-btn {
   min-width: 36px;
   height: 36px;
@@ -702,7 +736,6 @@ h2 {
   color: white;
 }
 .page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-
 .page-info {
   margin-left: 0.5rem;
   font-size: 0.8rem;
