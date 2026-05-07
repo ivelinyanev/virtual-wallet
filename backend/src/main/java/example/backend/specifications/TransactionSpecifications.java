@@ -7,7 +7,6 @@ import example.backend.models.Transaction;
 import example.backend.models.User;
 import example.backend.models.Wallet;
 import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
@@ -39,18 +38,9 @@ public class TransactionSpecifications {
         return (root, query, cb) -> {
             if (userId == null) return null;
 
-            if (query != null) {
-                query.distinct(true);
-            }
-
             Join<Transaction, Wallet> walletJoin = root.join("wallet");
-            Join<Transaction, Wallet> counterpartyWalletJoin =
-                    root.join("counterpartyWallet", JoinType.LEFT);
 
-            return cb.or(
-                    cb.equal(walletJoin.get("owner").get("id"), userId),
-                    cb.equal(counterpartyWalletJoin.get("owner").get("id"), userId)
-            );
+            return cb.equal(walletJoin.get("owner").get("id"), userId);
         };
     }
 
@@ -62,18 +52,9 @@ public class TransactionSpecifications {
 
     public static Specification<Transaction> belongsToUser(User user) {
         return (root, query, cb) -> {
-
-            if (query != null) {
-                query.distinct(true);
-            }
-
             Join<Transaction, Wallet> walletJoin = root.join("wallet");
-            Join<Transaction, Wallet> counterpartyWalletJoin = root.join("counterpartyWallet", JoinType.LEFT);
 
-            return cb.or(
-                    cb.equal(walletJoin.get("owner"), user),
-                    cb.equal(counterpartyWalletJoin.get("owner"), user)
-            );
+            return cb.equal(walletJoin.get("owner"), user);
         };
     }
 
