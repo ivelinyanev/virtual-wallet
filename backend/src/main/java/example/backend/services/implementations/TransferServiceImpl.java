@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static example.backend.utils.StringConstants.*;
 
@@ -38,8 +39,8 @@ public class TransferServiceImpl implements TransferService {
     @PreAuthorize("hasRole('USER')")
     public void transfer(TransferReq request) {
         // source wallet
-        Wallet from = walletRepository.findWalletByName(request.fromWalletName())
-                .orElseThrow(() -> new EntityNotFoundException("Wallet", "name", request.fromWalletName()));
+        Wallet from = Optional.ofNullable(walletRepository.findByIdForUpdate(request.fromWalletId()))
+                .orElseThrow(() -> new EntityNotFoundException("Wallet", "id", String.valueOf(request.fromWalletId())));
 
         validateWalletOwner(from);
 

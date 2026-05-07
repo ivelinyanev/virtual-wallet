@@ -10,8 +10,7 @@ export function useTransfer() {
   const recipientQuery = ref('')
   const searchResults = ref<PublicUserDto[]>([])
   const selectedRecipient = ref<PublicUserDto | null>(null)
-  const senderWalletId = ref<number | ''>('')
-  const recipientWalletId = ref<number | ''>('')
+  const selectedWalletName = ref<string>('')
   const amount = ref<number | ''>('')
   const error = ref('')
   const success = ref(false)
@@ -38,26 +37,31 @@ export function useTransfer() {
     searchResults.value = []
   }
 
-  const canSubmit = computed(
-    () => selectedRecipient.value && senderWalletId.value && recipientWalletId.value && Number(amount.value) > 0,
+  const selectedWallet = computed(() =>
+    walletStore.wallets.find((w) => w.wallet_name === selectedWalletName.value) ?? null,
+  )
+
+  const canSubmit = computed<boolean>(
+    () => !!(selectedRecipient.value && selectedWalletName.value && Number(amount.value) > 0),
   )
 
   async function handleTransfer() {
     error.value = ''
     success.value = false
     loading.value = true
+
     try {
       await transfersApi.send({
-        sender_wallet_id: Number(senderWalletId.value),
-        recipient_wallet_id: Number(recipientWalletId.value),
+        from_wallet_id: selectedWallet.value!.id,
+        to_username: selectedRecipient.value!.username,
         amount: Number(amount.value),
       })
+
       success.value = true
       await walletStore.fetchWallets({ force: true })
       recipientQuery.value = ''
       selectedRecipient.value = null
-      senderWalletId.value = ''
-      recipientWalletId.value = ''
+      selectedWalletName.value = ''
       amount.value = ''
     } catch (e: any) {
       error.value = e.response?.data?.message ?? 'Transfer failed.'
@@ -69,8 +73,8 @@ export function useTransfer() {
   return {
     walletStore,
     recipientQuery, searchResults, selectedRecipient,
-    senderWalletId, recipientWalletId, amount,
-    error, success, loading, canSubmit,
+    selectedWalletName, selectedWallet,
+    amount, error, success, loading, canSubmit,
     searchUsers, selectRecipient, handleTransfer,
   }
 }

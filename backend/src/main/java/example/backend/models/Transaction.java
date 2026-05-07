@@ -31,12 +31,14 @@ public class Transaction {
     @Column(name = "currency", nullable = false)
     private Currency currency;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private TransactionType type;
 
     @Column(name = "timestamp")
     private LocalDateTime timestamp;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private TransactionStatus status = TransactionStatus.PENDING;
 

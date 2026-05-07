@@ -38,7 +38,7 @@ public class UserController {
                 .body(userService.getAll(pageable).map(UserMapper::toPrivateUserDto));
     }
 
-    @GetMapping("/search/")
+    @GetMapping("/search")
     public ResponseEntity<Page<PublicUserDto>> search(@RequestParam("q") String query, Pageable pageable) {
         return ResponseEntity
                 .status(HttpStatus.OK)

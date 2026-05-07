@@ -16,6 +16,6 @@ public record VerifyUserDto(
                 regexp = "^\\d{6}$",
                 message = VERIFICATION_CODE_VALIDATION
         )
-        String code
+        String verificationCode
 ) {
 }

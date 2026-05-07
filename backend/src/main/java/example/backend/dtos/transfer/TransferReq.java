@@ -10,8 +10,8 @@ import static example.backend.utils.StringConstants.FIELD_CANNOT_BE_BLANK;
 
 public record TransferReq(
 
-        @NotBlank(message = FIELD_CANNOT_BE_BLANK)
-        String fromWalletName,
+        @NotNull(message = FIELD_CANNOT_BE_BLANK)
+        Long fromWalletId,
 
         @NotBlank(message = FIELD_CANNOT_BE_BLANK)
         String toUsername,

@@ -15,6 +15,7 @@ export interface RegisterUserDto {
 }
 
 export interface VerifyUserDto {
+  email: string
   verification_code: string
 }
 
@@ -132,7 +133,7 @@ export interface TransactionFilterRequest {
 // ─── Transfers ───────────────────────────────────────────────────────────────
 
 export interface TransferReq {
-  from_wallet_name: string
+  from_wallet_id: number
   to_username: string
   amount: number
 }

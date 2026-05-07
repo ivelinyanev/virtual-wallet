@@ -1,10 +1,13 @@
 package example.backend.config;
 
+import example.backend.enums.Currency;
 import example.backend.enums.ERole;
 import example.backend.models.Role;
 import example.backend.models.User;
+import example.backend.models.Wallet;
 import example.backend.repositories.RoleRepository;
 import example.backend.repositories.UserRepository;
+import example.backend.repositories.WalletRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +20,7 @@ public class DataSeeder {
     @Bean
     CommandLineRunner init(RoleRepository roleRepository,
                            UserRepository userRepository,
+                           WalletRepository walletRepository,
                            PasswordEncoder passwordEncoder) {
         return args -> {
 
@@ -68,7 +72,23 @@ public class DataSeeder {
                 unverified.setRoles(Set.of(userRole));
                 unverified.setVerified(false);
                 userRepository.save(unverified);
+
+                initWallets(admin, user, walletRepository);
             }
         };
+    }
+
+    private void initWallets(User admin, User user, WalletRepository walletRepository) {
+        Wallet adminWallet = new Wallet();
+        adminWallet.setOwner(admin);
+        adminWallet.setName("Auto-generated");
+        adminWallet.setCurrency(Currency.EUR);
+        walletRepository.save(adminWallet);
+
+        Wallet userWallet = new Wallet();
+        userWallet.setOwner(user);
+        userWallet.setName("Auto-generated");
+        userWallet.setCurrency(Currency.EUR);
+        walletRepository.save(userWallet);
     }
 }
