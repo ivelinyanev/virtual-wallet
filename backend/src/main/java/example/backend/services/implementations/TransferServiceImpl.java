@@ -51,10 +51,7 @@ public class TransferServiceImpl implements TransferService {
             throw new AccountNotVerifiedException(RECIPIENT_NOT_VERIFIED);
         }
 
-        Wallet toWallet = walletRepository
-                .findByOwnerAndCurrency(toUser, from.getCurrency())
-                .or(() -> walletRepository.findByOwnerAndCurrency(toUser, Currency.EUR))
-                .orElseThrow(() -> new ImpossibleOperationException(RECIPIENT_HAS_NO_SUITABLE_WALLET));
+        Wallet toWallet = findSuitableWallet(toUser, from.getCurrency());
 
         BigDecimal amount = request.amount();
 
@@ -85,6 +82,12 @@ public class TransferServiceImpl implements TransferService {
         if (!from.getOwner().equals(user)) {
             throw new ImpossibleOperationException(YOU_ARE_NOT_THE_WALLET_OWNER);
         }
+    }
+
+    private Wallet findSuitableWallet(User toUser, Currency currency) {
+        return walletRepository.findByOwnerAndCurrency(toUser, currency)
+                .or(() -> walletRepository.findAllByOwner(toUser).stream().findFirst())
+                .orElseThrow(() -> new ImpossibleOperationException(RECIPIENT_HAS_NO_SUITABLE_WALLET));
     }
 
     private void validateDifferentWallets(Long fromId, Long toId) {

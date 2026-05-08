@@ -1,19 +1,68 @@
 <template>
-  <div class="auth-page">
-    <div class="auth-card">
-      <h1>Verify Email</h1>
-      <p class="subtitle">Enter the verification code sent to your email.</p>
-      <form @submit.prevent="handleSubmit">
-        <div class="field">
-          <label>Verification Code</label>
-          <input v-model="code" type="text" required />
+  <div class="auth-root">
+    <!-- Brand panel -->
+    <div class="brand-panel">
+      <div class="deco deco-a" />
+      <div class="deco deco-b" />
+      <div class="deco deco-c" />
+      <div class="brand-content">
+        <div class="brand-mark">
+          <WalletIcon :size="30" />
         </div>
-        <p v-if="error" class="error">{{ error }}</p>
-        <p v-if="success" class="success">Email verified! Redirecting…</p>
-        <button type="submit" :disabled="loading">
-          {{ loading ? 'Verifying…' : 'Verify' }}
-        </button>
-      </form>
+        <p class="brand-name">VirtualWallet</p>
+        <p class="brand-tagline">One last step to<br>secure your account.</p>
+      </div>
+    </div>
+
+    <!-- Form panel -->
+    <div class="form-panel">
+      <div class="form-box">
+        <div class="form-heading">
+          <div class="verify-icon">
+            <MailCheckIcon :size="28" />
+          </div>
+          <h2>Check your email</h2>
+          <p>
+            Enter the verification code we sent to
+            <strong>{{ auth.emailForVerification ?? 'your email' }}</strong>.
+          </p>
+        </div>
+
+        <form @submit.prevent="handleSubmit">
+          <div class="field">
+            <label>Verification Code</label>
+            <div class="input-wrap">
+              <span class="input-icon"><KeyRoundIcon :size="16" /></span>
+              <input
+                v-model="code"
+                type="text"
+                placeholder="Enter your code"
+                required
+                autocomplete="one-time-code"
+              />
+            </div>
+          </div>
+
+          <p v-if="error" class="form-error">
+            <AlertCircleIcon :size="14" />{{ error }}
+          </p>
+
+          <div v-if="success" class="success-banner">
+            <CheckCircleIcon :size="16" />
+            Email verified! Redirecting…
+          </div>
+
+          <button type="submit" class="btn-primary submit-btn" :disabled="loading || success">
+            <LoaderIcon v-if="loading" :size="15" class="spinner" />
+            <CheckCircleIcon v-else-if="success" :size="15" />
+            {{ loading ? 'Verifying…' : success ? 'Verified!' : 'Verify Email' }}
+          </button>
+        </form>
+
+        <p class="switch-link">
+          Wrong email? <RouterLink to="/register">Start over</RouterLink>
+        </p>
+      </div>
     </div>
   </div>
 </template>
@@ -22,6 +71,14 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import {
+  WalletIcon,
+  MailCheckIcon,
+  KeyRoundIcon,
+  AlertCircleIcon,
+  CheckCircleIcon,
+  LoaderIcon,
+} from 'lucide-vue-next'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -36,7 +93,7 @@ async function handleSubmit() {
   loading.value = true
 
   if (!auth.emailForVerification) {
-    error.value = "Missing email. Please register again."
+    error.value = 'Missing email. Please register again.'
     await router.push('/register')
     return
   }
@@ -44,7 +101,7 @@ async function handleSubmit() {
   try {
     await auth.verify({
       email: auth.emailForVerification,
-      verification_code: code.value
+      verification_code: code.value,
     })
     success.value = true
     setTimeout(() => router.push('/login'), 1500)
@@ -57,57 +114,197 @@ async function handleSubmit() {
 </script>
 
 <style scoped>
-.auth-page {
+.auth-root {
   min-height: 100vh;
+  display: flex;
+}
+
+/* ── Brand panel ─────────────────────────────────────────── */
+.brand-panel {
+  position: relative;
+  flex: 1;
+  background: linear-gradient(150deg, #4338ca 0%, #6366f1 45%, #7c3aed 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f6fa;
+  overflow: hidden;
+  padding: 3rem;
 }
 
-.auth-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+.deco {
+  position: absolute;
+  border-radius: 50%;
+}
+.deco-a {
+  width: 480px;
+  height: 480px;
+  top: -140px;
+  right: -100px;
+  background: rgba(255, 255, 255, 0.07);
+}
+.deco-b {
+  width: 300px;
+  height: 300px;
+  bottom: -80px;
+  left: -60px;
+  background: rgba(255, 255, 255, 0.06);
+}
+.deco-c {
+  width: 160px;
+  height: 160px;
+  bottom: 120px;
+  right: 60px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.brand-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  color: white;
+}
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 1.25rem;
+}
+
+.brand-name {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
+}
+
+.brand-tagline {
+  font-size: 1rem;
+  opacity: 0.78;
+  line-height: 1.7;
+}
+
+/* ── Form panel ──────────────────────────────────────────── */
+.form-panel {
   width: 100%;
-  max-width: 380px;
+  max-width: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2.5rem;
+  background: var(--c-surface);
 }
 
-h1 { margin: 0 0 0.5rem; font-size: 1.5rem; color: #1a1a2e; }
-.subtitle { color: #666; font-size: 0.9rem; margin-bottom: 1.5rem; }
+.form-box {
+  width: 100%;
+  max-width: 360px;
+}
 
-.field {
+.form-heading {
+  margin-bottom: 2rem;
+}
+
+.verify-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-lg);
+  background: var(--c-primary-light);
+  color: var(--c-primary);
+  margin-bottom: 1.25rem;
+}
+
+.form-heading h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--c-text);
+  letter-spacing: -0.025em;
+  margin-bottom: 0.5rem;
+}
+
+.form-heading p {
+  color: var(--c-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.form-heading p strong {
+  color: var(--c-text-secondary);
+  font-weight: 600;
+}
+
+form {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  margin-bottom: 1rem;
+  gap: 1rem;
 }
 
-label { font-size: 0.875rem; color: #555; }
-
-input {
-  padding: 0.6rem 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
-  outline: none;
-  transition: border 0.2s;
+.success-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--c-success-soft);
+  border: 1px solid var(--c-success-border);
+  border-radius: var(--radius-md);
+  color: var(--c-success);
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
-input:focus { border-color: #7c83fd; }
-
-button {
+.submit-btn {
   width: 100%;
+  justify-content: center;
   padding: 0.75rem;
-  background: #7c83fd;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
+  font-size: 0.95rem;
+  gap: 0.5rem;
 }
 
-.error { color: #e53e3e; font-size: 0.875rem; margin: 0 0 0.75rem; }
-.success { color: #38a169; font-size: 0.875rem; margin: 0 0 0.75rem; }
+.switch-link {
+  text-align: center;
+  margin-top: 1.75rem;
+  font-size: 0.875rem;
+  color: var(--c-text-muted);
+}
+
+.switch-link a {
+  color: var(--c-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.switch-link a:hover {
+  text-decoration: underline;
+}
+
+/* ── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .auth-root {
+    flex-direction: column;
+  }
+
+  .brand-panel {
+    flex: none;
+    min-height: 180px;
+    padding: 2rem 1.5rem;
+  }
+
+  .brand-tagline {
+    display: none;
+  }
+
+  .form-panel {
+    max-width: 100%;
+    padding: 2rem 1.5rem 3rem;
+    align-items: flex-start;
+  }
+}
 </style>
