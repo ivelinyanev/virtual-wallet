@@ -1,5 +1,4 @@
 import { ref, computed } from 'vue'
-import { useTransactionCache } from '@/composables/useTransactionCache'
 import { transactionsApi } from '@/api/transactions'
 import type { UserTransactionResponse, TransactionType, TransactionStatus } from '@/types'
 import {
@@ -61,7 +60,27 @@ export function useTransactions() {
     return range
   })
 
-  const { get: cacheGet, set: cacheSet } = useTransactionCache()
+  const TTL_MS = 30_000
+  interface CacheEntry {
+    content: UserTransactionResponse[]
+    totalPages: number
+    cachedAt: number
+  }
+  const cache = new Map<string, CacheEntry>()
+
+  function cacheGet(key: string): { content: UserTransactionResponse[]; totalPages: number } | null {
+    const entry = cache.get(key)
+    if (!entry) return null
+    if (Date.now() - entry.cachedAt > TTL_MS) {
+      cache.delete(key)
+      return null
+    }
+    return { content: entry.content, totalPages: entry.totalPages }
+  }
+
+  function cacheSet(key: string, content: UserTransactionResponse[], totalPages: number) {
+    cache.set(key, { content, totalPages, cachedAt: Date.now() })
+  }
 
   function buildParams(p: number) {
     return {
