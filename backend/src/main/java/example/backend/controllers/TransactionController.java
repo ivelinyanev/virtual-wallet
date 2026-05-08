@@ -1,7 +1,8 @@
 package example.backend.controllers;
 
 import example.backend.dtos.filters.TransactionFilterRequest;
-import example.backend.dtos.transaction.TransactionResponse;
+import example.backend.dtos.transaction.AdminTransactionResponse;
+import example.backend.dtos.transaction.UserTransactionResponse;
 import example.backend.mappers.TransactionMapper;
 import example.backend.models.Transaction;
 import example.backend.services.protocols.TransactionService;
@@ -20,58 +21,44 @@ public class TransactionController {
     public final TransactionService transactionService;
 
     @GetMapping("/all")
-    ResponseEntity<Page<TransactionResponse>> getAllTransactions(
+    ResponseEntity<Page<AdminTransactionResponse>> getAllTransactions(
             @ModelAttribute TransactionFilterRequest request,
             Pageable pageable
     ) {
-
-        pageable = pageable == null
-                ? Pageable.unpaged()
-                : pageable;
+        pageable = pageable == null ? Pageable.unpaged() : pageable;
 
         Page<Transaction> page = transactionService.getAllTransactions(request, pageable);
 
-        Page<TransactionResponse> response = page.map(TransactionMapper::toTransactionResponse);
-
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(response);
+                .body(page.map(TransactionMapper::toAdminTransactionResponse));
     }
 
     @GetMapping
-    ResponseEntity<Page<TransactionResponse>> getMyTransactions(
+    ResponseEntity<Page<UserTransactionResponse>> getMyTransactions(
             @ModelAttribute TransactionFilterRequest request,
             Pageable pageable
     ) {
-
-        pageable = pageable == null
-                ? Pageable.unpaged()
-                : pageable;
+        pageable = pageable == null ? Pageable.unpaged() : pageable;
 
         Page<Transaction> page = transactionService.getMyTransactions(request, pageable);
 
-        Page<TransactionResponse> response = page.map(TransactionMapper::toTransactionResponse);
-
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(response);
+                .body(page.map(TransactionMapper::toUserTransactionResponse));
     }
 
     @GetMapping("/{transactionId}")
-    ResponseEntity<TransactionResponse> getMyTransactionById(@PathVariable Long transactionId) {
+    ResponseEntity<UserTransactionResponse> getMyTransactionById(@PathVariable Long transactionId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(
-                        TransactionMapper.toTransactionResponse(transactionService.getMyTransactionById(transactionId))
-                );
+                .body(TransactionMapper.toUserTransactionResponse(transactionService.getMyTransactionById(transactionId)));
     }
 
     @GetMapping("/admin/{transactionId}")
-    ResponseEntity<TransactionResponse> getAnyTransactionById(@PathVariable Long transactionId) {
+    ResponseEntity<AdminTransactionResponse> getAnyTransactionById(@PathVariable Long transactionId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(
-                        TransactionMapper.toTransactionResponse(transactionService.getMyTransactionById(transactionId))
-                );
+                .body(TransactionMapper.toAdminTransactionResponse(transactionService.getAnyTransactionById(transactionId)));
     }
 }

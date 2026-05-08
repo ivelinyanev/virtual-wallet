@@ -8,6 +8,7 @@ export const useAuthStore = defineStore(
   () => {
     const token = ref<string | null>(null)
     const user = ref<PrivateUserDto | null>(null)
+    const emailForVerification = ref<string | null>(null)
 
     const isAuthenticated = computed(() => !!token.value)
     const isAdmin = computed(() => user.value?.roles?.includes('ADMIN') ?? false)
@@ -25,6 +26,7 @@ export const useAuthStore = defineStore(
 
     async function verify(payload: VerifyUserDto) {
       await authApi.verify(payload)
+      emailForVerification.value = null
     }
 
     async function fetchMe() {
@@ -32,12 +34,16 @@ export const useAuthStore = defineStore(
       user.value = data
     }
 
+    function setEmail(email: string) {
+      emailForVerification.value = email
+    }
+
     function logout() {
       token.value = null
       user.value = null
     }
 
-    return { token, user, isAuthenticated, isAdmin, isVerified, login, register, verify, fetchMe, logout }
+    return { token, user, emailForVerification, isAuthenticated, isAdmin, isVerified, login, register, verify, fetchMe, setEmail, logout }
   },
   { persist: true },
 )

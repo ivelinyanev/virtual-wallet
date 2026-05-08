@@ -1,13 +1,13 @@
 import client from './client'
-import type { TransactionResponse, TransactionFilterRequest, Page } from '@/types'
+import type { UserTransactionResponse, AdminTransactionResponse, TransactionFilterRequest, Page } from '@/types'
 
 export const transactionsApi = {
   getMyTransactions: (params?: TransactionFilterRequest) =>
-    client.get<Page<TransactionResponse>>('/transactions', { params }),
+    client.get<Page<UserTransactionResponse>>('/transactions', { params }),
 
   getById: (id: number) =>
-    client.get<TransactionResponse>(`/transactions/${id}`),
+    client.get<UserTransactionResponse>(`/transactions/${id}`),
 
   getAllAdmin: (params?: TransactionFilterRequest) =>
-    client.get<Page<TransactionResponse>>('/transactions/all', { params }),
+    client.get<Page<AdminTransactionResponse>>('/transactions/all', { params }),
 }

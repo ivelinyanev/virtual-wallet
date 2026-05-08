@@ -28,27 +28,27 @@ public class VerificationServiceImpl implements VerificationService {
     @Override
     @Transactional
     public void createAndSendVerification(User user) {
-        String code = generateCode();
-        user.setVerificationCode(code);
+        String verificationCode = generateCode();
+        user.setVerificationCode(verificationCode);
         user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
         userRepository.save(user);
 
-        emailService.sendVerificationEmail(user.getEmail(), code);
+        emailService.sendVerificationEmail(user.getEmail(), verificationCode);
     }
 
     @Override
     public void resendVerification(User user) {
-        String code = generateCode();
-        user.setVerificationCode(code);
+        String verificationCode = generateCode();
+        user.setVerificationCode(verificationCode);
         user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(5));
         userRepository.save(user);
 
-        emailService.sendVerificationEmail(user.getEmail(), code);
+        emailService.sendVerificationEmail(user.getEmail(), verificationCode);
     }
 
     @Override
     @Transactional
-    public void verify(String email, String code) {
+    public void verify(String email, String verificationCode) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User", "email", email));
 
@@ -60,7 +60,7 @@ public class VerificationServiceImpl implements VerificationService {
             throw new ImpossibleOperationException(VERIFICATION_CODE_EXPIRED);
         }
 
-        if (!user.getVerificationCode().equals(code)) {
+        if (!user.getVerificationCode().equals(verificationCode)) {
             throw new ImpossibleOperationException(VERIFICATION_CODE_DOES_NOT_MATCH);
         }
 

@@ -34,8 +34,18 @@ const loading = ref(false)
 async function handleSubmit() {
   error.value = ''
   loading.value = true
+
+  if (!auth.emailForVerification) {
+    error.value = "Missing email. Please register again."
+    await router.push('/register')
+    return
+  }
+
   try {
-    await auth.verify({ verification_code: code.value })
+    await auth.verify({
+      email: auth.emailForVerification,
+      verification_code: code.value
+    })
     success.value = true
     setTimeout(() => router.push('/login'), 1500)
   } catch (e: any) {

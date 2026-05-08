@@ -7,18 +7,16 @@ import example.backend.enums.TransactionType;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public record TransactionResponse(
+public record AdminTransactionResponse(
     Long id,
     BigDecimal amount,
     Currency currency,
     TransactionType type,
     TransactionStatus status,
     LocalDateTime timestamp,
-
-    Long walletId,
+    String walletName,
     String walletOwnerUsername,
-
-    Long counterpartyWalletId,
-    String counterpartyWalletUsername
+    String counterPartyWalletName,
+    String counterpartyWalletOwnerUsername
 ) {
 }

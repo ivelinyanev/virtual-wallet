@@ -57,9 +57,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @PreAuthorize("hasRole('USER')")
     public void verifyAccount(VerifyUserDto dto) {
-        verificationService.verify(dto.email(), dto.code());
+        verificationService.verify(dto.email(), dto.verificationCode());
     }
 
     @Override

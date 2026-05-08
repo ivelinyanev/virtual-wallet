@@ -13,8 +13,17 @@
       <div class="stat-card accent">
         <div class="stat-icon accent-icon"><CircleDollarSignIcon :size="26" /></div>
         <div>
-          <span class="label">Total Balance</span>
-          <span class="value">{{ formatCurrency(totalBalance) }}</span>
+          <span class="label">{{ isSingleCurrency ? 'Total Balance' : 'Balances' }}</span>
+          <!-- Single currency: show normal total -->
+          <span v-if="isSingleCurrency" class="value">
+            {{ formatCurrency([...balanceByCurrency.entries()][0]?.[1] ?? 0, [...balanceByCurrency.entries()][0]?.[0]) }}
+          </span>
+          <!-- Multi-currency: show per-currency breakdown -->
+          <span v-else class="value multi-balance">
+            <span v-for="[currency, amount] in balanceByCurrency" :key="currency" class="balance-line">
+              {{ formatCurrency(amount, currency) }}
+            </span>
+          </span>
         </div>
       </div>
       <div class="stat-card">
@@ -77,12 +86,12 @@
               </span>
               <div class="tx-info">
                 <span class="tx-type-label">{{ txLabel(tx.type) }}</span>
-                <span class="tx-counterparty">{{ tx.counterparty_wallet_username ?? 'Virtual Wallet' }}</span>
+                <span class="tx-counterparty">{{ tx.counterparty_username ?? 'Virtual Wallet' }}</span>
               </div>
             </div>
             <div class="tx-right">
               <span class="tx-amount" :class="amountClass(tx.type)">
-                {{ tx.type === 'TRANSFER_OUT' ? '−' : '+' }}{{ formatCurrency(tx.amount, tx.currency) }}
+                {{ tx.type === 'TRANSFER_OUT' ? '−' : '+' }}{{ formatCurrency(Math.abs(tx.amount), tx.currency) }}
               </span>
               <span class="tx-date">{{ formatDate(tx.timestamp) }}</span>
             </div>
@@ -90,47 +99,43 @@
           </div>
 
           <!-- Detail panel -->
-          <Transition name="expand">
-            <div v-if="expandedId === tx.id" class="tx-detail">
+          <div class="tx-detail-outer" :class="{ expanded: expandedId === tx.id }">
+            <div class="tx-detail">
               <div v-if="loadingDetail && !details[tx.id]" class="detail-loading">Loading…</div>
               <div v-else-if="details[tx.id]" class="detail-grid">
                 <div class="detail-item">
                   <span class="detail-label">Transaction ID</span>
-                  <span class="detail-value">#{{ details[tx.id].id }}</span>
+                  <span class="detail-value">#{{ details[tx.id]?.id }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">Status</span>
-                  <span class="detail-value status-badge" :class="details[tx.id].status.toLowerCase()">
-                    {{ details[tx.id].status }}
+                  <span class="detail-value status-badge" :class="details[tx.id]?.status.toLowerCase()">
+                    {{ details[tx.id]?.status }}
                   </span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">Amount</span>
-                  <span class="detail-value">{{ formatCurrency(details[tx.id].amount, details[tx.id].currency) }}</span>
+                  <span class="detail-value">{{ formatCurrency(Math.abs(details[tx.id]?.amount ?? 0), details[tx.id]?.currency) }}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-label">Wallet</span>
-                  <span class="detail-value">{{ walletLabel(details[tx.id].wallet_id) }}</span>
+                  <span class="detail-label">Your wallet</span>
+                  <span class="detail-value">{{ details[tx.id]?.wallet_name ?? '—' }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">Type</span>
-                  <span class="detail-value">{{ txLabel(details[tx.id].type) }}</span>
+                  <span class="detail-value">{{ details[tx.id]?.type ? txLabel(details[tx.id]!.type) : '' }}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-label">Owner</span>
-                  <span class="detail-value">{{ details[tx.id].wallet_owner_username ?? '—' }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">Counterparty</span>
-                  <span class="detail-value">{{ details[tx.id].counterparty_wallet_username ?? '—' }}</span>
+                  <span class="detail-label">{{ details[tx.id]?.type === 'TRANSFER_OUT' ? 'Sent to' : details[tx.id]?.type === 'TRANSFER_IN' ? 'Received from' : 'Source' }}</span>
+                  <span class="detail-value">{{ details[tx.id]?.counterparty_username ?? '—' }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">Date & Time</span>
-                  <span class="detail-value">{{ formatDateTime(details[tx.id].timestamp) }}</span>
+                  <span class="detail-value">{{ details[tx.id]?.timestamp ? formatDateTime(details[tx.id]!.timestamp) : '' }}</span>
                 </div>
               </div>
             </div>
-          </Transition>
+          </div>
         </div>
       </div>
 
@@ -140,12 +145,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { useWalletStore } from '@/stores/wallet'
-import { transactionsApi } from '@/api/transactions'
-import { cardsApi } from '@/api/cards'
-import type { TransactionResponse, TransactionType } from '@/types'
+import { useDashboard } from '@/composables/useDashboard'
+import { useTransactionDetail } from '@/composables/useTransactionDetail'
+import { useFormatters } from '@/composables/useFormatters'
 import {
   CircleDollarSignIcon,
   LandmarkIcon,
@@ -157,72 +161,11 @@ import {
 } from 'lucide-vue-next'
 
 const auth = useAuthStore()
-const walletStore = useWalletStore()
+const { walletStore, recentTransactions, cardCount, balanceByCurrency, isSingleCurrency, loadDashboard } = useDashboard()
+const { expandedId, details, loadingDetail, toggle } = useTransactionDetail()
+const { formatCurrency, formatDate, formatDateTime, txLabel, amountClass } = useFormatters()
 
-const recentTransactions = ref<TransactionResponse[]>([])
-const cardCount = ref(0)
-const expandedId = ref<number | null>(null)
-const details = ref<Record<number, TransactionResponse>>({})
-const loadingDetail = ref(false)
-
-const totalBalance = computed(() =>
-  walletStore.wallets.reduce((sum, w) => sum + w.balance, 0),
-)
-
-function formatCurrency(amount: number, currency = 'EUR') {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount)
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
-
-function formatDateTime(iso: string) {
-  return new Date(iso).toLocaleString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  })
-}
-
-function txLabel(type: TransactionType) {
-  return type === 'TOP_UP' ? 'Top Up' : type === 'TRANSFER_IN' ? 'Received' : 'Sent'
-}
-
-function walletLabel(walletId: number) {
-  const wallet = walletStore.wallets.find((w) => w.id === walletId)
-  return wallet ? `${wallet.wallet_name} (${wallet.currency})` : `Wallet #${walletId}`
-}
-
-function amountClass(type: TransactionType) {
-  return type === 'TRANSFER_OUT' ? 'debit' : 'credit'
-}
-
-async function toggle(id: number) {
-  if (expandedId.value === id) {
-    expandedId.value = null
-    return
-  }
-  expandedId.value = id
-  if (!details.value[id]) {
-    loadingDetail.value = true
-    try {
-      const res = await transactionsApi.getById(id)
-      details.value[id] = res.data
-    } finally {
-      loadingDetail.value = false
-    }
-  }
-}
-
-onMounted(async () => {
-  await walletStore.fetchWallets()
-  const [txRes, cardRes] = await Promise.allSettled([
-    transactionsApi.getMyTransactions({ page: 0, size: 5 }),
-    cardsApi.getMyCards(),
-  ])
-  if (txRes.status === 'fulfilled') recentTransactions.value = txRes.value.data.content
-  if (cardRes.status === 'fulfilled') cardCount.value = cardRes.value.data.length
-})
+onMounted(loadDashboard)
 </script>
 
 <style scoped>
@@ -239,11 +182,11 @@ h2 {
   margin: 0 0 0.25rem;
   font-size: 1.75rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--c-text);
 }
 .subtitle {
   margin: 0;
-  color: #64748b;
+  color: var(--c-text-muted);
   font-size: 0.95rem;
 }
 
@@ -279,6 +222,17 @@ h2 {
 .stat-card > div { display: flex; flex-direction: column; gap: 0.2rem; }
 .label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
 .value { font-size: 1.5rem; font-weight: 700; color: #0f172a; }
+
+.multi-balance {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.balance-line {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
 
 /* Section */
 .section { margin-bottom: 2.5rem; }
@@ -377,7 +331,18 @@ h2 {
 .chevron.open { transform: rotate(90deg); }
 
 /* Detail panel */
+.tx-detail-outer {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+}
+.tx-detail-outer.expanded {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
 .tx-detail {
+  overflow: hidden;
   padding: 1rem 1.25rem 1.25rem;
   border-top: 1px solid #f1f5f9;
   background: #fafafa;
@@ -409,17 +374,6 @@ h2 {
 .status-badge.successful { background: #dcfce7; color: #166534; }
 .status-badge.pending { background: #fef9c3; color: #854d0e; }
 .status-badge.failed { background: #fee2e2; color: #991b1b; }
-
-/* Expand animation */
-.expand-enter-active, .expand-leave-active {
-  transition: max-height 0.28s ease, opacity 0.2s ease;
-  max-height: 400px;
-  overflow: hidden;
-}
-.expand-enter-from, .expand-leave-to {
-  max-height: 0;
-  opacity: 0;
-}
 
 .empty { color: #94a3b8; font-size: 0.9rem; }
 .empty a { color: #6366f1; text-decoration: none; }

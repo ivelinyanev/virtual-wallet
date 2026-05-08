@@ -15,6 +15,7 @@ export interface RegisterUserDto {
 }
 
 export interface VerifyUserDto {
+  email: string
   verification_code: string
 }
 
@@ -64,6 +65,7 @@ export interface WalletCreateReq {
 
 export interface TopUpRequest {
   wallet_id: number
+  card_id: number
   amount: number
 }
 
@@ -92,24 +94,38 @@ export interface CardCreateReq {
 export type TransactionType = 'TOP_UP' | 'TRANSFER_IN' | 'TRANSFER_OUT'
 export type TransactionStatus = 'SUCCESSFUL' | 'PENDING' | 'FAILED'
 
-export interface TransactionResponse {
+export interface UserTransactionResponse {
   id: number
   amount: number
   currency: Currency
   type: TransactionType
   status: TransactionStatus
   timestamp: string
-  wallet_id: number
-  wallet_owner_username: string | null
-  counterparty_wallet_id: number | null
-  counterparty_wallet_username: string | null
+  wallet_name: string | null
+  counterparty_username: string | null
 }
 
+export interface AdminTransactionResponse {
+  id: number
+  amount: number
+  currency: Currency
+  type: TransactionType
+  status: TransactionStatus
+  timestamp: string
+  wallet_name: string | null
+  wallet_owner_username: string | null
+  counter_party_wallet_name: string | null
+  counterparty_wallet_owner_username: string | null
+}
+
+// Alias kept for backwards compat within user-facing pages
+export type TransactionResponse = UserTransactionResponse
+
 export interface TransactionFilterRequest {
-  start_date?: string
-  end_date?: string
-  direction?: 'IN' | 'OUT'
-  counterparty?: string
+  type?: TransactionType
+  status?: TransactionStatus
+  from?: string      // ISO datetime, maps to backend `from` (LocalDateTime)
+  to?: string        // ISO datetime, maps to backend `to` (LocalDateTime)
   page?: number
   size?: number
 }
@@ -117,8 +133,8 @@ export interface TransactionFilterRequest {
 // ─── Transfers ───────────────────────────────────────────────────────────────
 
 export interface TransferReq {
-  sender_wallet_id: number
-  recipient_wallet_id: number
+  from_wallet_id: number
+  to_username: string
   amount: number
 }
 

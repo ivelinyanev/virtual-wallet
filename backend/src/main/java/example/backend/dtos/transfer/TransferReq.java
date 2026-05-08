@@ -11,7 +11,6 @@ import static example.backend.utils.StringConstants.FIELD_CANNOT_BE_BLANK;
 public record TransferReq(
 
         @NotNull(message = FIELD_CANNOT_BE_BLANK)
-        @Positive
         Long fromWalletId,
 
         @NotBlank(message = FIELD_CANNOT_BE_BLANK)
