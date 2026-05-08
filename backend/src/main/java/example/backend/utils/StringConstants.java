@@ -35,4 +35,6 @@ public class StringConstants {
     public static final String YOU_ARE_NOT_THE_WALLET_OWNER = "You are not owner of this wallet!";
     public static final String TOP_UP_AMOUNT_MUST_BE_POSITIVE = "Top up amount must be positive!";
     public static final String RECIPIENT_HAS_NO_SUITABLE_WALLET = "Recipient has no suitable wallet";
+    public static final String WALLET_STILL_HAS_FUNDS = "Wallet still has funds inside. Move funds to another wallet or spend them before removing.";
+    public static final String CANNOT_DELETE_LAST_WALLET = "Account cannot exist without a wallet. If you wish to delete this wallet, please create another one beforehand.";
 }
