@@ -43,11 +43,15 @@
               <span class="input-icon"><LockIcon :size="16" /></span>
               <input
                 v-model="form.password"
-                type="password"
+                :type="showPassword ? 'text' : 'password'"
                 placeholder="••••••••"
                 required
                 autocomplete="current-password"
               />
+              <button type="button" class="eye-btn" @click="showPassword = !showPassword" tabindex="-1">
+                <EyeOffIcon v-if="showPassword" :size="16" />
+                <EyeIcon v-else :size="16" />
+              </button>
             </div>
           </div>
 
@@ -73,7 +77,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { WalletIcon, MailIcon, LockIcon, AlertCircleIcon, LoaderIcon } from 'lucide-vue-next'
+import { WalletIcon, MailIcon, LockIcon, EyeIcon, EyeOffIcon, AlertCircleIcon, LoaderIcon } from 'lucide-vue-next'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -81,6 +85,7 @@ const router = useRouter()
 const form = ref({ email: '', password: '' })
 const error = ref('')
 const loading = ref(false)
+const showPassword = ref(false)
 
 async function handleSubmit() {
   error.value = ''
@@ -210,6 +215,21 @@ form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.eye-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--c-text-subtle);
+  padding: 0 0.75rem;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.eye-btn:hover {
+  color: var(--c-text-secondary);
 }
 
 .submit-btn {

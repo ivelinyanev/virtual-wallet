@@ -70,11 +70,29 @@
               <span class="input-icon"><LockIcon :size="16" /></span>
               <input
                 v-model="form.password"
-                type="password"
+                :type="showPassword ? 'text' : 'password'"
                 placeholder="••••••••"
                 required
                 autocomplete="new-password"
               />
+              <button type="button" class="eye-btn" @click="showPassword = !showPassword" tabindex="-1">
+                <EyeOffIcon v-if="showPassword" :size="16" />
+                <EyeIcon v-else :size="16" />
+              </button>
+            </div>
+
+            <!-- Password strength meter -->
+            <div v-if="form.password" class="strength-meter">
+              <div class="strength-bars">
+                <span
+                  v-for="i in 4"
+                  :key="i"
+                  class="strength-bar"
+                  :class="{ active: i <= passwordStrength }"
+                  :style="i <= passwordStrength ? { background: strengthColor } : {}"
+                />
+              </div>
+              <span class="strength-label" :style="{ color: strengthColor }">{{ strengthLabel }}</span>
             </div>
           </div>
 
@@ -97,7 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import {
@@ -107,6 +125,8 @@ import {
   MailIcon,
   PhoneIcon,
   LockIcon,
+  EyeIcon,
+  EyeOffIcon,
   AlertCircleIcon,
   LoaderIcon,
 } from 'lucide-vue-next'
@@ -124,6 +144,21 @@ const form = ref({
 })
 const error = ref('')
 const loading = ref(false)
+const showPassword = ref(false)
+
+const passwordStrength = computed(() => {
+  const p = form.value.password
+  if (!p) return 0
+  let score = 0
+  if (p.length >= 8) score++
+  if (/[A-Z]/.test(p)) score++
+  if (/[0-9]/.test(p)) score++
+  if (/[^A-Za-z0-9]/.test(p)) score++
+  return score
+})
+
+const strengthLabel = computed(() => ['', 'Weak', 'Fair', 'Good', 'Strong'][passwordStrength.value])
+const strengthColor = computed(() => ['', '#ef4444', '#f59e0b', '#3b82f6', '#16a34a'][passwordStrength.value])
 
 async function handleSubmit() {
   error.value = ''
@@ -261,6 +296,48 @@ form {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
+}
+
+.eye-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--c-text-subtle);
+  padding: 0 0.75rem;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.eye-btn:hover {
+  color: var(--c-text-secondary);
+}
+
+/* Password strength */
+.strength-meter {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+.strength-bars {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+.strength-bar {
+  flex: 1;
+  height: 3px;
+  border-radius: 99px;
+  background: var(--c-border);
+  transition: background 0.25s;
+}
+.strength-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  min-width: 36px;
+  text-align: right;
+  transition: color 0.25s;
 }
 
 .submit-btn {

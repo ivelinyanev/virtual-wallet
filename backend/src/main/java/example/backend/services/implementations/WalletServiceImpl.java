@@ -92,7 +92,7 @@ public class WalletServiceImpl implements WalletService {
 
         walletRepository.save(wallet);
     }
-    
+
     @Override
     @Transactional
     @RequiresVerifiedAccount
