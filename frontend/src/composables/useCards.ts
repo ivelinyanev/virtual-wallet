@@ -100,6 +100,15 @@ export function useCards() {
 
   async function handleAdd() {
     addError.value = ''
+    const now = new Date()
+    const currentMonth = now.getMonth() + 1
+    if (
+      form.value.exp_year < currentYear ||
+      (form.value.exp_year === currentYear && form.value.exp_month < currentMonth)
+    ) {
+      addError.value = 'Card is expired.'
+      return
+    }
     addLoading.value = true
     try {
       const parts = form.value.card_holder_name.trim().split(/\s+/)
