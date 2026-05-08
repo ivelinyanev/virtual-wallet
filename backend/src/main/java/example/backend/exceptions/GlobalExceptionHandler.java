@@ -245,4 +245,20 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.badRequest().body(error);
     }
+
+    @ExceptionHandler(CardExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleCardExpiredException(
+            CardExpiredException ex,
+            HttpServletRequest request
+    ) {
+
+        ErrorResponse error = new ErrorResponse(
+                400,
+                ex.getMessage(),
+                request.getRequestURI(),
+                Map.of()
+        );
+
+        return ResponseEntity.badRequest().body(error);
+    }
 }

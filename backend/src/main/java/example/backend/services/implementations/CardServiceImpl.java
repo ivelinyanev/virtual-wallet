@@ -4,6 +4,7 @@ import example.backend.annotations.RequiresVerifiedAccount;
 import example.backend.dtos.card.CardCreateReq;
 import example.backend.dtos.card.CardMetaData;
 import example.backend.exceptions.AuthorizationException;
+import example.backend.exceptions.CardExpiredException;
 import example.backend.exceptions.DuplicateException;
 import example.backend.exceptions.EntityNotFoundException;
 import example.backend.mappers.CardMapper;
@@ -18,6 +19,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.Date;
 import java.util.List;
 
 import static example.backend.utils.StringConstants.CARD_ALREADY_ADDED;
@@ -63,8 +67,9 @@ public class CardServiceImpl implements CardService {
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public Card create(CardCreateReq request) {
-        User actingUser = authUtils.getAuthenticatedUser();
+        checkCardExpired(request.expMonth(), request.expYear());
 
+        User actingUser = authUtils.getAuthenticatedUser();
         CardMetaData metaData = paymentService.tokenize(request);
 
         if (cardRepository.existsByFingerprintAndCardHolder(metaData.fingerprint(), actingUser)) {
@@ -92,5 +97,18 @@ public class CardServiceImpl implements CardService {
         }
 
         cardRepository.delete(card);
+    }
+
+    private void checkCardExpired(int expirationMonth, int expirationYear) {
+        int currentMonth = LocalDate.now().getMonth().getValue();
+        int currentYear = LocalDate.now().getYear();
+
+        if (expirationYear < currentYear) {
+            throw new CardExpiredException("Provided card is expired");
+        }
+
+        if (expirationYear == currentYear && expirationMonth < currentMonth) {
+            throw new CardExpiredException("Provided card is expired");
+        }
     }
 }
