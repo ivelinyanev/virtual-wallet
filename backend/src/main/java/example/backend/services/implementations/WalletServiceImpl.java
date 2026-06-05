@@ -2,6 +2,7 @@ package example.backend.services.implementations;
 
 import example.backend.annotations.RequiresVerifiedAccount;
 import example.backend.dtos.wallet.TopUpRequest;
+import example.backend.dtos.wallet.WithdrawRequest;
 import example.backend.enums.Currency;
 import example.backend.enums.TransactionType;
 import example.backend.exceptions.*;
@@ -152,6 +153,49 @@ public class WalletServiceImpl implements WalletService {
                 null,
                 amount,
                 TransactionType.TOP_UP
+        );
+    }
+
+    @Override
+    @Transactional
+    @RequiresVerifiedAccount
+    @PreAuthorize("hasRole('USER')")
+    public void withdraw(WithdrawRequest request) {
+        Long walletId = request.walletId();
+        Long cardId = request.cardId();
+        BigDecimal amount = request.amount();
+
+        Wallet wallet = walletRepository.findByIdForUpdate(walletId);
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new EntityNotFoundException("Card", "id", String.valueOf(cardId)));
+
+        if (wallet == null) {
+            throw new EntityNotFoundException("Wallet", "id", String.valueOf(walletId));
+        }
+
+        if (!isOwner(wallet)) {
+            throw new AuthorizationException(CANNOT_ACCESS_WALLET_YOU_ARE_NOT_OWNER_OF);
+        }
+
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ImpossibleOperationException(WITHDRAWAL_AMOUNT_MUST_BE_POSITIVE);
+        }
+
+        if (wallet.getBalance().compareTo(amount) < 0) {
+            throw new ImpossibleOperationException(INSUFFICIENT_FUNDS);
+        }
+
+        paymentService.withdraw(card.getToken(), amount);
+
+        wallet.setBalance(wallet.getBalance().subtract(amount));
+
+        walletRepository.save(wallet);
+
+        transactionService.recordTransaction(
+                wallet,
+                null,
+                amount.negate(),
+                TransactionType.WITHDRAWAL
         );
     }
 

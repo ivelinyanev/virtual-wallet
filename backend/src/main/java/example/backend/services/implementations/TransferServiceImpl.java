@@ -1,10 +1,12 @@
 package example.backend.services.implementations;
 
 import example.backend.annotations.RequiresVerifiedAccount;
+import example.backend.dtos.transfer.OwnWalletTransferReq;
 import example.backend.dtos.transfer.TransferReq;
 import example.backend.enums.Currency;
 import example.backend.enums.TransactionType;
 import example.backend.exceptions.AccountNotVerifiedException;
+import example.backend.exceptions.AuthorizationException;
 import example.backend.exceptions.EntityNotFoundException;
 import example.backend.exceptions.ImpossibleOperationException;
 import example.backend.models.User;
@@ -64,6 +66,31 @@ public class TransferServiceImpl implements TransferService {
         credit(toWallet, creditAmount);
 
         recordTransaction(from, toWallet, amount, creditAmount);
+    }
+
+    @Override
+    @Transactional
+    @RequiresVerifiedAccount
+    @PreAuthorize("hasRole('USER')")
+    public void internalTransfer(OwnWalletTransferReq request) {
+        Wallet from = Optional.ofNullable(walletRepository.findByIdForUpdate(request.fromWalletId()))
+                .orElseThrow(() -> new EntityNotFoundException("Wallet", "id", String.valueOf(request.fromWalletId())));
+
+        Wallet to = Optional.ofNullable(walletRepository.findByIdForUpdate(request.toWalletId()))
+                .orElseThrow(() -> new EntityNotFoundException("Wallet", "id", String.valueOf(request.toWalletId())));
+
+        validateWalletOwner(from);
+        validateWalletOwner(to);
+
+        validateTransferRequest(from.getId(), to.getId(), request.amount());
+        validateSufficientAmount(from, request.amount());
+
+        BigDecimal creditAmount = convertIfNeeded(from, to, request.amount());
+
+        debit(from, request.amount());
+        credit(to, creditAmount);
+
+        recordTransaction(from, to, request.amount(), creditAmount);
     }
 
     private void validateTransferRequest(Long fromId, Long toId, BigDecimal amount) {

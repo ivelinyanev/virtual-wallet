@@ -3,6 +3,7 @@ package example.backend.controllers;
 import example.backend.dtos.wallet.PrivateWalletDto;
 import example.backend.dtos.wallet.TopUpRequest;
 import example.backend.dtos.wallet.WalletCreateReq;
+import example.backend.dtos.wallet.WithdrawRequest;
 import example.backend.mappers.WalletMapper;
 import example.backend.services.protocols.WalletService;
 import jakarta.validation.Valid;
@@ -66,6 +67,15 @@ public class WalletController {
     @PostMapping("/top-up")
     public ResponseEntity<?> topUp(@RequestBody @Valid TopUpRequest request) {
         walletService.topUp(request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .build();
+    }
+
+    @PostMapping("/withdraw")
+    public ResponseEntity<?> withdraw(@RequestBody @Valid WithdrawRequest request) {
+        walletService.withdraw(request);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

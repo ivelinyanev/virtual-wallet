@@ -49,10 +49,18 @@ public class PaymentServiceImpl implements PaymentService {
          */
     }
 
+    @Override
+    public void withdraw(String token, BigDecimal amount) {
+        /*
+            Simulates withdrawal. For now
+            always successful.
+         */
+    }
+
     /*
 
-        Token is used to perform transactions
-     */
+            Token is used to perform transactions
+         */
     private String generateToken() {
         return "tok_" + UUID.randomUUID();
     }

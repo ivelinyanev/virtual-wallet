@@ -10,4 +10,6 @@ public interface PaymentService {
     CardMetaData tokenize(CardCreateReq request);
 
     void charge(String token, BigDecimal amount);
+
+    void withdraw(String token, BigDecimal amount);
 }

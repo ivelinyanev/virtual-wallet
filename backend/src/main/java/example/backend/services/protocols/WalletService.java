@@ -1,6 +1,7 @@
 package example.backend.services.protocols;
 
 import example.backend.dtos.wallet.TopUpRequest;
+import example.backend.dtos.wallet.WithdrawRequest;
 import example.backend.models.User;
 import example.backend.models.Wallet;
 
@@ -19,4 +20,6 @@ public interface WalletService {
     void deleteWallet(Long id);
 
     void topUp(TopUpRequest request);
+
+    void withdraw(WithdrawRequest request);
 }
