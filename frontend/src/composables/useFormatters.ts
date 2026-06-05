@@ -19,6 +19,7 @@ export function useFormatters() {
   function txLabel(type: TransactionType) {
     if (type === 'TOP_UP') return 'Top Up'
     if (type === 'TRANSFER_IN') return 'Received'
+    if (type === 'WITHDRAWAL') return 'Withdrawal'
     return 'Sent'
   }
 
@@ -29,7 +30,7 @@ export function useFormatters() {
   }
 
   function amountClass(type: TransactionType) {
-    return type === 'TRANSFER_OUT' ? 'debit' : 'credit'
+    return type === 'TRANSFER_OUT' || type === 'WITHDRAWAL' ? 'debit' : 'credit'
   }
 
   return { formatCurrency, formatDate, formatDateTime, txLabel, statusLabel, amountClass }

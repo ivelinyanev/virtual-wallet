@@ -15,6 +15,7 @@ public record UserTransactionResponse(
     TransactionStatus status,
     LocalDateTime timestamp,
     String walletName,
-    String counterpartyUsername
+    String counterpartyUsername,
+    String cardLast4
 ) {
 }

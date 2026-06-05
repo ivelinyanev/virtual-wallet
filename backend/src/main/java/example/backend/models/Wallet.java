@@ -12,14 +12,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-@Table(
-        name = "wallet",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        columnNames = {"user_id", "currency"}
-                )
-        }
-)
+@Table(name = "wallet")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -53,6 +46,9 @@ public class Wallet {
             nullable = false
     )
     private Currency currency;
+
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "wallet")
     Set<Transaction> transactions = new LinkedHashSet<>();

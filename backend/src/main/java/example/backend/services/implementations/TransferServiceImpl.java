@@ -112,8 +112,8 @@ public class TransferServiceImpl implements TransferService {
     }
 
     private Wallet findSuitableWallet(User toUser, Currency currency) {
-        return walletRepository.findByOwnerAndCurrency(toUser, currency)
-                .or(() -> walletRepository.findAllByOwner(toUser).stream().findFirst())
+        return walletRepository.findByOwnerAndCurrencyAndDeletedFalse(toUser, currency)
+                .or(() -> walletRepository.findAllByOwnerAndDeletedFalse(toUser).stream().findFirst())
                 .orElseThrow(() -> new ImpossibleOperationException(RECIPIENT_HAS_NO_SUITABLE_WALLET));
     }
 

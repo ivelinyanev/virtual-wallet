@@ -25,6 +25,11 @@ public class ConversionServiceImpl implements ConversionService {
     }
 
     @Override
+    public BigDecimal getRate(Currency from, Currency to) {
+        return convert(from, to, BigDecimal.ONE);
+    }
+
+    @Override
     public BigDecimal convert(Currency from, Currency to, BigDecimal amount) {
         try {
             String uri = "https://v6.exchangerate-api.com/v6/{key}/pair/{from}/{to}/{amount}";

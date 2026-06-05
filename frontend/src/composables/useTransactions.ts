@@ -5,6 +5,7 @@ import {
   PlusCircleIcon,
   ArrowDownCircleIcon,
   ArrowUpCircleIcon,
+  BanknoteIcon,
 } from 'lucide-vue-next'
 
 export function useTransactions() {
@@ -26,6 +27,7 @@ export function useTransactions() {
     { value: 'TOP_UP' as TransactionType, label: 'Top Up', icon: PlusCircleIcon, color: 'indigo' },
     { value: 'TRANSFER_IN' as TransactionType, label: 'Received', icon: ArrowDownCircleIcon, color: 'green' },
     { value: 'TRANSFER_OUT' as TransactionType, label: 'Sent', icon: ArrowUpCircleIcon, color: 'red' },
+    { value: 'WITHDRAWAL' as TransactionType, label: 'Withdrawal', icon: BanknoteIcon, color: 'amber' },
   ]
 
   const statusOptions = [

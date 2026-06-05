@@ -97,7 +97,7 @@ export interface CardCreateRequest {
 
 // ─── Transactions ────────────────────────────────────────────────────────────
 
-export type TransactionType = 'TOP_UP' | 'TRANSFER_IN' | 'TRANSFER_OUT'
+export type TransactionType = 'TOP_UP' | 'TRANSFER_IN' | 'TRANSFER_OUT' | 'WITHDRAWAL'
 export type TransactionStatus = 'SUCCESSFUL' | 'PENDING' | 'FAILED'
 
 export interface UserTransactionResponse {
@@ -109,6 +109,7 @@ export interface UserTransactionResponse {
   timestamp: string
   wallet_name: string | null
   counterparty_username: string | null
+  card_last4: string | null
 }
 
 export interface AdminTransactionResponse {
