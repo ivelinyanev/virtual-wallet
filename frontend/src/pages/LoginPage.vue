@@ -93,8 +93,8 @@ async function handleSubmit() {
   try {
     await auth.login(form.value)
     router.push('/')
-  } catch (e: any) {
-    error.value = e.response?.data?.message ?? 'Login failed. Check your credentials.'
+  } catch (e) {
+    error.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message ?? 'Login failed. Check your credentials.'
   } finally {
     loading.value = false
   }

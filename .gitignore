@@ -23,5 +23,7 @@
 hs_err_pid*
 replay_pid*
 backend/src/main/resources/application-secrets.properties
+backend/src/main/resources/application-local.properties
 .DS_Store
 CLAUDE.md
+.env

@@ -1,7 +1,7 @@
 package example.backend.controllers;
 
-import example.backend.dtos.transfer.TransferReq;
-import example.backend.services.protocols.AuthService;
+import example.backend.dtos.transfer.OwnWalletTransferRequest;
+import example.backend.dtos.transfer.TransferRequest;
 import example.backend.services.protocols.TransferService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +21,15 @@ public class TransferController {
     private final TransferService transferService;
 
     @PostMapping
-    public ResponseEntity<?> transfer(@RequestBody @Valid TransferReq request) {
+    public ResponseEntity<?> transfer(@RequestBody @Valid TransferRequest request) {
         transferService.transfer(request);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/internal")
+    public ResponseEntity<?> internalTransfer(@RequestBody @Valid OwnWalletTransferRequest request) {
+        transferService.internalTransfer(request);
 
         return ResponseEntity.ok().build();
     }

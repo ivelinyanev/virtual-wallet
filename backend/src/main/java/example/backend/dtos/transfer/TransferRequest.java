@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 
 import static example.backend.utils.StringConstants.FIELD_CANNOT_BE_BLANK;
 
-public record TransferReq(
+public record TransferRequest(
 
         @NotNull(message = FIELD_CANNOT_BE_BLANK)
         Long fromWalletId,

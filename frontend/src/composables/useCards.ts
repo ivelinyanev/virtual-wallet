@@ -1,11 +1,11 @@
 import { ref, computed } from 'vue'
 import { cardsApi } from '@/api/cards'
 import { useDialog } from '@/composables/useDialog'
-import type { PrivateCardDto } from '@/types'
+import type { CardResponse } from '@/types'
 
 export function useCards() {
   const dialog = useDialog()
-  const cards = ref<PrivateCardDto[]>([])
+  const cards = ref<CardResponse[]>([])
   const loading = ref(false)
   const showAdd = ref(false)
   const addLoading = ref(false)
@@ -44,7 +44,7 @@ export function useCards() {
 
   function detectBrand(number: string): string {
     const n = (number ?? '').replace(/\s/g, '')
-    if (/^4/.test(n)) return 'VISA'
+    if (n.startsWith('4')) return 'VISA'
     if (/^5[1-5]/.test(n) || /^2[2-7]/.test(n)) return 'MASTERCARD'
     if (/^3[47]/.test(n)) return 'AMEX'
     return 'CARD'
@@ -123,8 +123,8 @@ export function useCards() {
       const { data } = await cardsApi.create(payload)
       cards.value.push(data)
       showAdd.value = false
-    } catch (e: any) {
-      addError.value = e.response?.data?.message ?? 'Failed to add card.'
+    } catch (e) {
+      addError.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message ?? 'Failed to add card.'
     } finally {
       addLoading.value = false
     }

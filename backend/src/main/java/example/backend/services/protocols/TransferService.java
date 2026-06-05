@@ -1,11 +1,12 @@
 package example.backend.services.protocols;
 
-import example.backend.dtos.transfer.TransferReq;
-
-import java.math.BigDecimal;
+import example.backend.dtos.transfer.OwnWalletTransferRequest;
+import example.backend.dtos.transfer.TransferRequest;
 
 public interface TransferService {
 
-    void transfer(TransferReq request);
+    void transfer(TransferRequest request);
+
+    void internalTransfer(OwnWalletTransferRequest request);
 
 }

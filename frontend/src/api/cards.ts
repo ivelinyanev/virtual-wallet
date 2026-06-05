@@ -1,15 +1,15 @@
 import client from './client'
-import type { PrivateCardDto, CardCreateReq } from '@/types'
+import type { CardResponse, CardCreateRequest } from '@/types'
 
 export const cardsApi = {
   getMyCards: () =>
-    client.get<PrivateCardDto[]>('/cards'),
+    client.get<CardResponse[]>('/cards'),
 
   getById: (id: number) =>
-    client.get<PrivateCardDto>(`/cards/${id}`),
+    client.get<CardResponse>(`/cards/${id}`),
 
-  create: (data: CardCreateReq) =>
-    client.post<PrivateCardDto>('/cards', data),
+  create: (data: CardCreateRequest) =>
+    client.post<CardResponse>('/cards', data),
 
   delete: (id: number) =>
     client.delete<void>(`/cards/${id}`),

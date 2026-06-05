@@ -2,14 +2,14 @@ import { ref, computed } from 'vue'
 import { useWalletStore } from '@/stores/wallet'
 import { usersApi } from '@/api/users'
 import { transfersApi } from '@/api/transfers'
-import type { PublicUserDto } from '@/types'
+import type { PublicUserResponse } from '@/types'
 
 export function useTransfer() {
   const walletStore = useWalletStore()
 
   const recipientQuery = ref('')
-  const searchResults = ref<PublicUserDto[]>([])
-  const selectedRecipient = ref<PublicUserDto | null>(null)
+  const searchResults = ref<PublicUserResponse[]>([])
+  const selectedRecipient = ref<PublicUserResponse | null>(null)
   const selectedWalletName = ref<string>('')
   const amount = ref<number | ''>('')
   const error = ref('')
@@ -31,7 +31,7 @@ export function useTransfer() {
     }, 300)
   }
 
-  function selectRecipient(user: PublicUserDto) {
+  function selectRecipient(user: PublicUserResponse) {
     selectedRecipient.value = user
     recipientQuery.value = user.username
     searchResults.value = []
@@ -63,8 +63,8 @@ export function useTransfer() {
       selectedRecipient.value = null
       selectedWalletName.value = ''
       amount.value = ''
-    } catch (e: any) {
-      error.value = e.response?.data?.message ?? 'Transfer failed.'
+    } catch (e) {
+      error.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message ?? 'Transfer failed.'
     } finally {
       loading.value = false
     }

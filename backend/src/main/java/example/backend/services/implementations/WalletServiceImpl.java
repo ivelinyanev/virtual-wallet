@@ -2,6 +2,7 @@ package example.backend.services.implementations;
 
 import example.backend.annotations.RequiresVerifiedAccount;
 import example.backend.dtos.wallet.TopUpRequest;
+import example.backend.dtos.wallet.WithdrawRequest;
 import example.backend.enums.Currency;
 import example.backend.enums.TransactionType;
 import example.backend.exceptions.*;
@@ -10,9 +11,7 @@ import example.backend.models.User;
 import example.backend.models.Wallet;
 import example.backend.repositories.CardRepository;
 import example.backend.repositories.WalletRepository;
-import example.backend.services.protocols.CardService;
 import example.backend.services.protocols.PaymentService;
-import example.backend.services.protocols.TransactionService;
 import example.backend.services.protocols.WalletService;
 import example.backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +41,7 @@ public class WalletServiceImpl implements WalletService {
     public List<Wallet> getMyWallets() {
         User actingUser = authUtils.getAuthenticatedUser();
 
-        return walletRepository.findAllByOwner(actingUser);
+        return walletRepository.findAllByOwnerAndDeletedFalse(actingUser);
     }
 
     @Override
@@ -50,7 +49,7 @@ public class WalletServiceImpl implements WalletService {
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public Wallet getWalletById(Long id) {
-        Wallet wallet = walletRepository.findById(id)
+        Wallet wallet = walletRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new EntityNotFoundException("Wallet", "id", String.valueOf(id)));
 
         if (!isOwner(wallet)) {
@@ -76,7 +75,7 @@ public class WalletServiceImpl implements WalletService {
             wallet.setCurrency(Currency.EUR);
         }
 
-        enforceOneWalletPerCurrency(wallet.getCurrency(), wallet.getOwner());
+        enforceOneWalletPerCurrencyForOwner(wallet.getCurrency(), wallet.getOwner());
 
         return walletRepository.save(wallet);
     }
@@ -98,7 +97,7 @@ public class WalletServiceImpl implements WalletService {
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public void deleteWallet(Long id) {
-        Wallet wallet = walletRepository.findById(id)
+        Wallet wallet = walletRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new EntityNotFoundException("Wallet", "id", String.valueOf(id)));
 
         if (wallet.getBalance().compareTo(BigDecimal.ZERO) > 0) {
@@ -111,7 +110,8 @@ public class WalletServiceImpl implements WalletService {
         stopWalletDeletionIfLastWallet(wallet);
         stopWalletDeletionIfBalancePositive(wallet);
 
-        walletRepository.delete(wallet);
+        wallet.setDeleted(true);
+        walletRepository.save(wallet);
     }
 
     @Override
@@ -155,18 +155,62 @@ public class WalletServiceImpl implements WalletService {
         );
     }
 
+    @Override
+    @Transactional
+    @RequiresVerifiedAccount
+    @PreAuthorize("hasRole('USER')")
+    public void withdraw(WithdrawRequest request) {
+        Long walletId = request.walletId();
+        Long cardId = request.cardId();
+        BigDecimal amount = request.amount();
+
+        Wallet wallet = walletRepository.findByIdForUpdate(walletId);
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new EntityNotFoundException("Card", "id", String.valueOf(cardId)));
+
+        if (wallet == null) {
+            throw new EntityNotFoundException("Wallet", "id", String.valueOf(walletId));
+        }
+
+        if (!isOwner(wallet)) {
+            throw new AuthorizationException(CANNOT_ACCESS_WALLET_YOU_ARE_NOT_OWNER_OF);
+        }
+
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ImpossibleOperationException(WITHDRAWAL_AMOUNT_MUST_BE_POSITIVE);
+        }
+
+        if (wallet.getBalance().compareTo(amount) < 0) {
+            throw new ImpossibleOperationException(INSUFFICIENT_FUNDS);
+        }
+
+        paymentService.withdraw(card.getToken(), amount);
+
+        wallet.setBalance(wallet.getBalance().subtract(amount));
+
+        walletRepository.save(wallet);
+
+        transactionService.recordTransaction(
+                wallet,
+                null,
+                amount.negate(),
+                TransactionType.WITHDRAWAL,
+                card
+        );
+    }
+
     private boolean isOwner(Wallet wallet) {
         return wallet.getOwner().equals(authUtils.getAuthenticatedUser());
     }
 
-    private void enforceOneWalletPerCurrency(Currency currency, User owner) {
-        if (walletRepository.existsByCurrencyAndOwner(currency, owner)) {
+    private void enforceOneWalletPerCurrencyForOwner(Currency currency, User owner) {
+        if (walletRepository.existsByCurrencyAndOwnerAndDeletedFalse(currency, owner)) {
             throw new ImpossibleOperationException(String.format(WALLET_DUPLICATE, currency));
         }
     }
 
     private void stopWalletDeletionIfLastWallet(Wallet wallet) {
-        if(walletRepository.findAllByOwner(wallet.getOwner()).size() == 1) {
+        if (walletRepository.findAllByOwnerAndDeletedFalse(wallet.getOwner()).size() == 1) {
             throw new ImpossibleOperationException(CANNOT_DELETE_LAST_WALLET);
         }
     }

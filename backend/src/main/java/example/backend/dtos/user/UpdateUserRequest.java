@@ -7,7 +7,7 @@ import static example.backend.utils.StringConstants.*;
 import static example.backend.utils.StringConstants.PHONE_NUMBER_MUST_BE_VALID;
 import static example.backend.utils.StringConstants.PHOTO_URL_MUST_BE_VALID;
 
-public record UpdateUserDto(
+public record UpdateUserRequest(
         String password,
 
         @Email(message = EMAIL_MUST_BE_VALID)

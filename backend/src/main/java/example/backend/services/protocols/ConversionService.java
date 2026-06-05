@@ -8,4 +8,6 @@ public interface ConversionService {
 
     BigDecimal convert(Currency from, Currency to, BigDecimal amount);
 
+    BigDecimal getRate(Currency from, Currency to);
+
 }

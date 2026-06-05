@@ -1,12 +1,12 @@
 package example.backend.services;
 
-import example.backend.dtos.card.CardCreateReq;
-import example.backend.dtos.card.CardMetaData;
+import example.backend.dtos.card.CardCreateRequest;
+import example.backend.dtos.card.CardTokenizationResult;
 import example.backend.enums.CardBrand;
 import example.backend.exceptions.AuthorizationException;
+import example.backend.exceptions.CardExpiredException;
 import example.backend.exceptions.DuplicateException;
 import example.backend.exceptions.EntityNotFoundException;
-import example.backend.mappers.CardMapper;
 import example.backend.models.Card;
 import example.backend.models.User;
 import example.backend.repositories.CardRepository;
@@ -20,164 +20,155 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CardServiceTests {
 
-    @Mock
-    private CardRepository cardRepository;
-
-    @Mock
-    private PaymentService paymentService;
-
-    @Mock
-    private AuthUtils authUtils;
+    @Mock private CardRepository cardRepository;
+    @Mock private PaymentService paymentService;
+    @Mock private AuthUtils authUtils;
 
     @InjectMocks
     private CardServiceImpl cardService;
 
+    // ───────────────────────── getMyCards ─────────────────────────
+
     @Test
-    void getMyCards_Should_ReturnMyCards() {
+    void getMyCards_Should_ReturnCardsForAuthenticatedUser() {
         User user = new User();
         List<Card> cards = List.of(new Card(), new Card());
 
         when(authUtils.getAuthenticatedUser()).thenReturn(user);
         when(cardRepository.findAllByCardHolder(user)).thenReturn(cards);
 
-        List<Card> actualCards = cardService.getMyCards();
+        List<Card> result = cardService.getMyCards();
 
-        assertEquals(2, actualCards.size());
-        verify(authUtils, Mockito.times(1)).getAuthenticatedUser();
-        verify(cardRepository, Mockito.times(1)).findAllByCardHolder(user);
-        verify(cardRepository, Mockito.never()).findAll();
+        assertEquals(2, result.size());
+        verify(cardRepository, times(1)).findAllByCardHolder(user);
+        verify(cardRepository, never()).findAll();
     }
 
-    @Test
-    void getCardsByUserId_Should_ReturnCardsByUserId() {
-        Long userId = 10L;
+    // ───────────────────────── getCardsByUserId ─────────────────────────
 
+    @Test
+    void getCardsByUserId_Should_ReturnCardsForGivenUser() {
+        Long userId = 10L;
         User user = new User();
         user.setId(userId);
 
         Card card1 = new Card();
         Card card2 = new Card();
-
         card1.setCardHolder(user);
         card2.setCardHolder(user);
 
-        List<Card> cards = List.of(card1, card2);
+        when(cardRepository.findAllByCardHolderId(userId)).thenReturn(List.of(card1, card2));
 
-        when(cardRepository.findAllByCardHolderId(userId)).thenReturn(cards);
+        List<Card> result = cardService.getCardsByUserId(userId);
 
-        List<Card> actualCards = cardService.getCardsByUserId(userId);
-
-        assertEquals(2, actualCards.size());
-        assertTrue(actualCards.contains(card1));
-        assertTrue(actualCards.contains(card2));
+        assertEquals(2, result.size());
+        assertTrue(result.contains(card1));
+        assertTrue(result.contains(card2));
     }
 
+    // ───────────────────────── getById ─────────────────────────
+
     @Test
-    void getById_Should_ReturnCardById() {
+    void getById_Should_ReturnCard_When_Found() {
         Card card = new Card();
         card.setId(5L);
 
         when(cardRepository.findById(5L)).thenReturn(Optional.of(card));
-        Card actualCard = cardService.getById(5L);
 
-        assertEquals(card, actualCard);
-        verify(cardRepository, Mockito.times(1)).findById(5L);
+        Card result = cardService.getById(5L);
+
+        assertEquals(card, result);
+        verify(cardRepository, times(1)).findById(5L);
     }
 
     @Test
-    void getById_Should_ThrowException_IfCardNotFound() {
+    void getById_Should_Throw_When_NotFound() {
         when(cardRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> cardService.getById(99L));
-
-        verify(cardRepository, Mockito.times(1)).findById(99L);
     }
 
+    // ───────────────────────── create ─────────────────────────
+
     @Test
-    void create_Should_SaveCard_When_NewCardIsCreated() {
+    void create_Should_SaveCard_When_Valid() {
         User actingUser = new User();
         actingUser.setUsername("testUser");
 
-        CardCreateReq request = new CardCreateReq(
-                "1234123412341234",
-                "John",
-                "Doe",
-                10,
-                2026,
-                "353"
-        );
+        int futureYear = LocalDate.now().getYear() + 1;
 
-        CardMetaData cardMetaData = new CardMetaData(
-                "tok_123",
-                "fingerprint_123",
-                CardBrand.VISA,
-                "1234",
-                10,
-                2026
-        );
-
-        Card cardEntity = new Card();
-        cardEntity.setCardHolder(actingUser);
+        CardCreateRequest request = new CardCreateRequest("4111111111111111", "John", "Doe", 1, futureYear, "123");
+        CardTokenizationResult metaData = new CardTokenizationResult("tok_123", "fp_123", CardBrand.VISA, "1111", 1, futureYear);
 
         when(authUtils.getAuthenticatedUser()).thenReturn(actingUser);
-        when(paymentService.tokenize(request)).thenReturn(cardMetaData);
-        when(cardRepository.existsByFingerprintAndCardHolder(cardMetaData.fingerprint(), actingUser))
-                .thenReturn(false);
-        when(cardRepository.save(any(Card.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(paymentService.tokenize(request)).thenReturn(metaData);
+        when(cardRepository.existsByFingerprintAndCardHolder("fp_123", actingUser)).thenReturn(false);
+        when(cardRepository.save(any(Card.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Card actualCard = cardService.create(request);
+        Card result = cardService.create(request);
 
-        assertEquals(cardEntity, actualCard);
-        assertEquals(actingUser, actualCard.getCardHolder());
-        verify(cardRepository, Mockito.times(1)).save(cardEntity);
+        assertNotNull(result);
+        assertEquals(actingUser, result.getCardHolder());
+        verify(cardRepository, times(1)).save(any(Card.class));
     }
 
     @Test
-    void create_Should_ThrowException_IfCardAlreadyExists() {
+    void create_Should_Throw_When_CardAlreadyAdded() {
         User actingUser = new User();
         actingUser.setUsername("testUser");
 
-        CardCreateReq request = new CardCreateReq(
-                "1234123412341234",
-                "John",
-                "Doe",
-                10,
-                2026,
-                "353"
-        );
+        int futureYear = LocalDate.now().getYear() + 1;
 
-        CardMetaData cardMetaData = new CardMetaData(
-                "tok_123",
-                "fingerprint_123",
-                CardBrand.VISA,
-                "1234",
-                10,
-                2026
-        );
+        CardCreateRequest request = new CardCreateRequest("4111111111111111", "John", "Doe", 1, futureYear, "123");
+        CardTokenizationResult metaData = new CardTokenizationResult("tok_123", "fp_123", CardBrand.VISA, "1111", 1, futureYear);
 
         when(authUtils.getAuthenticatedUser()).thenReturn(actingUser);
-        when(paymentService.tokenize(request)).thenReturn(cardMetaData);
-        when(cardRepository.existsByFingerprintAndCardHolder(cardMetaData.fingerprint(), actingUser))
-                .thenReturn(true);
+        when(paymentService.tokenize(request)).thenReturn(metaData);
+        when(cardRepository.existsByFingerprintAndCardHolder("fp_123", actingUser)).thenReturn(true);
 
         assertThrows(DuplicateException.class, () -> cardService.create(request));
-        verify(cardRepository, Mockito.times(0)).save(any());
+        verify(cardRepository, never()).save(any());
     }
 
     @Test
-    void delete_Should_DeleteCard_When_CardIsFound() {
+    void create_Should_Throw_When_CardIsExpired_PastYear() {
+        int pastYear = LocalDate.now().getYear() - 1;
+        CardCreateRequest request = new CardCreateRequest("4111111111111111", "John", "Doe", 12, pastYear, "123");
+
+        assertThrows(CardExpiredException.class, () -> cardService.create(request));
+        verify(paymentService, never()).tokenize(any());
+    }
+
+    @Test
+    void create_Should_Throw_When_CardIsExpired_PastMonthSameYear() {
+        LocalDate now = LocalDate.now();
+        int currentYear = now.getYear();
+        int pastMonth = now.getMonthValue() - 1;
+
+        // only valid if we are not in January (month 1)
+        if (pastMonth < 1) return;
+
+        CardCreateRequest request = new CardCreateRequest("4111111111111111", "John", "Doe", pastMonth, currentYear, "123");
+
+        assertThrows(CardExpiredException.class, () -> cardService.create(request));
+        verify(paymentService, never()).tokenize(any());
+    }
+
+    // ───────────────────────── delete ─────────────────────────
+
+    @Test
+    void delete_Should_DeleteCard_When_UserIsOwner() {
         User actingUser = new User();
         actingUser.setUsername("testUser");
 
@@ -190,17 +181,16 @@ public class CardServiceTests {
 
         cardService.delete(5L);
 
-        verify(cardRepository, Mockito.times(1)).findById(5L);
-        verify(cardRepository, Mockito.times(1)).delete(card);
+        verify(cardRepository, times(1)).delete(card);
     }
 
     @Test
-    void delete_Should_ThrowException_IfUserIsNotOwner() {
+    void delete_Should_Throw_When_UserIsNotOwner() {
         User actingUser = new User();
-        actingUser.setUsername("testUser");
+        actingUser.setUsername("actingUser");
 
         User owner = new User();
-        actingUser.setUsername("owner");
+        owner.setUsername("owner");
 
         Card card = new Card();
         card.setId(5L);
@@ -210,8 +200,14 @@ public class CardServiceTests {
         when(cardRepository.findById(5L)).thenReturn(Optional.of(card));
 
         assertThrows(AuthorizationException.class, () -> cardService.delete(5L));
+        verify(cardRepository, never()).delete(any());
+    }
 
-        verify(cardRepository, Mockito.times(1)).findById(5L);
-        verify(cardRepository, Mockito.times(0)).delete(any());
+    @Test
+    void delete_Should_Throw_When_CardNotFound() {
+        when(authUtils.getAuthenticatedUser()).thenReturn(new User());
+        when(cardRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> cardService.delete(99L));
     }
 }

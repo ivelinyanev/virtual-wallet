@@ -16,13 +16,15 @@ import java.util.Optional;
 @Repository
 public interface WalletRepository extends JpaRepository<Wallet, Long> {
 
-    List<Wallet> findAllByOwner(User owner);
+    List<Wallet> findAllByOwnerAndDeletedFalse(User owner);
 
-    boolean existsByCurrencyAndOwner(Currency currency, User owner);
+    boolean existsByCurrencyAndOwnerAndDeletedFalse(Currency currency, User owner);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT w FROM Wallet w WHERE w.id = :id")
+    @Query("SELECT w FROM Wallet w WHERE w.id = :id AND w.deleted = false")
     Wallet findByIdForUpdate(@Param("id") Long id);
 
-    Optional<Wallet> findByOwnerAndCurrency(User owner, Currency currency);
+    Optional<Wallet> findByIdAndDeletedFalse(Long id);
+
+    Optional<Wallet> findByOwnerAndCurrencyAndDeletedFalse(User owner, Currency currency);
 }

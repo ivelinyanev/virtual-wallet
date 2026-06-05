@@ -59,6 +59,10 @@
               <PlusCircleIcon :size="16" />
               Top Up
             </button>
+            <button class="card-btn withdraw-btn" title="Withdraw" @click="openWithdraw(wallet)">
+              <ArrowUpCircleIcon :size="16" />
+              Withdraw
+            </button>
             <button class="card-btn delete-btn" title="Delete wallet" @click="confirmDelete(wallet.id)">
               <Trash2Icon :size="16" />
             </button>
@@ -244,6 +248,118 @@
         </div>
       </Transition>
     </Teleport>
+    <!-- ── Withdraw Modal ───────────────────────────────────── -->
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="withdrawWallet" class="modal-overlay" @click.self="withdrawWallet = null">
+          <div class="modal" role="dialog" aria-modal="true" aria-labelledby="withdraw-title">
+            <div class="modal-header">
+              <div class="modal-icon-wrap orange">
+                <ArrowUpCircleIcon :size="20" />
+              </div>
+              <div>
+                <h3 id="withdraw-title">Withdraw</h3>
+                <p class="modal-sub">{{ withdrawWallet.wallet_name }} · {{ withdrawWallet.currency }}</p>
+              </div>
+              <button class="modal-close" @click="withdrawWallet = null">
+                <XIcon :size="18" />
+              </button>
+            </div>
+
+            <form @submit.prevent="handleWithdraw" class="modal-body">
+              <!-- Current balance -->
+              <div class="balance-preview">
+                <span class="balance-preview-label">Available balance</span>
+                <span class="balance-preview-value">{{ formatCurrency(withdrawWallet.balance, withdrawWallet.currency) }}</span>
+              </div>
+
+              <!-- Card selector -->
+              <div class="field">
+                <label>Withdraw to card</label>
+                <div v-if="!cards.length" class="no-cards">
+                  <CreditCardIcon :size="14" />
+                  No cards linked. <RouterLink to="/cards">Add one first</RouterLink>.
+                </div>
+                <div v-else class="card-options">
+                  <button
+                    v-for="card in cards"
+                    :key="card.id"
+                    type="button"
+                    class="card-option"
+                    :class="{ selected: withdrawCardId === card.id }"
+                    @click="withdrawCardId = card.id"
+                  >
+                    <CreditCardIcon :size="16" />
+                    <span class="card-option-brand">{{ card.card_brand }}</span>
+                    <span class="card-option-num">•••• {{ card.last4 }}</span>
+                    <span class="card-option-exp">{{ String(card.expiration_month).padStart(2,'0') }}/{{ card.expiration_year }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Amount input -->
+              <div class="field">
+                <label for="withdraw-amount">Amount to withdraw</label>
+                <div class="input-wrap amount-wrap">
+                  <span class="currency-prefix">{{ currencySymbol(withdrawWallet.currency) }}</span>
+                  <input
+                    id="withdraw-amount"
+                    v-model.number="withdrawAmount"
+                    type="number"
+                    min="0.01"
+                    :max="withdrawWallet.balance"
+                    step="0.01"
+                    placeholder="0.00"
+                    required
+                    class="amount-input"
+                  />
+                  <span class="currency-suffix">{{ withdrawWallet.currency }}</span>
+                </div>
+              </div>
+
+              <!-- Quick amounts -->
+              <div class="quick-amounts">
+                <button
+                  v-for="q in quickAmounts"
+                  :key="q"
+                  type="button"
+                  class="quick-btn"
+                  :class="{ selected: withdrawAmount === q }"
+                  :disabled="q > withdrawWallet.balance"
+                  @click="withdrawAmount = q"
+                >
+                  {{ currencySymbol(withdrawWallet.currency) }}{{ q }}
+                </button>
+              </div>
+
+              <!-- After-withdraw preview -->
+              <div v-if="withdrawAmount > 0" class="after-preview withdraw-preview">
+                <span>Remaining balance</span>
+                <span class="after-value">{{ formatCurrency(withdrawWallet.balance - withdrawAmount, withdrawWallet.currency) }}</span>
+              </div>
+
+              <p v-if="withdrawError" class="form-error">
+                <AlertCircleIcon :size="14" />
+                {{ withdrawError }}
+              </p>
+
+              <div class="modal-actions">
+                <button type="button" class="btn-ghost" @click="withdrawWallet = null">Cancel</button>
+                <button
+                  type="submit"
+                  class="btn-warning"
+                  :disabled="withdrawLoading || withdrawAmount <= 0 || !withdrawCardId || withdrawAmount > withdrawWallet.balance"
+                >
+                  <LoaderCircleIcon v-if="withdrawLoading" :size="16" class="spinner" />
+                  <ArrowUpCircleIcon v-else :size="16" />
+                  <span>{{ withdrawLoading ? 'Processing…' : 'Confirm Withdrawal' }}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -260,6 +376,7 @@ import {
   XIcon,
   PencilIcon,
   ArrowDownCircleIcon,
+  ArrowUpCircleIcon,
   AlertCircleIcon,
   LoaderCircleIcon,
   CreditCardIcon,
@@ -269,9 +386,10 @@ const {
   walletStore,
   showCreate, createForm, createError, createLoading,
   topUpWallet, topUpAmount, topUpCardId, topUpError, topUpLoading, cards,
+  withdrawWallet, withdrawAmount, withdrawCardId, withdrawError, withdrawLoading,
   quickAmounts, currencies,
   currencySymbol, cardAccent,
-  openCreate, openTopUp, confirmDelete, handleCreate, handleTopUp,
+  openCreate, openTopUp, openWithdraw, confirmDelete, handleCreate, handleTopUp, handleWithdraw,
 } = useWallets()
 
 const { formatCurrency } = useFormatters()
@@ -309,7 +427,6 @@ h2 { margin: 0 0 0.25rem; font-size: 1.75rem; font-weight: 700; color: var(--c-t
   position: relative;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-  min-height: 190px;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 .wallet-card::before {
@@ -352,28 +469,32 @@ h2 { margin: 0 0 0.25rem; font-size: 1.75rem; font-weight: 700; color: var(--c-t
 
 .card-footer {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: auto;
 }
 .wallet-name { font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.75); }
 
-.card-actions { display: flex; gap: 0.4rem; }
+.card-actions { display: flex; gap: 0.4rem; width: 100%; }
 .card-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-size: 0.78rem;
   font-weight: 600;
-  padding: 0.4rem 0.75rem;
+  padding: 0.45rem 0;
   transition: background 0.15s;
+  flex: 1;
 }
 .topup-btn { background: rgba(255,255,255,0.2); color: white; }
 .topup-btn:hover { background: rgba(255,255,255,0.3); }
-.delete-btn { background: rgba(239,68,68,0.25); color: #fca5a5; padding: 0.4rem 0.6rem; }
+.withdraw-btn { background: rgba(251,191,36,0.25); color: #fef08a; }
+.withdraw-btn:hover { background: rgba(251,191,36,0.4); }
+.delete-btn { background: rgba(239,68,68,0.25); color: #fca5a5; flex: 0 0 auto; padding: 0.45rem 0.75rem; }
 .delete-btn:hover { background: rgba(239,68,68,0.4); }
 
 /* ── Currency selector ─────────────────────────────────────── */
@@ -499,6 +620,28 @@ h2 { margin: 0 0 0.25rem; font-size: 1.75rem; font-weight: 700; color: var(--c-t
   font-size: 0.85rem;
   color: #166534;
 }
+.withdraw-preview { background: #fffbeb; border-color: #fde68a; color: #92400e; }
 .after-value { font-weight: 700; }
+
+/* ── Modal icon variants ────────────────────────────────── */
+.modal-icon-wrap.orange { background: #fef3c7; color: #d97706; }
+
+/* ── Warning button ─────────────────────────────────────── */
+.btn-warning {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.25rem;
+  border: none;
+  border-radius: 10px;
+  background: #d97706;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-warning:hover:not(:disabled) { background: #b45309; }
+.btn-warning:disabled { opacity: 0.5; cursor: not-allowed; }
 
 </style>

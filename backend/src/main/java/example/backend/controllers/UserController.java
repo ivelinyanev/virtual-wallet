@@ -1,9 +1,9 @@
 package example.backend.controllers;
 
-import example.backend.dtos.user.PrivateUserDto;
-import example.backend.dtos.user.PublicUserDto;
-import example.backend.dtos.user.RegisterUserDto;
-import example.backend.dtos.user.UpdateUserDto;
+import example.backend.dtos.user.PrivateUserResponse;
+import example.backend.dtos.user.PublicUserResponse;
+import example.backend.dtos.user.RegisterRequest;
+import example.backend.dtos.user.UpdateUserRequest;
 import example.backend.mappers.UserMapper;
 import example.backend.services.protocols.UserService;
 import jakarta.validation.Valid;
@@ -22,43 +22,43 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/{userId}")
-    public ResponseEntity<PrivateUserDto> getById(@PathVariable Long userId) {
+    public ResponseEntity<PrivateUserResponse> getById(@PathVariable Long userId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(UserMapper.toPrivateUserDto(userService.getById(userId)));
+                .body(UserMapper.toPrivateUserResponse(userService.getById(userId)));
     }
 
     @GetMapping
-    public ResponseEntity<Page<PrivateUserDto>> getAll(Pageable pageable) {
+    public ResponseEntity<Page<PrivateUserResponse>> getAll(Pageable pageable) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userService.getAll(pageable).map(UserMapper::toPrivateUserDto));
+                .body(userService.getAll(pageable).map(UserMapper::toPrivateUserResponse));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<PublicUserDto>> search(@RequestParam("q") String query, Pageable pageable) {
+    public ResponseEntity<Page<PublicUserResponse>> search(@RequestParam("q") String query, Pageable pageable) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userService.search(query, pageable).map(UserMapper::toPublicUserDto));
+                .body(userService.search(query, pageable).map(UserMapper::toPublicUserResponse));
     }
 
     @PostMapping
-    public ResponseEntity<PrivateUserDto> createByAdmin(@RequestBody @Valid RegisterUserDto registerUserDto) {
+    public ResponseEntity<PrivateUserResponse> createByAdmin(@RequestBody @Valid RegisterRequest registerUserDto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(
-                        UserMapper.toPrivateUserDto(
+                        UserMapper.toPrivateUserResponse(
                                 userService.createByAdmin(UserMapper.toUser(registerUserDto))
                         )
                 );
     }
 
     @PutMapping
-    public ResponseEntity<PrivateUserDto> update(@RequestBody @Valid UpdateUserDto updateUserDto) {
+    public ResponseEntity<PrivateUserResponse> update(@RequestBody @Valid UpdateUserRequest updateUserDto) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(
-                        UserMapper.toPrivateUserDto(
+                        UserMapper.toPrivateUserResponse(
                                 userService.edit(UserMapper.toUser(updateUserDto))
                         )
                 );

@@ -4,7 +4,7 @@ import example.backend.enums.Currency;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Size;
 
-public record WalletCreateReq(
+public record WalletCreateRequest(
 
         @Size(max = 20)
         @Nullable

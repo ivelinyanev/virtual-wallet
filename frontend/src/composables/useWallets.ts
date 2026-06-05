@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import { useWalletStore } from '@/stores/wallet'
 import { useDialog } from '@/composables/useDialog'
 import { cardsApi } from '@/api/cards'
-import type { PrivateWalletDto, PrivateCardDto, Currency } from '@/types'
+import type { WalletResponse, CardResponse, Currency } from '@/types'
 
 export const currencies = [
   { code: 'EUR' as Currency, symbol: '€', name: 'Euro' },
@@ -21,12 +21,19 @@ export function useWallets() {
   const createLoading = ref(false)
 
   // Top-up modal
-  const topUpWallet = ref<PrivateWalletDto | null>(null)
+  const topUpWallet = ref<WalletResponse | null>(null)
   const topUpAmount = ref(0)
   const topUpCardId = ref<number | null>(null)
   const topUpError = ref('')
   const topUpLoading = ref(false)
-  const cards = ref<PrivateCardDto[]>([])
+  const cards = ref<CardResponse[]>([])
+
+  // Withdraw modal
+  const withdrawWallet = ref<WalletResponse | null>(null)
+  const withdrawAmount = ref(0)
+  const withdrawCardId = ref<number | null>(null)
+  const withdrawError = ref('')
+  const withdrawLoading = ref(false)
 
   const quickAmounts = [10, 50, 100, 500]
 
@@ -44,11 +51,22 @@ export function useWallets() {
     showCreate.value = true
   }
 
-  async function openTopUp(wallet: PrivateWalletDto) {
+  async function openTopUp(wallet: WalletResponse) {
     topUpWallet.value = wallet
     topUpAmount.value = 0
     topUpCardId.value = null
     topUpError.value = ''
+    if (!cards.value.length) {
+      const { data } = await cardsApi.getMyCards()
+      cards.value = data
+    }
+  }
+
+  async function openWithdraw(wallet: WalletResponse) {
+    withdrawWallet.value = wallet
+    withdrawAmount.value = 0
+    withdrawCardId.value = null
+    withdrawError.value = ''
     if (!cards.value.length) {
       const { data } = await cardsApi.getMyCards()
       cards.value = data
@@ -64,8 +82,8 @@ export function useWallets() {
     if (!isConfirmed) return
     try {
       await walletStore.deleteWallet(id)
-    } catch (e: any) {
-      await dialog.error('Could not delete wallet', e.response?.data?.message)
+    } catch (e) {
+      await dialog.error('Could not delete wallet', (e as { response?: { data?: { message?: string } } }).response?.data?.message)
     }
   }
 
@@ -75,8 +93,8 @@ export function useWallets() {
     try {
       await walletStore.createWallet(createForm.value)
       showCreate.value = false
-    } catch (e: any) {
-      createError.value = e.response?.data?.message ?? 'Failed to create wallet.'
+    } catch (e) {
+      createError.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message ?? 'Failed to create wallet.'
     } finally {
       createLoading.value = false
     }
@@ -89,10 +107,24 @@ export function useWallets() {
     try {
       await walletStore.topUp({ wallet_id: topUpWallet.value.id, card_id: topUpCardId.value!, amount: topUpAmount.value })
       topUpWallet.value = null
-    } catch (e: any) {
-      topUpError.value = e.response?.data?.message ?? 'Top-up failed.'
+    } catch (e) {
+      topUpError.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message ?? 'Top-up failed.'
     } finally {
       topUpLoading.value = false
+    }
+  }
+
+  async function handleWithdraw() {
+    if (!withdrawWallet.value) return
+    withdrawError.value = ''
+    withdrawLoading.value = true
+    try {
+      await walletStore.withdraw({ wallet_id: withdrawWallet.value.id, card_id: withdrawCardId.value!, amount: withdrawAmount.value })
+      withdrawWallet.value = null
+    } catch (e) {
+      withdrawError.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message ?? 'Withdrawal failed.'
+    } finally {
+      withdrawLoading.value = false
     }
   }
 
@@ -100,8 +132,9 @@ export function useWallets() {
     walletStore,
     showCreate, createForm, createError, createLoading,
     topUpWallet, topUpAmount, topUpCardId, topUpError, topUpLoading, cards,
+    withdrawWallet, withdrawAmount, withdrawCardId, withdrawError, withdrawLoading,
     quickAmounts, currencies,
     currencySymbol, cardAccent,
-    openCreate, openTopUp, confirmDelete, handleCreate, handleTopUp,
+    openCreate, openTopUp, openWithdraw, confirmDelete, handleCreate, handleTopUp, handleWithdraw,
   }
 }

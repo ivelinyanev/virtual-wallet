@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Pattern;
 
 import static example.backend.utils.StringConstants.*;
 
-public record VerifyUserDto(
+public record VerifyRequest(
         @NotBlank(message = FIELD_CANNOT_BE_BLANK)
         @Email(message = EMAIL_MUST_BE_VALID)
         String email,

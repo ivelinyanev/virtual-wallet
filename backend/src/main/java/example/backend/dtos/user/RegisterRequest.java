@@ -4,7 +4,7 @@ import jakarta.validation.constraints.*;
 
 import static example.backend.utils.StringConstants.*;
 
-public record RegisterUserDto(
+public record RegisterRequest(
 
         @NotBlank(message = FIELD_CANNOT_BE_BLANK)
         @Size(max = 50, message = FIELD_MUST_BE_IN_RANGE)

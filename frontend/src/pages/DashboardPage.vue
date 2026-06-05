@@ -82,16 +82,21 @@
               <span class="tx-icon" :class="tx.type.toLowerCase()">
                 <ArrowDownCircleIcon v-if="tx.type === 'TRANSFER_IN'" :size="28" />
                 <ArrowUpCircleIcon v-else-if="tx.type === 'TRANSFER_OUT'" :size="28" />
+                <BanknoteIcon v-else-if="tx.type === 'WITHDRAWAL'" :size="28" />
                 <PlusCircleIcon v-else :size="28" />
               </span>
               <div class="tx-info">
                 <span class="tx-type-label">{{ txLabel(tx.type) }}</span>
-                <span class="tx-counterparty">{{ tx.counterparty_username ?? 'Virtual Wallet' }}</span>
+                <span class="tx-counterparty">
+                  {{ tx.type === 'WITHDRAWAL'
+                    ? (tx.card_last4 ? `•••• ${tx.card_last4}` : 'Your card')
+                    : tx.counterparty_username ?? 'Virtual Wallet' }}
+                </span>
               </div>
             </div>
             <div class="tx-right">
               <span class="tx-amount" :class="amountClass(tx.type)">
-                {{ tx.type === 'TRANSFER_OUT' ? '−' : '+' }}{{ formatCurrency(Math.abs(tx.amount), tx.currency) }}
+                {{ tx.type === 'TRANSFER_OUT' || tx.type === 'WITHDRAWAL' ? '−' : '+' }}{{ formatCurrency(Math.abs(tx.amount), tx.currency) }}
               </span>
               <span class="tx-date">{{ formatDate(tx.timestamp) }}</span>
             </div>
@@ -126,8 +131,17 @@
                   <span class="detail-value">{{ details[tx.id]?.type ? txLabel(details[tx.id]!.type) : '' }}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-label">{{ details[tx.id]?.type === 'TRANSFER_OUT' ? 'Sent to' : details[tx.id]?.type === 'TRANSFER_IN' ? 'Received from' : 'Source' }}</span>
-                  <span class="detail-value">{{ details[tx.id]?.counterparty_username ?? '—' }}</span>
+                  <span class="detail-label">{{
+                    details[tx.id]?.type === 'TRANSFER_OUT' ? 'Sent to'
+                    : details[tx.id]?.type === 'TRANSFER_IN' ? 'Received from'
+                    : details[tx.id]?.type === 'WITHDRAWAL' ? 'Destination'
+                    : 'Source'
+                  }}</span>
+                  <span class="detail-value">{{
+                    details[tx.id]?.type === 'WITHDRAWAL'
+                      ? (details[tx.id]?.card_last4 ? `•••• ${details[tx.id]!.card_last4}` : 'Your card')
+                      : details[tx.id]?.counterparty_username ?? '—'
+                  }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">Date & Time</span>
@@ -157,6 +171,7 @@ import {
   ArrowDownCircleIcon,
   ArrowUpCircleIcon,
   PlusCircleIcon,
+  BanknoteIcon,
   ChevronRightIcon,
 } from 'lucide-vue-next'
 
@@ -313,6 +328,7 @@ h2 {
 .tx-icon.transfer_in :deep(svg) { color: #16a34a; }
 .tx-icon.transfer_out :deep(svg) { color: #dc2626; }
 .tx-icon.top_up :deep(svg) { color: #6366f1; }
+.tx-icon.withdrawal :deep(svg) { color: #d97706; }
 .tx-info { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
 .tx-type-label { font-size: 0.875rem; font-weight: 600; color: #0f172a; }
 .tx-counterparty { font-size: 0.78rem; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

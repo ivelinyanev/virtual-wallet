@@ -1,8 +1,9 @@
 package example.backend.controllers;
 
-import example.backend.dtos.wallet.PrivateWalletDto;
+import example.backend.dtos.wallet.WalletResponse;
 import example.backend.dtos.wallet.TopUpRequest;
-import example.backend.dtos.wallet.WalletCreateReq;
+import example.backend.dtos.wallet.WalletCreateRequest;
+import example.backend.dtos.wallet.WithdrawRequest;
 import example.backend.mappers.WalletMapper;
 import example.backend.services.protocols.WalletService;
 import jakarta.validation.Valid;
@@ -21,15 +22,15 @@ public class WalletController {
     private final WalletService walletService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<PrivateWalletDto> getById(@PathVariable Long id) {
+    public ResponseEntity<WalletResponse> getById(@PathVariable Long id) {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(WalletMapper.toPrivateWalletDto(walletService.getWalletById(id)));
+                .body(WalletMapper.toWalletResponse(walletService.getWalletById(id)));
     }
 
     @GetMapping
-    public ResponseEntity<List<PrivateWalletDto>> getMyWallets() {
+    public ResponseEntity<List<WalletResponse>> getMyWallets() {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -37,18 +38,18 @@ public class WalletController {
                         walletService
                                 .getMyWallets()
                                 .stream()
-                                .map(WalletMapper::toPrivateWalletDto)
+                                .map(WalletMapper::toWalletResponse)
                                 .toList()
                 );
     }
 
     @PostMapping
-    public ResponseEntity<PrivateWalletDto> create(@RequestBody @Valid WalletCreateReq request) {
+    public ResponseEntity<WalletResponse> create(@RequestBody @Valid WalletCreateRequest request) {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(
-                        WalletMapper.toPrivateWalletDto(
+                        WalletMapper.toWalletResponse(
                                 walletService.createWallet(WalletMapper.toWallet(request))
                         )
                 );
@@ -66,6 +67,15 @@ public class WalletController {
     @PostMapping("/top-up")
     public ResponseEntity<?> topUp(@RequestBody @Valid TopUpRequest request) {
         walletService.topUp(request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .build();
+    }
+
+    @PostMapping("/withdraw")
+    public ResponseEntity<?> withdraw(@RequestBody @Valid WithdrawRequest request) {
+        walletService.withdraw(request);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

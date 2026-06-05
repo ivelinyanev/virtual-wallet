@@ -6,6 +6,7 @@ import example.backend.enums.TransactionStatus;
 import example.backend.enums.TransactionType;
 import example.backend.exceptions.EntityNotFoundException;
 import example.backend.exceptions.ImpossibleOperationException;
+import example.backend.models.Card;
 import example.backend.models.Transaction;
 import example.backend.models.User;
 import example.backend.models.Wallet;
@@ -65,7 +66,7 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Transaction", "id", String.valueOf(id)));
 
-        if (!transaction.getWallet().getOwner().equals(actingUser)) {
+        if (transaction.getWallet() == null || !transaction.getWallet().getOwner().equals(actingUser)) {
             throw new ImpossibleOperationException(YOU_DO_NOT_OWN_THAT_TRANSACTION);
         }
 
@@ -88,6 +89,17 @@ public class TransactionServiceImpl implements TransactionService {
             BigDecimal amount,
             TransactionType type
     ) {
+        recordTransaction(wallet, counterparty, amount, type, null);
+    }
+
+    @Transactional
+    void recordTransaction(
+            Wallet wallet,
+            Wallet counterparty,
+            BigDecimal amount,
+            TransactionType type,
+            Card card
+    ) {
         Transaction transaction = new Transaction();
         transaction.setWallet(wallet);
         transaction.setCounterpartyWallet(counterparty);
@@ -95,6 +107,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setType(type);
         transaction.setStatus(TransactionStatus.SUCCESSFUL);
         transaction.setCurrency(wallet.getCurrency());
+        transaction.setCard(card);
 
         transactionRepository.save(transaction);
     }

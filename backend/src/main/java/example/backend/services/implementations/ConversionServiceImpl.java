@@ -1,6 +1,6 @@
 package example.backend.services.implementations;
 
-import example.backend.dtos.ExchangeRateApiResponseDto;
+import example.backend.dtos.ExchangeRateApiResponse;
 import example.backend.enums.Currency;
 import example.backend.exceptions.ExchangeRateApiException;
 import example.backend.services.protocols.ConversionService;
@@ -25,17 +25,22 @@ public class ConversionServiceImpl implements ConversionService {
     }
 
     @Override
+    public BigDecimal getRate(Currency from, Currency to) {
+        return convert(from, to, BigDecimal.ONE);
+    }
+
+    @Override
     public BigDecimal convert(Currency from, Currency to, BigDecimal amount) {
         try {
             String uri = "https://v6.exchangerate-api.com/v6/{key}/pair/{from}/{to}/{amount}";
 
-            ExchangeRateApiResponseDto response;
+            ExchangeRateApiResponse response;
 
             response = client
                     .get()
                     .uri(uri, key, from.toString(), to.toString(), amount)
                     .retrieve()
-                    .body(ExchangeRateApiResponseDto.class);
+                    .body(ExchangeRateApiResponse.class);
 
             assert response != null;
             return response.conversionResult();

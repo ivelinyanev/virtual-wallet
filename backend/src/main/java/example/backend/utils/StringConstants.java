@@ -38,4 +38,5 @@ public class StringConstants {
     public static final String CANNOT_DELETE_WALLET_WITH_POSITIVE_BALANCE = "Cannot delete a wallet with positive balance! Move balance to another wallet and try again.";
     public static final String WALLET_STILL_HAS_FUNDS = "Wallet still has funds inside. Move funds to another wallet or spend them before removing.";
     public static final String CANNOT_DELETE_LAST_WALLET = "Account cannot exist without a wallet. If you wish to delete this wallet, please create another one beforehand.";
+    public static final String WITHDRAWAL_AMOUNT_MUST_BE_POSITIVE = "Withdrawal amount must be positive!";
 }

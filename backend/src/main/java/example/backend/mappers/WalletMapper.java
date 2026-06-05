@@ -1,13 +1,13 @@
 package example.backend.mappers;
 
-import example.backend.dtos.wallet.PrivateWalletDto;
-import example.backend.dtos.wallet.WalletCreateReq;
+import example.backend.dtos.wallet.WalletResponse;
+import example.backend.dtos.wallet.WalletCreateRequest;
 import example.backend.models.Wallet;
 import org.springframework.stereotype.Component;
 
 public class WalletMapper {
 
-    public static Wallet toWallet(WalletCreateReq request) {
+    public static Wallet toWallet(WalletCreateRequest request) {
         Wallet wallet = new Wallet();
 
         wallet.setName(request.name());
@@ -16,9 +16,9 @@ public class WalletMapper {
         return wallet;
     }
 
-    public static PrivateWalletDto toPrivateWalletDto(Wallet wallet) {
+    public static WalletResponse toWalletResponse(Wallet wallet) {
 
-        return new PrivateWalletDto(
+        return new WalletResponse(
                 wallet.getId(),
                 wallet.getOwner().getFirstName() + " " + wallet.getOwner().getLastName(),
                 wallet.getName(),

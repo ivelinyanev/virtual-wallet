@@ -1,11 +1,11 @@
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
-export interface LoginUserDto {
+export interface LoginRequest {
   email: string
   password: string
 }
 
-export interface RegisterUserDto {
+export interface RegisterRequest {
   first_name: string
   last_name: string
   username: string
@@ -14,14 +14,14 @@ export interface RegisterUserDto {
   password: string
 }
 
-export interface VerifyUserDto {
+export interface VerifyRequest {
   email: string
   verification_code: string
 }
 
 // ─── Users ───────────────────────────────────────────────────────────────────
 
-export interface PublicUserDto {
+export interface PublicUserResponse {
   id: number
   username: string
   first_name: string
@@ -29,7 +29,7 @@ export interface PublicUserDto {
   photo_url: string | null
 }
 
-export interface PrivateUserDto extends PublicUserDto {
+export interface PrivateUserResponse extends PublicUserResponse {
   email: string
   phone_number: string
   is_verified: boolean
@@ -37,7 +37,7 @@ export interface PrivateUserDto extends PublicUserDto {
   roles: string[]
 }
 
-export interface UpdateUserDto {
+export interface UpdateUserRequest {
   first_name?: string
   last_name?: string
   email?: string
@@ -50,7 +50,7 @@ export interface UpdateUserDto {
 
 export type Currency = 'EUR' | 'USD' | 'GBP'
 
-export interface PrivateWalletDto {
+export interface WalletResponse {
   id: number
   owner_name: string
   wallet_name: string
@@ -58,7 +58,7 @@ export interface PrivateWalletDto {
   currency: Currency
 }
 
-export interface WalletCreateReq {
+export interface WalletCreateRequest {
   name: string
   currency: Currency
 }
@@ -69,9 +69,15 @@ export interface TopUpRequest {
   amount: number
 }
 
+export interface WithdrawRequest {
+  wallet_id: number
+  card_id: number
+  amount: number
+}
+
 // ─── Cards ───────────────────────────────────────────────────────────────────
 
-export interface PrivateCardDto {
+export interface CardResponse {
   id: number
   card_brand: string
   last4: string
@@ -80,7 +86,7 @@ export interface PrivateCardDto {
   card_holder: string
 }
 
-export interface CardCreateReq {
+export interface CardCreateRequest {
   card_number: string
   first_name: string
   last_name: string
@@ -91,7 +97,7 @@ export interface CardCreateReq {
 
 // ─── Transactions ────────────────────────────────────────────────────────────
 
-export type TransactionType = 'TOP_UP' | 'TRANSFER_IN' | 'TRANSFER_OUT'
+export type TransactionType = 'TOP_UP' | 'TRANSFER_IN' | 'TRANSFER_OUT' | 'WITHDRAWAL'
 export type TransactionStatus = 'SUCCESSFUL' | 'PENDING' | 'FAILED'
 
 export interface UserTransactionResponse {
@@ -103,6 +109,7 @@ export interface UserTransactionResponse {
   timestamp: string
   wallet_name: string | null
   counterparty_username: string | null
+  card_last4: string | null
 }
 
 export interface AdminTransactionResponse {
@@ -132,9 +139,15 @@ export interface TransactionFilterRequest {
 
 // ─── Transfers ───────────────────────────────────────────────────────────────
 
-export interface TransferReq {
+export interface TransferRequest {
   from_wallet_id: number
   to_username: string
+  amount: number
+}
+
+export interface OwnWalletTransferRequest {
+  from_wallet_id: number
+  to_wallet_id: number
   amount: number
 }
 
@@ -152,5 +165,5 @@ export interface Page<T> {
 
 export interface AuthResponse {
   token: string
-  user: PrivateUserDto
+  user: PrivateUserResponse
 }

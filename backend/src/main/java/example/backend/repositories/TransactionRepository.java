@@ -18,8 +18,10 @@ public interface TransactionRepository
     @Override
     @EntityGraph(attributePaths = {
         "wallet", "wallet.owner",
-        "counterpartyWallet", "counterpartyWallet.owner"
+        "counterpartyWallet", "counterpartyWallet.owner",
+        "card"
     })
     @NonNull
     Page<Transaction> findAll(Specification<Transaction> spec, @NonNull Pageable pageable);
+
 }

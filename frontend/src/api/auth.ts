@@ -1,16 +1,16 @@
 import client from './client'
-import type { LoginUserDto, RegisterUserDto, VerifyUserDto, AuthResponse, PrivateUserDto } from '@/types'
+import type { LoginRequest, RegisterRequest, VerifyRequest, AuthResponse, PrivateUserResponse } from '@/types'
 
 export const authApi = {
-  login: (data: LoginUserDto) =>
+  login: (data: LoginRequest) =>
     client.post<AuthResponse>('/auth/login', data),
 
-  register: (data: RegisterUserDto) =>
+  register: (data: RegisterRequest) =>
     client.post<void>('/auth/register', data),
 
-  verify: (data: VerifyUserDto) =>
+  verify: (data: VerifyRequest) =>
     client.post<void>('/auth/verify', data),
 
   me: () =>
-    client.get<PrivateUserDto>('/auth/me'),
+    client.get<PrivateUserResponse>('/auth/me'),
 }

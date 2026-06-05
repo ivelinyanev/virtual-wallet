@@ -1,7 +1,7 @@
 package example.backend.services.implementations;
 
-import example.backend.dtos.card.CardCreateReq;
-import example.backend.dtos.card.CardMetaData;
+import example.backend.dtos.card.CardCreateRequest;
+import example.backend.dtos.card.CardTokenizationResult;
 import example.backend.enums.CardBrand;
 import example.backend.exceptions.InvalidCardException;
 import example.backend.services.protocols.PaymentService;
@@ -17,7 +17,7 @@ import static example.backend.utils.StringConstants.CARD_NUMBER_MUST_CONTAIN_ONL
 public class PaymentServiceImpl implements PaymentService {
 
     @Override
-    public CardMetaData tokenize(CardCreateReq request) {
+    public CardTokenizationResult tokenize(CardCreateRequest request) {
 
         String cardNumber = request.cardNumber();
 
@@ -31,7 +31,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new InvalidCardException("Invalid card number for " + cardBrand);
         }
 
-        return new CardMetaData(
+        return new CardTokenizationResult(
                 generateToken(),
                 generateFingerprint(cardNumber, cardBrand),
                 cardBrand,
@@ -49,10 +49,18 @@ public class PaymentServiceImpl implements PaymentService {
          */
     }
 
+    @Override
+    public void withdraw(String token, BigDecimal amount) {
+        /*
+            Simulates withdrawal. For now
+            always successful.
+         */
+    }
+
     /*
 
-        Token is used to perform transactions
-     */
+            Token is used to perform transactions
+         */
     private String generateToken() {
         return "tok_" + UUID.randomUUID();
     }
