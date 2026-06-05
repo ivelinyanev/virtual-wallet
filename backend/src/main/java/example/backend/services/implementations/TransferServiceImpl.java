@@ -1,8 +1,8 @@
 package example.backend.services.implementations;
 
 import example.backend.annotations.RequiresVerifiedAccount;
-import example.backend.dtos.transfer.OwnWalletTransferReq;
-import example.backend.dtos.transfer.TransferReq;
+import example.backend.dtos.transfer.OwnWalletTransferRequest;
+import example.backend.dtos.transfer.TransferRequest;
 import example.backend.enums.Currency;
 import example.backend.enums.TransactionType;
 import example.backend.exceptions.AccountNotVerifiedException;
@@ -39,7 +39,7 @@ public class TransferServiceImpl implements TransferService {
     @Transactional
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
-    public void transfer(TransferReq request) {
+    public void transfer(TransferRequest request) {
         // source wallet
         Wallet from = Optional.ofNullable(walletRepository.findByIdForUpdate(request.fromWalletId()))
                 .orElseThrow(() -> new EntityNotFoundException("Wallet", "id", String.valueOf(request.fromWalletId())));
@@ -72,7 +72,7 @@ public class TransferServiceImpl implements TransferService {
     @Transactional
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
-    public void internalTransfer(OwnWalletTransferReq request) {
+    public void internalTransfer(OwnWalletTransferRequest request) {
         Wallet from = Optional.ofNullable(walletRepository.findByIdForUpdate(request.fromWalletId()))
                 .orElseThrow(() -> new EntityNotFoundException("Wallet", "id", String.valueOf(request.fromWalletId())));
 

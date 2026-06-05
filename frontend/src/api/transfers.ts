@@ -1,7 +1,10 @@
 import client from './client'
-import type { TransferReq, TransactionResponse } from '@/types'
+import type { TransferRequest, OwnWalletTransferRequest, TransactionResponse } from '@/types'
 
 export const transfersApi = {
-  send: (data: TransferReq) =>
+  send: (data: TransferRequest) =>
     client.post<TransactionResponse>('/transfers', data),
+
+  internalTransfer: (data: OwnWalletTransferRequest) =>
+    client.post<void>('/transfers/internal', data),
 }

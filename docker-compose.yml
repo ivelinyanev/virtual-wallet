@@ -1,0 +1,44 @@
+services:
+  db:
+    image: mariadb:11
+    container_name: virtual-wallet-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: virtual_wallet
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - db_data:/var/lib/mysql
+
+  backend:
+    build: ./backend
+    container_name: virtual-wallet-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://db:3306/virtual_wallet
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      # Loaded from a .env file at the repo root (see .env.example)
+      EMAIL_USERNAME: ${EMAIL_USERNAME}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      EXCHANGE_RATE_API_KEY: ${EXCHANGE_RATE_API_KEY}
+
+  frontend:
+    build: ./frontend
+    container_name: virtual-wallet-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:

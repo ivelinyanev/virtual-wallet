@@ -1,13 +1,13 @@
 package example.backend.mappers;
 
-import example.backend.dtos.card.CardMetaData;
-import example.backend.dtos.card.PrivateCardDto;
+import example.backend.dtos.card.CardTokenizationResult;
+import example.backend.dtos.card.CardResponse;
 import example.backend.models.Card;
 import org.springframework.stereotype.Component;
 
 public class CardMapper {
 
-    public static Card toCard(CardMetaData cardMetaData) {
+    public static Card toCard(CardTokenizationResult cardMetaData) {
         Card card = new Card();
         card.setToken(cardMetaData.token());
         card.setFingerprint(cardMetaData.fingerprint());
@@ -20,9 +20,9 @@ public class CardMapper {
     }
 
 
-    public static PrivateCardDto toPrivateCardDto(Card card) {
+    public static CardResponse toCardResponse(Card card) {
 
-        return new PrivateCardDto(
+        return new CardResponse(
                 card.getId(),
                 card.getCardBrand(),
                 card.getLast4(),

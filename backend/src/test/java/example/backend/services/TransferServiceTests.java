@@ -1,7 +1,7 @@
 package example.backend.services;
 
-import example.backend.dtos.transfer.OwnWalletTransferReq;
-import example.backend.dtos.transfer.TransferReq;
+import example.backend.dtos.transfer.OwnWalletTransferRequest;
+import example.backend.dtos.transfer.TransferRequest;
 import example.backend.enums.Currency;
 import example.backend.exceptions.AccountNotVerifiedException;
 import example.backend.exceptions.EntityNotFoundException;
@@ -80,7 +80,7 @@ public class TransferServiceTests {
 
     @Test
     void transfer_Should_Succeed_When_AllValid() {
-        TransferReq req = new TransferReq(10L, "toUser", new BigDecimal("100"));
+        TransferRequest req = new TransferRequest(10L, "toUser", new BigDecimal("100"));
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(userService.getByUsername("toUser")).thenReturn(toUser);
@@ -95,7 +95,7 @@ public class TransferServiceTests {
 
     @Test
     void transfer_Should_Throw_When_AmountNegative() {
-        TransferReq req = new TransferReq(10L, "toUser", new BigDecimal("-1"));
+        TransferRequest req = new TransferRequest(10L, "toUser", new BigDecimal("-1"));
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(userService.getByUsername("toUser")).thenReturn(toUser);
@@ -110,7 +110,7 @@ public class TransferServiceTests {
 
     @Test
     void transfer_Should_Throw_When_AmountZero() {
-        TransferReq req = new TransferReq(10L, "toUser", BigDecimal.ZERO);
+        TransferRequest req = new TransferRequest(10L, "toUser", BigDecimal.ZERO);
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(userService.getByUsername("toUser")).thenReturn(toUser);
@@ -125,7 +125,7 @@ public class TransferServiceTests {
 
     @Test
     void transfer_Should_Throw_When_FromAndToSameWallet() {
-        TransferReq req = new TransferReq(10L, "toUser", new BigDecimal("100"));
+        TransferRequest req = new TransferRequest(10L, "toUser", new BigDecimal("100"));
 
         Wallet toSameWallet = new Wallet();
         toSameWallet.setId(10L);
@@ -144,7 +144,7 @@ public class TransferServiceTests {
 
     @Test
     void transfer_Should_Throw_When_InsufficientFunds() {
-        TransferReq req = new TransferReq(10L, "toUser", new BigDecimal("2000"));
+        TransferRequest req = new TransferRequest(10L, "toUser", new BigDecimal("2000"));
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(userService.getByUsername("toUser")).thenReturn(toUser);
@@ -159,7 +159,7 @@ public class TransferServiceTests {
 
     @Test
     void transfer_Should_Throw_When_RecipientNotVerified() {
-        TransferReq req = new TransferReq(10L, "toUser", BigDecimal.TEN);
+        TransferRequest req = new TransferRequest(10L, "toUser", BigDecimal.TEN);
         toUser.setVerified(false);
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
@@ -173,7 +173,7 @@ public class TransferServiceTests {
 
     @Test
     void transfer_Should_Throw_When_NotWalletOwner() {
-        TransferReq req = new TransferReq(10L, "toUser", BigDecimal.TEN);
+        TransferRequest req = new TransferRequest(10L, "toUser", BigDecimal.TEN);
 
         User otherUser = new User();
         otherUser.setUsername("other");
@@ -189,7 +189,7 @@ public class TransferServiceTests {
 
     @Test
     void transfer_Should_Throw_When_RecipientHasNoWallet() {
-        TransferReq req = new TransferReq(10L, "toUser", BigDecimal.TEN);
+        TransferRequest req = new TransferRequest(10L, "toUser", BigDecimal.TEN);
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(userService.getByUsername("toUser")).thenReturn(toUser);
@@ -204,7 +204,7 @@ public class TransferServiceTests {
 
     @Test
     void transfer_Should_ConvertCurrency_When_CurrenciesDiffer() {
-        TransferReq req = new TransferReq(10L, "toUser", BigDecimal.TEN);
+        TransferRequest req = new TransferRequest(10L, "toUser", BigDecimal.TEN);
 
         fromWallet.setCurrency(Currency.USD);
         toWallet.setCurrency(Currency.EUR);
@@ -234,7 +234,7 @@ public class TransferServiceTests {
         ownWallet.setCurrency(Currency.EUR);
         ownWallet.setBalance(new BigDecimal("200"));
 
-        OwnWalletTransferReq req = new OwnWalletTransferReq(10L, 30L, new BigDecimal("100"));
+        OwnWalletTransferRequest req = new OwnWalletTransferRequest(10L, 30L, new BigDecimal("100"));
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(walletRepository.findByIdForUpdate(30L)).thenReturn(ownWallet);
@@ -253,7 +253,7 @@ public class TransferServiceTests {
         usdWallet.setCurrency(Currency.USD);
         usdWallet.setBalance(new BigDecimal("200"));
 
-        OwnWalletTransferReq req = new OwnWalletTransferReq(10L, 30L, new BigDecimal("100"));
+        OwnWalletTransferRequest req = new OwnWalletTransferRequest(10L, 30L, new BigDecimal("100"));
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(walletRepository.findByIdForUpdate(30L)).thenReturn(usdWallet);
@@ -268,7 +268,7 @@ public class TransferServiceTests {
 
     @Test
     void internalTransfer_Should_Throw_When_SameWallet() {
-        OwnWalletTransferReq req = new OwnWalletTransferReq(10L, 10L, BigDecimal.TEN);
+        OwnWalletTransferRequest req = new OwnWalletTransferRequest(10L, 10L, BigDecimal.TEN);
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
 
@@ -287,7 +287,7 @@ public class TransferServiceTests {
         ownWallet.setCurrency(Currency.EUR);
         ownWallet.setBalance(BigDecimal.ZERO);
 
-        OwnWalletTransferReq req = new OwnWalletTransferReq(10L, 30L, new BigDecimal("2000"));
+        OwnWalletTransferRequest req = new OwnWalletTransferRequest(10L, 30L, new BigDecimal("2000"));
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(walletRepository.findByIdForUpdate(30L)).thenReturn(ownWallet);
@@ -310,7 +310,7 @@ public class TransferServiceTests {
         other.setUsername("other");
         fromWallet.setOwner(other);
 
-        OwnWalletTransferReq req = new OwnWalletTransferReq(10L, 30L, BigDecimal.TEN);
+        OwnWalletTransferRequest req = new OwnWalletTransferRequest(10L, 30L, BigDecimal.TEN);
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(walletRepository.findByIdForUpdate(30L)).thenReturn(ownWallet);
@@ -329,7 +329,7 @@ public class TransferServiceTests {
         otherWallet.setOwner(toUser);  // different owner
         otherWallet.setCurrency(Currency.EUR);
 
-        OwnWalletTransferReq req = new OwnWalletTransferReq(10L, 30L, BigDecimal.TEN);
+        OwnWalletTransferRequest req = new OwnWalletTransferRequest(10L, 30L, BigDecimal.TEN);
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(walletRepository.findByIdForUpdate(30L)).thenReturn(otherWallet);
@@ -343,7 +343,7 @@ public class TransferServiceTests {
 
     @Test
     void internalTransfer_Should_Throw_When_FromWalletNotFound() {
-        OwnWalletTransferReq req = new OwnWalletTransferReq(99L, 30L, BigDecimal.TEN);
+        OwnWalletTransferRequest req = new OwnWalletTransferRequest(99L, 30L, BigDecimal.TEN);
         // findByIdForUpdate(99L) returns null by default
 
         assertThrows(EntityNotFoundException.class,
@@ -352,7 +352,7 @@ public class TransferServiceTests {
 
     @Test
     void internalTransfer_Should_Throw_When_ToWalletNotFound() {
-        OwnWalletTransferReq req = new OwnWalletTransferReq(10L, 99L, BigDecimal.TEN);
+        OwnWalletTransferRequest req = new OwnWalletTransferRequest(10L, 99L, BigDecimal.TEN);
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         // findByIdForUpdate(99L) returns null by default

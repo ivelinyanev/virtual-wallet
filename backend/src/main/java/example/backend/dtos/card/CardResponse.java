@@ -2,7 +2,7 @@ package example.backend.dtos.card;
 
 import example.backend.enums.CardBrand;
 
-public record PrivateCardDto(
+public record CardResponse(
         Long id,
         CardBrand cardBrand,
         String last4,

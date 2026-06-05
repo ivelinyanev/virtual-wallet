@@ -25,3 +25,4 @@ replay_pid*
 backend/src/main/resources/application-secrets.properties
 .DS_Store
 CLAUDE.md
+.env

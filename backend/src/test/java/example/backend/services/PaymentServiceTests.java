@@ -1,7 +1,7 @@
 package example.backend.services;
 
-import example.backend.dtos.card.CardCreateReq;
-import example.backend.dtos.card.CardMetaData;
+import example.backend.dtos.card.CardCreateRequest;
+import example.backend.dtos.card.CardTokenizationResult;
 import example.backend.enums.CardBrand;
 import example.backend.exceptions.InvalidCardException;
 import example.backend.services.implementations.PaymentServiceImpl;
@@ -20,7 +20,7 @@ public class PaymentServiceTests {
 
     @Test
     void tokenize_Should_ThrowException_When_CardNumberIsNotOnlyDigits() {
-        CardCreateReq request = new CardCreateReq(
+        CardCreateRequest request = new CardCreateRequest(
                 "123412341234ABCD",
                 "John",
                 "Doe",
@@ -39,7 +39,7 @@ public class PaymentServiceTests {
 
     @Test
     void tokenize_Should_ThrowException_When_CardNumberIsNotWithValidLength() {
-        CardCreateReq request = new CardCreateReq(
+        CardCreateRequest request = new CardCreateRequest(
                 "41111111111111111", // VISA but invalid length
                 "John",
                 "Doe",
@@ -58,7 +58,7 @@ public class PaymentServiceTests {
 
     @Test
     void tokenize_Should_ThrowException_When_CardBrandIsNotValid() {
-        CardCreateReq request = new CardCreateReq(
+        CardCreateRequest request = new CardCreateRequest(
                 "1234123412341234",
                 "John",
                 "Doe",
@@ -76,8 +76,8 @@ public class PaymentServiceTests {
     }
 
     @Test
-    void tokenize_Should_ReturnCardMetaData_When_CardIsValid() {
-        CardCreateReq request = new CardCreateReq(
+    void tokenize_Should_ReturnCardTokenizationResult_When_CardIsValid() {
+        CardCreateRequest request = new CardCreateRequest(
                 "4111111111111111", // VISA with valid length
                 "John",
                 "Doe",
@@ -86,9 +86,9 @@ public class PaymentServiceTests {
                 "123"
         );
 
-        CardMetaData cardMetaData = paymentService.tokenize(request);
+        CardTokenizationResult cardMetaData = paymentService.tokenize(request);
 
-        assertNotNull(cardMetaData, "PaymentService.tokenize() should return a non-null CardMetaData");
+        assertNotNull(cardMetaData, "PaymentService.tokenize() should return a non-null CardTokenizationResult");
         assertEquals("1111", cardMetaData.last4(), "Last 4 digits should match");
         assertEquals(CardBrand.VISA, cardMetaData.cardBrand(), "Card brand should be VISA");
         assertNotNull(cardMetaData.fingerprint(), "Fingerprint should not be null");

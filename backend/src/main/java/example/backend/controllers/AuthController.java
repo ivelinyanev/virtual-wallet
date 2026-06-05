@@ -19,14 +19,14 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDto> login(@RequestBody @Valid LoginUserDto loginUserDto) {
+    public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest loginUserDto) {
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(authService.login(loginUserDto));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody @Valid RegisterUserDto dto) {
+    public ResponseEntity<String> register(@RequestBody @Valid RegisterRequest dto) {
         authService.register(dto);
 
         return ResponseEntity
@@ -36,7 +36,7 @@ public class AuthController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<?> verify(@RequestBody @Valid VerifyUserDto dto) {
+    public ResponseEntity<?> verify(@RequestBody @Valid VerifyRequest dto) {
         authService.verifyAccount(dto);
 
         return ResponseEntity
@@ -45,10 +45,10 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<PrivateUserDto> getMe() {
+    public ResponseEntity<PrivateUserResponse> getMe() {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(UserMapper.toPrivateUserDto(authService.getMe()));
+                .body(UserMapper.toPrivateUserResponse(authService.getMe()));
     }
 }

@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import static example.backend.utils.StringConstants.EMAIL_MUST_BE_VALID;
 import static example.backend.utils.StringConstants.FIELD_CANNOT_BE_BLANK;
 
-public record LoginUserDto(
+public record LoginRequest(
 
         @Email(message = EMAIL_MUST_BE_VALID)
         @NotBlank(message = FIELD_CANNOT_BE_BLANK)

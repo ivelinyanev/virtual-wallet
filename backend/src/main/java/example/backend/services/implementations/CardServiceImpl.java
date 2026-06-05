@@ -1,8 +1,8 @@
 package example.backend.services.implementations;
 
 import example.backend.annotations.RequiresVerifiedAccount;
-import example.backend.dtos.card.CardCreateReq;
-import example.backend.dtos.card.CardMetaData;
+import example.backend.dtos.card.CardCreateRequest;
+import example.backend.dtos.card.CardTokenizationResult;
 import example.backend.exceptions.AuthorizationException;
 import example.backend.exceptions.CardExpiredException;
 import example.backend.exceptions.DuplicateException;
@@ -66,11 +66,11 @@ public class CardServiceImpl implements CardService {
     @Transactional
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
-    public Card create(CardCreateReq request) {
+    public Card create(CardCreateRequest request) {
         checkCardExpired(request.expMonth(), request.expYear());
 
         User actingUser = authUtils.getAuthenticatedUser();
-        CardMetaData metaData = paymentService.tokenize(request);
+        CardTokenizationResult metaData = paymentService.tokenize(request);
 
         if (cardRepository.existsByFingerprintAndCardHolder(metaData.fingerprint(), actingUser)) {
             throw new DuplicateException(CARD_ALREADY_ADDED);

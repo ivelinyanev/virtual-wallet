@@ -2,7 +2,7 @@ package example.backend.dtos.card;
 
 import example.backend.enums.CardBrand;
 
-public record CardMetaData(
+public record CardTokenizationResult(
         String token,
         String fingerprint,
         CardBrand cardBrand,

@@ -29,12 +29,12 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthResponseDto login(LoginUserDto loginUserDto) {
+    public AuthResponse login(LoginRequest loginUserDto) {
         User user = userService.getByEmail(loginUserDto.email());
 
         validatePassword(loginUserDto.password(), user.getPassword());
 
-        PrivateUserDto userResponse = UserMapper.toPrivateUserDto(user);
+        PrivateUserResponse userResponse = UserMapper.toPrivateUserResponse(user);
 
         String token = jwtUtils.generateToken(
                 user.getUsername(),
@@ -42,12 +42,12 @@ public class AuthServiceImpl implements AuthService {
                         .map(role -> role.getName().name())
                         .collect(Collectors.toSet()));
 
-        return new AuthResponseDto(token, userResponse);
+        return new AuthResponse(token, userResponse);
     }
 
     @Override
     @Transactional
-    public void register(RegisterUserDto dto) {
+    public void register(RegisterRequest dto) {
         User user = UserMapper.toUser(dto);
 
         User savedUser = userService.registerUnverified(user);
@@ -57,7 +57,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void verifyAccount(VerifyUserDto dto) {
+    public void verifyAccount(VerifyRequest dto) {
         verificationService.verify(dto.email(), dto.verificationCode());
     }
 

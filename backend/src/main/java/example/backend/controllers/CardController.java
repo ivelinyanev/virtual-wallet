@@ -1,7 +1,7 @@
 package example.backend.controllers;
 
-import example.backend.dtos.card.CardCreateReq;
-import example.backend.dtos.card.PrivateCardDto;
+import example.backend.dtos.card.CardCreateRequest;
+import example.backend.dtos.card.CardResponse;
 import example.backend.mappers.CardMapper;
 import example.backend.services.protocols.CardService;
 import jakarta.validation.Valid;
@@ -20,7 +20,7 @@ public class CardController {
     private final CardService cardService;
 
     @GetMapping("/users/{userId}")
-    public ResponseEntity<List<PrivateCardDto>> getCardsByUserId(@PathVariable Long userId) {
+    public ResponseEntity<List<CardResponse>> getCardsByUserId(@PathVariable Long userId) {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -28,13 +28,13 @@ public class CardController {
                         cardService
                                 .getCardsByUserId(userId)
                                 .stream()
-                                .map(CardMapper::toPrivateCardDto)
+                                .map(CardMapper::toCardResponse)
                                 .toList()
                 );
     }
 
     @GetMapping
-    public ResponseEntity<List<PrivateCardDto>> getMyCards() {
+    public ResponseEntity<List<CardResponse>> getMyCards() {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -42,25 +42,25 @@ public class CardController {
                         cardService
                                 .getMyCards()
                                 .stream()
-                                .map(CardMapper::toPrivateCardDto)
+                                .map(CardMapper::toCardResponse)
                                 .toList()
                 );
     }
 
     @GetMapping("/{cardId}")
-    public ResponseEntity<PrivateCardDto> getCardById(@PathVariable Long cardId) {
+    public ResponseEntity<CardResponse> getCardById(@PathVariable Long cardId) {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(CardMapper.toPrivateCardDto(cardService.getById(cardId)));
+                .body(CardMapper.toCardResponse(cardService.getById(cardId)));
     }
 
     @PostMapping
-    public ResponseEntity<PrivateCardDto> create(@RequestBody @Valid CardCreateReq request) {
+    public ResponseEntity<CardResponse> create(@RequestBody @Valid CardCreateRequest request) {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(CardMapper.toPrivateCardDto(cardService.create(request)));
+                .body(CardMapper.toCardResponse(cardService.create(request)));
     }
 
     @DeleteMapping("/{cardId}")

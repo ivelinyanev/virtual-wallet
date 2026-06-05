@@ -31,9 +31,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { usersApi } from '@/api/users'
-import type { PublicUserDto } from '@/types'
+import type { PublicUserResponse } from '@/types'
 
-const users = ref<PublicUserDto[]>([])
+const users = ref<PublicUserResponse[]>([])
 const query = ref('')
 const page = ref(0)
 const totalPages = ref(1)

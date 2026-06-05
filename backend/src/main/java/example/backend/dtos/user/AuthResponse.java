@@ -1,7 +1,7 @@
 package example.backend.dtos.user;
 
-public record AuthResponseDto (
+public record AuthResponse (
         String token,
-        PrivateUserDto user
+        PrivateUserResponse user
 ){
 }

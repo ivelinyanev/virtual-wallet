@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import { useWalletStore } from '@/stores/wallet'
 import { useDialog } from '@/composables/useDialog'
 import { cardsApi } from '@/api/cards'
-import type { PrivateWalletDto, PrivateCardDto, Currency } from '@/types'
+import type { WalletResponse, CardResponse, Currency } from '@/types'
 
 export const currencies = [
   { code: 'EUR' as Currency, symbol: '€', name: 'Euro' },
@@ -21,12 +21,12 @@ export function useWallets() {
   const createLoading = ref(false)
 
   // Top-up modal
-  const topUpWallet = ref<PrivateWalletDto | null>(null)
+  const topUpWallet = ref<WalletResponse | null>(null)
   const topUpAmount = ref(0)
   const topUpCardId = ref<number | null>(null)
   const topUpError = ref('')
   const topUpLoading = ref(false)
-  const cards = ref<PrivateCardDto[]>([])
+  const cards = ref<CardResponse[]>([])
 
   const quickAmounts = [10, 50, 100, 500]
 
@@ -44,7 +44,7 @@ export function useWallets() {
     showCreate.value = true
   }
 
-  async function openTopUp(wallet: PrivateWalletDto) {
+  async function openTopUp(wallet: WalletResponse) {
     topUpWallet.value = wallet
     topUpAmount.value = 0
     topUpCardId.value = null

@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { walletsApi } from '@/api/wallets'
-import type { PrivateWalletDto, WalletCreateReq, TopUpRequest } from '@/types'
+import type { WalletResponse, WalletCreateRequest, TopUpRequest, WithdrawRequest } from '@/types'
 
 const TTL_MS = 30_000
 
 export const useWalletStore = defineStore('wallet', () => {
-  const wallets = ref<PrivateWalletDto[]>([])
+  const wallets = ref<WalletResponse[]>([])
   const loading = ref(false)
   const lastFetchedAt = ref<number | null>(null)
 
@@ -24,7 +24,7 @@ export const useWalletStore = defineStore('wallet', () => {
     }
   }
 
-  async function createWallet(payload: WalletCreateReq) {
+  async function createWallet(payload: WalletCreateRequest) {
     const { data } = await walletsApi.create(payload)
     wallets.value.push(data)
   }
@@ -39,5 +39,10 @@ export const useWalletStore = defineStore('wallet', () => {
     await fetchWallets({ force: true })
   }
 
-  return { wallets, loading, fetchWallets, createWallet, deleteWallet, topUp }
+  async function withdraw(payload: WithdrawRequest) {
+    await walletsApi.withdraw(payload)
+    await fetchWallets({ force: true })
+  }
+
+  return { wallets, loading, fetchWallets, createWallet, deleteWallet, topUp, withdraw }
 })

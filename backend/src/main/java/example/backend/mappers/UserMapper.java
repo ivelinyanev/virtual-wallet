@@ -1,9 +1,9 @@
 package example.backend.mappers;
 
-import example.backend.dtos.user.PublicUserDto;
-import example.backend.dtos.user.RegisterUserDto;
-import example.backend.dtos.user.PrivateUserDto;
-import example.backend.dtos.user.UpdateUserDto;
+import example.backend.dtos.user.PublicUserResponse;
+import example.backend.dtos.user.RegisterRequest;
+import example.backend.dtos.user.PrivateUserResponse;
+import example.backend.dtos.user.UpdateUserRequest;
 import example.backend.models.Role;
 import example.backend.models.User;
 import org.springframework.stereotype.Component;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Collectors;
 
 public class UserMapper {
-    public static User toUser(RegisterUserDto registerUserDto) {
+    public static User toUser(RegisterRequest registerUserDto) {
         User user = new User();
 
         user.setFirstName(registerUserDto.firstName());
@@ -28,7 +28,7 @@ public class UserMapper {
         return user;
     }
 
-    public static User toUser(UpdateUserDto updateUserDto) {
+    public static User toUser(UpdateUserRequest updateUserDto) {
         User user = new User();
 
         user.setPassword(updateUserDto.password());
@@ -39,9 +39,9 @@ public class UserMapper {
         return user;
     }
 
-    public static PrivateUserDto toPrivateUserDto(User user) {
+    public static PrivateUserResponse toPrivateUserResponse(User user) {
 
-        return new PrivateUserDto(
+        return new PrivateUserResponse(
                 user.getId(),
                 user.getFirstName(),
                 user.getLastName(),
@@ -59,8 +59,8 @@ public class UserMapper {
         );
     }
 
-    public static PublicUserDto toPublicUserDto(User user) {
-        return new PublicUserDto(
+    public static PublicUserResponse toPublicUserResponse(User user) {
+        return new PublicUserResponse(
                 user.getId(),
                 user.getUsername(),
                 user.getPhotoUrl()

@@ -1,11 +1,11 @@
 import { ref, computed } from 'vue'
 import { cardsApi } from '@/api/cards'
 import { useDialog } from '@/composables/useDialog'
-import type { PrivateCardDto } from '@/types'
+import type { CardResponse } from '@/types'
 
 export function useCards() {
   const dialog = useDialog()
-  const cards = ref<PrivateCardDto[]>([])
+  const cards = ref<CardResponse[]>([])
   const loading = ref(false)
   const showAdd = ref(false)
   const addLoading = ref(false)

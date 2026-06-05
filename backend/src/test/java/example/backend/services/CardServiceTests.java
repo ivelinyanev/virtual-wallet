@@ -1,7 +1,7 @@
 package example.backend.services;
 
-import example.backend.dtos.card.CardCreateReq;
-import example.backend.dtos.card.CardMetaData;
+import example.backend.dtos.card.CardCreateRequest;
+import example.backend.dtos.card.CardTokenizationResult;
 import example.backend.enums.CardBrand;
 import example.backend.exceptions.AuthorizationException;
 import example.backend.exceptions.CardExpiredException;
@@ -108,8 +108,8 @@ public class CardServiceTests {
 
         int futureYear = LocalDate.now().getYear() + 1;
 
-        CardCreateReq request = new CardCreateReq("4111111111111111", "John", "Doe", 1, futureYear, "123");
-        CardMetaData metaData = new CardMetaData("tok_123", "fp_123", CardBrand.VISA, "1111", 1, futureYear);
+        CardCreateRequest request = new CardCreateRequest("4111111111111111", "John", "Doe", 1, futureYear, "123");
+        CardTokenizationResult metaData = new CardTokenizationResult("tok_123", "fp_123", CardBrand.VISA, "1111", 1, futureYear);
 
         when(authUtils.getAuthenticatedUser()).thenReturn(actingUser);
         when(paymentService.tokenize(request)).thenReturn(metaData);
@@ -130,8 +130,8 @@ public class CardServiceTests {
 
         int futureYear = LocalDate.now().getYear() + 1;
 
-        CardCreateReq request = new CardCreateReq("4111111111111111", "John", "Doe", 1, futureYear, "123");
-        CardMetaData metaData = new CardMetaData("tok_123", "fp_123", CardBrand.VISA, "1111", 1, futureYear);
+        CardCreateRequest request = new CardCreateRequest("4111111111111111", "John", "Doe", 1, futureYear, "123");
+        CardTokenizationResult metaData = new CardTokenizationResult("tok_123", "fp_123", CardBrand.VISA, "1111", 1, futureYear);
 
         when(authUtils.getAuthenticatedUser()).thenReturn(actingUser);
         when(paymentService.tokenize(request)).thenReturn(metaData);
@@ -144,7 +144,7 @@ public class CardServiceTests {
     @Test
     void create_Should_Throw_When_CardIsExpired_PastYear() {
         int pastYear = LocalDate.now().getYear() - 1;
-        CardCreateReq request = new CardCreateReq("4111111111111111", "John", "Doe", 12, pastYear, "123");
+        CardCreateRequest request = new CardCreateRequest("4111111111111111", "John", "Doe", 12, pastYear, "123");
 
         assertThrows(CardExpiredException.class, () -> cardService.create(request));
         verify(paymentService, never()).tokenize(any());
@@ -159,7 +159,7 @@ public class CardServiceTests {
         // only valid if we are not in January (month 1)
         if (pastMonth < 1) return;
 
-        CardCreateReq request = new CardCreateReq("4111111111111111", "John", "Doe", pastMonth, currentYear, "123");
+        CardCreateRequest request = new CardCreateRequest("4111111111111111", "John", "Doe", pastMonth, currentYear, "123");
 
         assertThrows(CardExpiredException.class, () -> cardService.create(request));
         verify(paymentService, never()).tokenize(any());

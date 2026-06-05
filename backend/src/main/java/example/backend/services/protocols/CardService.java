@@ -1,6 +1,6 @@
 package example.backend.services.protocols;
 
-import example.backend.dtos.card.CardCreateReq;
+import example.backend.dtos.card.CardCreateRequest;
 import example.backend.models.Card;
 
 import java.util.List;
@@ -16,7 +16,7 @@ public interface CardService {
 
     Card getById(Long id);
 
-    Card create(CardCreateReq request);
+    Card create(CardCreateRequest request);
 
     void delete(Long id);
 }

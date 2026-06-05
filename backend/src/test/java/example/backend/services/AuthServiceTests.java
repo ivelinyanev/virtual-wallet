@@ -1,9 +1,9 @@
 package example.backend.services;
 
-import example.backend.dtos.user.AuthResponseDto;
-import example.backend.dtos.user.LoginUserDto;
-import example.backend.dtos.user.RegisterUserDto;
-import example.backend.dtos.user.VerifyUserDto;
+import example.backend.dtos.user.AuthResponse;
+import example.backend.dtos.user.LoginRequest;
+import example.backend.dtos.user.RegisterRequest;
+import example.backend.dtos.user.VerifyRequest;
 import example.backend.enums.ERole;
 import example.backend.models.Role;
 import example.backend.models.User;
@@ -39,8 +39,8 @@ public class AuthServiceTests {
     private AuthServiceImpl authService;
 
     @Test
-    void login_Should_ReturnAuthResponseDto_When_CredentialsAreValid() {
-        LoginUserDto dto = new LoginUserDto("test@mail.com", "password");
+    void login_Should_ReturnAuthResponse_When_CredentialsAreValid() {
+        LoginRequest dto = new LoginRequest("test@mail.com", "password");
 
         Role role = new Role();
         role.setName(ERole.ROLE_USER);
@@ -54,7 +54,7 @@ public class AuthServiceTests {
         when(passwordEncoder.matches(dto.password(), user.getPassword())).thenReturn(true);
         when(jwtUtils.generateToken(eq("testuser"), anySet())).thenReturn("jwt-token");
 
-        AuthResponseDto response = authService.login(dto);
+        AuthResponse response = authService.login(dto);
 
         assertEquals("jwt-token", response.token());
         verify(jwtUtils).generateToken(eq("testuser"), anySet());
@@ -62,7 +62,7 @@ public class AuthServiceTests {
 
     @Test
     void login_Should_ThrowBadCredentials_When_PasswordIsIncorrect() {
-        LoginUserDto dto = new LoginUserDto("test@mail.com", "wrong");
+        LoginRequest dto = new LoginRequest("test@mail.com", "wrong");
 
         User user = new User();
         user.setPassword("encodedPassword");
@@ -76,7 +76,7 @@ public class AuthServiceTests {
 
     @Test
     void register_Should_CreateUser_And_SendVerification() {
-        RegisterUserDto dto = mock(RegisterUserDto.class);
+        RegisterRequest dto = mock(RegisterRequest.class);
         User savedUser = new User();
 
         when(userService.registerUnverified(any(User.class))).thenReturn(savedUser);
@@ -89,7 +89,7 @@ public class AuthServiceTests {
 
     @Test
     void verifyAccount_Should_DelegateToVerificationService() {
-        VerifyUserDto dto = new VerifyUserDto("test@mail.com", "123456");
+        VerifyRequest dto = new VerifyRequest("test@mail.com", "123456");
 
         authService.verifyAccount(dto);
 

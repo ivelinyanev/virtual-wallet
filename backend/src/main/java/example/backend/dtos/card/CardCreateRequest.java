@@ -1,6 +1,6 @@
 package example.backend.dtos.card;
 
-public record CardCreateReq(
+public record CardCreateRequest(
         String cardNumber,
         String firstName,
         String lastName,
