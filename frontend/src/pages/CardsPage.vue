@@ -251,7 +251,7 @@ const {
   openAdd, fetchCards, confirmDelete, handleAdd,
 } = useCards()
 
-function networkIcon(_brand: string | null | undefined) {
+function networkIcon() {
   return CircleIcon
 }
 

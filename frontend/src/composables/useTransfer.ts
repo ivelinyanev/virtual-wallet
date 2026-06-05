@@ -63,8 +63,8 @@ export function useTransfer() {
       selectedRecipient.value = null
       selectedWalletName.value = ''
       amount.value = ''
-    } catch (e: any) {
-      error.value = e.response?.data?.message ?? 'Transfer failed.'
+    } catch (e) {
+      error.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message ?? 'Transfer failed.'
     } finally {
       loading.value = false
     }

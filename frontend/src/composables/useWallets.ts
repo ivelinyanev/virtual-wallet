@@ -64,8 +64,8 @@ export function useWallets() {
     if (!isConfirmed) return
     try {
       await walletStore.deleteWallet(id)
-    } catch (e: any) {
-      await dialog.error('Could not delete wallet', e.response?.data?.message)
+    } catch (e) {
+      await dialog.error('Could not delete wallet', (e as { response?: { data?: { message?: string } } }).response?.data?.message)
     }
   }
 
@@ -75,8 +75,8 @@ export function useWallets() {
     try {
       await walletStore.createWallet(createForm.value)
       showCreate.value = false
-    } catch (e: any) {
-      createError.value = e.response?.data?.message ?? 'Failed to create wallet.'
+    } catch (e) {
+      createError.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message ?? 'Failed to create wallet.'
     } finally {
       createLoading.value = false
     }
@@ -89,8 +89,8 @@ export function useWallets() {
     try {
       await walletStore.topUp({ wallet_id: topUpWallet.value.id, card_id: topUpCardId.value!, amount: topUpAmount.value })
       topUpWallet.value = null
-    } catch (e: any) {
-      topUpError.value = e.response?.data?.message ?? 'Top-up failed.'
+    } catch (e) {
+      topUpError.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message ?? 'Top-up failed.'
     } finally {
       topUpLoading.value = false
     }

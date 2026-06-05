@@ -105,8 +105,8 @@ async function handleSubmit() {
     })
     success.value = true
     setTimeout(() => router.push('/login'), 1500)
-  } catch (e: any) {
-    error.value = e.response?.data?.message ?? 'Invalid code. Please try again.'
+  } catch (e) {
+    error.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message ?? 'Invalid code. Please try again.'
   } finally {
     loading.value = false
   }
