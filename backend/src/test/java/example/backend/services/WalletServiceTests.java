@@ -224,18 +224,13 @@ public class WalletServiceTests {
     void deleteWallet_Should_Throw_When_BalanceIsPositive() {
         wallet.setBalance(new BigDecimal("50"));
 
-        Wallet second = new Wallet();
-        second.setId(20L);
-        second.setOwner(owner);
-
         when(walletRepository.findByIdAndDeletedFalse(10L)).thenReturn(Optional.of(wallet));
-        when(walletRepository.findAllByOwnerAndDeletedFalse(owner)).thenReturn(List.of(wallet, second));
 
         ImpossibleOperationException ex =
                 assertThrows(ImpossibleOperationException.class,
                         () -> walletService.deleteWallet(10L));
 
-        assertEquals(WALLET_STILL_HAS_FUNDS, ex.getMessage());
+        assertEquals(CANNOT_DELETE_WALLET_WITH_POSITIVE_BALANCE, ex.getMessage());
         verify(walletRepository, never()).delete(any());
         verify(walletRepository, never()).save(any());
     }
