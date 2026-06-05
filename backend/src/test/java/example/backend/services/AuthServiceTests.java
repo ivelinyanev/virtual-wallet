@@ -5,7 +5,6 @@ import example.backend.dtos.user.LoginUserDto;
 import example.backend.dtos.user.RegisterUserDto;
 import example.backend.dtos.user.VerifyUserDto;
 import example.backend.enums.ERole;
-import example.backend.mappers.UserMapper;
 import example.backend.models.Role;
 import example.backend.models.User;
 import example.backend.security.JwtUtils;
@@ -23,58 +22,46 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTests {
 
-    @Mock
-    private UserService userService;
-
-    @Mock
-    private VerificationService verificationService;
-
-    @Mock
-    private AuthUtils authUtils;
-
-    @Mock
-    private JwtUtils jwtUtils;
-
-    @Mock
-    private PasswordEncoder passwordEncoder;
+    @Mock private UserService userService;
+    @Mock private VerificationService verificationService;
+    @Mock private AuthUtils authUtils;
+    @Mock private JwtUtils jwtUtils;
+    @Mock private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private AuthServiceImpl authService;
 
-    //TODO: update test to check for AuthResponseDto response, not plain String token
-//    @Test
-//    void login_ShouldReturnAuthResponseDto_When_CredentialsAreValid() {
-//        LoginUserDto dto = new LoginUserDto("test@mail.com", "password");
-//
-//        Role role = new Role();
-//        role.setName(ERole.ROLE_USER);
-//
-//        User user = new User();
-//        user.setUsername("testuser");
-//        user.setPassword("password");
-//        user.setRoles(Set.of(role));
-//
-//        when(userService.getByEmail(dto.email())).thenReturn(user);
-//        when(passwordEncoder.matches(dto.password(), user.getPassword())).thenReturn(true);
-//        when(jwtUtils.generateToken(eq("testuser"), anySet())).thenReturn("jwt-token");
-//
-//        AuthResponseDto response = authService.login(dto);
-//
-//        assertEquals("jwt-token", token);
-//        verify(jwtUtils).generateToken(eq("testuser"), anySet());
-//    }
+    @Test
+    void login_Should_ReturnAuthResponseDto_When_CredentialsAreValid() {
+        LoginUserDto dto = new LoginUserDto("test@mail.com", "password");
+
+        Role role = new Role();
+        role.setName(ERole.ROLE_USER);
+
+        User user = new User();
+        user.setUsername("testuser");
+        user.setPassword("encodedPassword");
+        user.setRoles(Set.of(role));
+
+        when(userService.getByEmail(dto.email())).thenReturn(user);
+        when(passwordEncoder.matches(dto.password(), user.getPassword())).thenReturn(true);
+        when(jwtUtils.generateToken(eq("testuser"), anySet())).thenReturn("jwt-token");
+
+        AuthResponseDto response = authService.login(dto);
+
+        assertEquals("jwt-token", response.token());
+        verify(jwtUtils).generateToken(eq("testuser"), anySet());
+    }
 
     @Test
-    void login_ShouldThrowException_When_PasswordIsIncorrect() {
+    void login_Should_ThrowBadCredentials_When_PasswordIsIncorrect() {
         LoginUserDto dto = new LoginUserDto("test@mail.com", "wrong");
 
         User user = new User();
@@ -88,39 +75,33 @@ public class AuthServiceTests {
     }
 
     @Test
-    void register_ShouldCreateUser_And_SendVerification() {
+    void register_Should_CreateUser_And_SendVerification() {
         RegisterUserDto dto = mock(RegisterUserDto.class);
         User savedUser = new User();
 
-        when(userService.registerUnverified(any(User.class)))
-                .thenReturn(savedUser);
+        when(userService.registerUnverified(any(User.class))).thenReturn(savedUser);
 
         authService.register(dto);
 
-        // verify user was registered
         verify(userService).registerUnverified(any(User.class));
-
-        // verify verification email was sent
-        verify(verificationService)
-                .createAndSendVerification(savedUser);
+        verify(verificationService).createAndSendVerification(savedUser);
     }
 
     @Test
-    void verifyAccount_Should_CallVerificationService() {
-        VerifyUserDto dto = new VerifyUserDto("test@mail.com", "password");
+    void verifyAccount_Should_DelegateToVerificationService() {
+        VerifyUserDto dto = new VerifyUserDto("test@mail.com", "123456");
 
         authService.verifyAccount(dto);
 
-        verify(verificationService).verify(dto.email(), dto.code());
+        verify(verificationService).verify(dto.email(), dto.verificationCode());
     }
 
     @Test
     void getMe_Should_ReturnAuthenticatedUser() {
         User user = new User();
-
         when(authUtils.getAuthenticatedUser()).thenReturn(user);
 
-        User result= authService.getMe();
+        User result = authService.getMe();
 
         assertEquals(user, result);
     }
