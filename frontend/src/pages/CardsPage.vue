@@ -46,7 +46,7 @@
         <!-- Top row: brand + network logo -->
         <div class="card-top">
           <span class="card-brand">{{ card.card_brand }}</span>
-          <component :is="networkIcon(card.card_brand)" :size="36" class="network-icon" />
+          <component :is="networkIcon()" :size="36" class="network-icon" />
         </div>
 
         <!-- Chip + number -->
