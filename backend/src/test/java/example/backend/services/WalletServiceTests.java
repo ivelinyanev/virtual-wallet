@@ -74,7 +74,7 @@ public class WalletServiceTests {
 
     @Test
     void getMyWallets_Should_ReturnOwnersWallets() {
-        when(walletRepository.findAllByOwner(owner)).thenReturn(List.of(wallet));
+        when(walletRepository.findAllByOwnerAndDeletedFalse(owner)).thenReturn(List.of(wallet));
 
         List<Wallet> result = walletService.getMyWallets();
 
@@ -86,7 +86,7 @@ public class WalletServiceTests {
 
     @Test
     void getWalletById_Should_ReturnWallet_When_OwnerRequests() {
-        when(walletRepository.findById(10L)).thenReturn(Optional.of(wallet));
+        when(walletRepository.findByIdAndDeletedFalse(10L)).thenReturn(Optional.of(wallet));
 
         Wallet result = walletService.getWalletById(10L);
 
@@ -95,7 +95,7 @@ public class WalletServiceTests {
 
     @Test
     void getWalletById_Should_Throw_When_NotFound() {
-        when(walletRepository.findById(99L)).thenReturn(Optional.empty());
+        when(walletRepository.findByIdAndDeletedFalse(99L)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> walletService.getWalletById(99L));
     }
@@ -106,7 +106,7 @@ public class WalletServiceTests {
         other.setUsername("other");
         wallet.setOwner(other);
 
-        when(walletRepository.findById(10L)).thenReturn(Optional.of(wallet));
+        when(walletRepository.findByIdAndDeletedFalse(10L)).thenReturn(Optional.of(wallet));
 
         assertThrows(AuthorizationException.class, () -> walletService.getWalletById(10L));
     }
@@ -118,7 +118,7 @@ public class WalletServiceTests {
         Wallet newWallet = new Wallet();
         newWallet.setCurrency(Currency.USD);
 
-        when(walletRepository.existsByCurrencyAndOwner(Currency.USD, owner)).thenReturn(false);
+        when(walletRepository.existsByCurrencyAndOwnerAndDeletedFalse(Currency.USD, owner)).thenReturn(false);
         when(walletRepository.save(newWallet)).thenReturn(newWallet);
 
         Wallet result = walletService.createWallet(newWallet);
@@ -132,7 +132,7 @@ public class WalletServiceTests {
         Wallet newWallet = new Wallet();
         // currency left null
 
-        when(walletRepository.existsByCurrencyAndOwner(Currency.EUR, owner)).thenReturn(false);
+        when(walletRepository.existsByCurrencyAndOwnerAndDeletedFalse(Currency.EUR, owner)).thenReturn(false);
         when(walletRepository.save(newWallet)).thenReturn(newWallet);
 
         walletService.createWallet(newWallet);
@@ -145,7 +145,7 @@ public class WalletServiceTests {
         Wallet newWallet = new Wallet();
         newWallet.setCurrency(Currency.EUR);
 
-        when(walletRepository.existsByCurrencyAndOwner(Currency.EUR, owner)).thenReturn(true);
+        when(walletRepository.existsByCurrencyAndOwnerAndDeletedFalse(Currency.EUR, owner)).thenReturn(true);
 
         ImpossibleOperationException ex =
                 assertThrows(ImpossibleOperationException.class,
@@ -170,23 +170,25 @@ public class WalletServiceTests {
     // ───────────────────────── deleteWallet ─────────────────────────
 
     @Test
-    void deleteWallet_Should_Delete_When_Valid() {
+    void deleteWallet_Should_SoftDelete_When_Valid() {
         Wallet second = new Wallet();
         second.setId(20L);
         second.setOwner(owner);
         second.setBalance(BigDecimal.ZERO);
 
-        when(walletRepository.findById(10L)).thenReturn(Optional.of(wallet));
-        when(walletRepository.findAllByOwner(owner)).thenReturn(List.of(wallet, second));
+        when(walletRepository.findByIdAndDeletedFalse(10L)).thenReturn(Optional.of(wallet));
+        when(walletRepository.findAllByOwnerAndDeletedFalse(owner)).thenReturn(List.of(wallet, second));
 
         walletService.deleteWallet(10L);
 
-        verify(walletRepository).delete(wallet);
+        assertTrue(wallet.isDeleted());
+        verify(walletRepository).save(wallet);
+        verify(walletRepository, never()).delete(any());
     }
 
     @Test
     void deleteWallet_Should_Throw_When_NotFound() {
-        when(walletRepository.findById(99L)).thenReturn(Optional.empty());
+        when(walletRepository.findByIdAndDeletedFalse(99L)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> walletService.deleteWallet(99L));
     }
@@ -197,16 +199,17 @@ public class WalletServiceTests {
         other.setUsername("other");
         wallet.setOwner(other);
 
-        when(walletRepository.findById(10L)).thenReturn(Optional.of(wallet));
+        when(walletRepository.findByIdAndDeletedFalse(10L)).thenReturn(Optional.of(wallet));
 
         assertThrows(AuthorizationException.class, () -> walletService.deleteWallet(10L));
         verify(walletRepository, never()).delete(any());
+        verify(walletRepository, never()).save(any());
     }
 
     @Test
     void deleteWallet_Should_Throw_When_LastWallet() {
-        when(walletRepository.findById(10L)).thenReturn(Optional.of(wallet));
-        when(walletRepository.findAllByOwner(owner)).thenReturn(List.of(wallet)); // only one
+        when(walletRepository.findByIdAndDeletedFalse(10L)).thenReturn(Optional.of(wallet));
+        when(walletRepository.findAllByOwnerAndDeletedFalse(owner)).thenReturn(List.of(wallet)); // only one
 
         ImpossibleOperationException ex =
                 assertThrows(ImpossibleOperationException.class,
@@ -214,6 +217,7 @@ public class WalletServiceTests {
 
         assertEquals(CANNOT_DELETE_LAST_WALLET, ex.getMessage());
         verify(walletRepository, never()).delete(any());
+        verify(walletRepository, never()).save(any());
     }
 
     @Test
@@ -224,8 +228,8 @@ public class WalletServiceTests {
         second.setId(20L);
         second.setOwner(owner);
 
-        when(walletRepository.findById(10L)).thenReturn(Optional.of(wallet));
-        when(walletRepository.findAllByOwner(owner)).thenReturn(List.of(wallet, second));
+        when(walletRepository.findByIdAndDeletedFalse(10L)).thenReturn(Optional.of(wallet));
+        when(walletRepository.findAllByOwnerAndDeletedFalse(owner)).thenReturn(List.of(wallet, second));
 
         ImpossibleOperationException ex =
                 assertThrows(ImpossibleOperationException.class,
@@ -233,6 +237,7 @@ public class WalletServiceTests {
 
         assertEquals(WALLET_STILL_HAS_FUNDS, ex.getMessage());
         verify(walletRepository, never()).delete(any());
+        verify(walletRepository, never()).save(any());
     }
 
     // ───────────────────────── topUp ─────────────────────────

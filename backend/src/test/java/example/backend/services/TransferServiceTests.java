@@ -84,7 +84,7 @@ public class TransferServiceTests {
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(userService.getByUsername("toUser")).thenReturn(toUser);
-        when(walletRepository.findByOwnerAndCurrency(toUser, Currency.EUR))
+        when(walletRepository.findByOwnerAndCurrencyAndDeletedFalse(toUser, Currency.EUR))
                 .thenReturn(Optional.of(toWallet));
 
         transferService.transfer(req);
@@ -99,7 +99,7 @@ public class TransferServiceTests {
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(userService.getByUsername("toUser")).thenReturn(toUser);
-        when(walletRepository.findByOwnerAndCurrency(toUser, Currency.EUR))
+        when(walletRepository.findByOwnerAndCurrencyAndDeletedFalse(toUser, Currency.EUR))
                 .thenReturn(Optional.of(toWallet));
 
         ImpossibleOperationException ex =
@@ -114,7 +114,7 @@ public class TransferServiceTests {
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(userService.getByUsername("toUser")).thenReturn(toUser);
-        when(walletRepository.findByOwnerAndCurrency(toUser, Currency.EUR))
+        when(walletRepository.findByOwnerAndCurrencyAndDeletedFalse(toUser, Currency.EUR))
                 .thenReturn(Optional.of(toWallet));
 
         ImpossibleOperationException ex =
@@ -133,7 +133,7 @@ public class TransferServiceTests {
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(userService.getByUsername("toUser")).thenReturn(toUser);
-        when(walletRepository.findByOwnerAndCurrency(toUser, Currency.EUR))
+        when(walletRepository.findByOwnerAndCurrencyAndDeletedFalse(toUser, Currency.EUR))
                 .thenReturn(Optional.of(toSameWallet));
 
         ImpossibleOperationException ex =
@@ -148,7 +148,7 @@ public class TransferServiceTests {
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(userService.getByUsername("toUser")).thenReturn(toUser);
-        when(walletRepository.findByOwnerAndCurrency(toUser, Currency.EUR))
+        when(walletRepository.findByOwnerAndCurrencyAndDeletedFalse(toUser, Currency.EUR))
                 .thenReturn(Optional.of(toWallet));
 
         ImpossibleOperationException ex =
@@ -193,8 +193,8 @@ public class TransferServiceTests {
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(userService.getByUsername("toUser")).thenReturn(toUser);
-        when(walletRepository.findByOwnerAndCurrency(toUser, Currency.EUR)).thenReturn(Optional.empty());
-        when(walletRepository.findAllByOwner(toUser)).thenReturn(List.of());
+        when(walletRepository.findByOwnerAndCurrencyAndDeletedFalse(toUser, Currency.EUR)).thenReturn(Optional.empty());
+        when(walletRepository.findAllByOwnerAndDeletedFalse(toUser)).thenReturn(List.of());
 
         ImpossibleOperationException ex =
                 assertThrows(ImpossibleOperationException.class, () -> transferService.transfer(req));
@@ -212,8 +212,8 @@ public class TransferServiceTests {
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(userService.getByUsername("toUser")).thenReturn(toUser);
         // source currency is USD — no exact match, fall back to findAllByOwner
-        when(walletRepository.findByOwnerAndCurrency(toUser, Currency.USD)).thenReturn(Optional.empty());
-        when(walletRepository.findAllByOwner(toUser)).thenReturn(List.of(toWallet));
+        when(walletRepository.findByOwnerAndCurrencyAndDeletedFalse(toUser, Currency.USD)).thenReturn(Optional.empty());
+        when(walletRepository.findAllByOwnerAndDeletedFalse(toUser)).thenReturn(List.of(toWallet));
         when(conversionService.convert(Currency.USD, Currency.EUR, BigDecimal.TEN))
                 .thenReturn(new BigDecimal("9"));
 
