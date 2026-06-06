@@ -48,6 +48,9 @@ public class Card {
     @Transient
     private String cvv;
 
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User cardHolder;

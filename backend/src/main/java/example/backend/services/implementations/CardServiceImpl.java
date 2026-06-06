@@ -42,7 +42,7 @@ public class CardServiceImpl implements CardService {
     public List<Card> getMyCards() {
         User actingUser = authUtils.getAuthenticatedUser();
 
-        return cardRepository.findAllByCardHolder(actingUser);
+        return cardRepository.findAllByCardHolderAndDeletedFalse(actingUser);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class CardServiceImpl implements CardService {
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('ADMIN')")
     public List<Card> getCardsByUserId(Long userId) {
-        return cardRepository.findAllByCardHolderId(userId);
+        return cardRepository.findAllByCardHolderIdAndDeletedFalse(userId);
     }
 
     @Override
@@ -89,14 +89,15 @@ public class CardServiceImpl implements CardService {
     public void delete(Long cardId) {
         User actingUser = authUtils.getAuthenticatedUser();
 
-        Card card = cardRepository.findById(cardId)
+        Card card = cardRepository.findByIdAndDeletedFalse(cardId)
                 .orElseThrow(() -> new EntityNotFoundException("Card", "id", String.valueOf(cardId)));
 
         if (!actingUser.equals(card.getCardHolder())) {
             throw new AuthorizationException(NOT_ALLOWED_TO_DELETE_CARD);
         }
 
-        cardRepository.delete(card);
+        card.setDeleted(true);
+        cardRepository.save(card);
     }
 
     private void checkCardExpired(int expirationMonth, int expirationYear) {
