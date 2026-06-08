@@ -27,4 +27,3 @@ backend/src/main/resources/application-local.properties
 .DS_Store
 CLAUDE.md
 .env
-docs/architecture-review.md
