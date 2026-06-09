@@ -7,8 +7,8 @@ import example.backend.exceptions.ImpossibleOperationException;
 import example.backend.models.Transaction;
 import example.backend.models.User;
 import example.backend.repositories.TransactionRepository;
+import example.backend.services.protocols.AuthorizationService;
 import example.backend.services.protocols.TransactionService;
-import example.backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +25,7 @@ import static example.backend.utils.StringConstants.YOU_DO_NOT_OWN_THAT_TRANSACT
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
-    private final AuthUtils authUtils;
+    private final AuthorizationService authorizationService;
 
     @Override
     @Transactional(readOnly = true)
@@ -43,7 +43,7 @@ public class TransactionServiceImpl implements TransactionService {
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public Page<Transaction> getMyTransactions(TransactionFilterRequest request, Pageable pageable) {
-        User actingUser = authUtils.getAuthenticatedUser();
+        User actingUser = authorizationService.currentUser();
 
         Specification<Transaction> spec = buildSpec(actingUser, request);
 
@@ -55,7 +55,7 @@ public class TransactionServiceImpl implements TransactionService {
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public Transaction getMyTransactionById(Long id) {
-        User actingUser = authUtils.getAuthenticatedUser();
+        User actingUser = authorizationService.currentUser();
 
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Transaction", "id", String.valueOf(id)));

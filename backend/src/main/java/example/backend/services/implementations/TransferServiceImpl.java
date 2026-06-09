@@ -11,10 +11,10 @@ import example.backend.exceptions.ImpossibleOperationException;
 import example.backend.models.User;
 import example.backend.models.Wallet;
 import example.backend.repositories.WalletRepository;
+import example.backend.services.protocols.AuthorizationService;
 import example.backend.services.protocols.ConversionService;
 import example.backend.services.protocols.LedgerService;
 import example.backend.services.protocols.TransferService;
-import example.backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -33,7 +33,7 @@ public class TransferServiceImpl implements TransferService {
     private final LedgerService ledger;
     private final ConversionService conversionService;
     private final UserServiceImpl userService;
-    private final AuthUtils authUtils;
+    private final AuthorizationService authorizationService;
 
     @Override
     @Transactional
@@ -103,12 +103,8 @@ public class TransferServiceImpl implements TransferService {
         validateSufficientAmount(from, amount);
     }
 
-    private void validateWalletOwner(Wallet from) {
-        User user = authUtils.getAuthenticatedUser();
-
-        if (!from.getOwner().equals(user)) {
-            throw new ImpossibleOperationException(YOU_ARE_NOT_THE_WALLET_OWNER);
-        }
+    private void validateWalletOwner(Wallet wallet) {
+        authorizationService.assertOwnsWallet(wallet);
     }
 
     private Wallet findSuitableWallet(User toUser, Currency currency) {

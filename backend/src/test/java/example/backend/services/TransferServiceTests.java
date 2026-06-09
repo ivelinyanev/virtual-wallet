@@ -4,6 +4,7 @@ import example.backend.dtos.transfer.OwnWalletTransferRequest;
 import example.backend.dtos.transfer.TransferRequest;
 import example.backend.enums.Currency;
 import example.backend.exceptions.AccountNotVerifiedException;
+import example.backend.exceptions.AuthorizationException;
 import example.backend.exceptions.EntityNotFoundException;
 import example.backend.exceptions.ImpossibleOperationException;
 import example.backend.models.User;
@@ -11,9 +12,9 @@ import example.backend.models.Wallet;
 import example.backend.repositories.WalletRepository;
 import example.backend.services.implementations.TransferServiceImpl;
 import example.backend.services.implementations.UserServiceImpl;
+import example.backend.services.protocols.AuthorizationService;
 import example.backend.services.protocols.ConversionService;
 import example.backend.services.protocols.LedgerService;
-import example.backend.utils.AuthUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +40,7 @@ public class TransferServiceTests {
     @Mock private LedgerService ledger;
     @Mock private ConversionService conversionService;
     @Mock private UserServiceImpl userService;
-    @Mock private AuthUtils authUtils;
+    @Mock private AuthorizationService authorizationService;
 
     @InjectMocks
     private TransferServiceImpl transferService;
@@ -73,7 +74,6 @@ public class TransferServiceTests {
         toWallet.setCurrency(Currency.EUR);
         toWallet.setBalance(new BigDecimal("500"));
 
-        when(authUtils.getAuthenticatedUser()).thenReturn(fromUser);
     }
 
     // ───────────────────────── transfer (user-to-user) ─────────────────────────
@@ -176,14 +176,12 @@ public class TransferServiceTests {
     void transfer_Should_Throw_When_NotWalletOwner() {
         TransferRequest req = new TransferRequest(10L, "toUser", BigDecimal.TEN);
 
-        User otherUser = new User();
-        otherUser.setUsername("other");
-        fromWallet.setOwner(otherUser);
-
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
+        doThrow(new AuthorizationException(YOU_ARE_NOT_THE_WALLET_OWNER))
+                .when(authorizationService).assertOwnsWallet(fromWallet);
 
-        ImpossibleOperationException ex =
-                assertThrows(ImpossibleOperationException.class, () -> transferService.transfer(req));
+        AuthorizationException ex =
+                assertThrows(AuthorizationException.class, () -> transferService.transfer(req));
 
         assertEquals(YOU_ARE_NOT_THE_WALLET_OWNER, ex.getMessage());
     }
@@ -310,17 +308,15 @@ public class TransferServiceTests {
         ownWallet.setOwner(fromUser);
         ownWallet.setCurrency(Currency.EUR);
 
-        User other = new User();
-        other.setUsername("other");
-        fromWallet.setOwner(other);
-
         OwnWalletTransferRequest req = new OwnWalletTransferRequest(10L, 30L, BigDecimal.TEN);
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(walletRepository.findByIdForUpdate(30L)).thenReturn(ownWallet);
+        doThrow(new AuthorizationException(YOU_ARE_NOT_THE_WALLET_OWNER))
+                .when(authorizationService).assertOwnsWallet(fromWallet);
 
-        ImpossibleOperationException ex =
-                assertThrows(ImpossibleOperationException.class,
+        AuthorizationException ex =
+                assertThrows(AuthorizationException.class,
                         () -> transferService.internalTransfer(req));
 
         assertEquals(YOU_ARE_NOT_THE_WALLET_OWNER, ex.getMessage());
@@ -330,16 +326,18 @@ public class TransferServiceTests {
     void internalTransfer_Should_Throw_When_ToWalletNotOwnedByUser() {
         Wallet otherWallet = new Wallet();
         otherWallet.setId(30L);
-        otherWallet.setOwner(toUser);  // different owner
+        otherWallet.setOwner(toUser);
         otherWallet.setCurrency(Currency.EUR);
 
         OwnWalletTransferRequest req = new OwnWalletTransferRequest(10L, 30L, BigDecimal.TEN);
 
         when(walletRepository.findByIdForUpdate(10L)).thenReturn(fromWallet);
         when(walletRepository.findByIdForUpdate(30L)).thenReturn(otherWallet);
+        doThrow(new AuthorizationException(YOU_ARE_NOT_THE_WALLET_OWNER))
+                .when(authorizationService).assertOwnsWallet(otherWallet);
 
-        ImpossibleOperationException ex =
-                assertThrows(ImpossibleOperationException.class,
+        AuthorizationException ex =
+                assertThrows(AuthorizationException.class,
                         () -> transferService.internalTransfer(req));
 
         assertEquals(YOU_ARE_NOT_THE_WALLET_OWNER, ex.getMessage());

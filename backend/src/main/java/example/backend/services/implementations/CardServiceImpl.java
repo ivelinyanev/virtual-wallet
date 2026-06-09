@@ -3,7 +3,6 @@ package example.backend.services.implementations;
 import example.backend.annotations.RequiresVerifiedAccount;
 import example.backend.dtos.card.CardCreateRequest;
 import example.backend.dtos.card.CardTokenizationResult;
-import example.backend.exceptions.AuthorizationException;
 import example.backend.exceptions.CardExpiredException;
 import example.backend.exceptions.DuplicateException;
 import example.backend.exceptions.EntityNotFoundException;
@@ -11,9 +10,9 @@ import example.backend.mappers.CardMapper;
 import example.backend.models.Card;
 import example.backend.models.User;
 import example.backend.repositories.CardRepository;
+import example.backend.services.protocols.AuthorizationService;
 import example.backend.services.protocols.CardService;
 import example.backend.services.protocols.PaymentService;
-import example.backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -25,7 +24,6 @@ import java.util.Date;
 import java.util.List;
 
 import static example.backend.utils.StringConstants.CARD_ALREADY_ADDED;
-import static example.backend.utils.StringConstants.NOT_ALLOWED_TO_DELETE_CARD;
 
 @Service
 @RequiredArgsConstructor
@@ -33,14 +31,14 @@ public class CardServiceImpl implements CardService {
 
     private final CardRepository cardRepository;
     private final PaymentService paymentService;
-    private final AuthUtils authUtils;
+    private final AuthorizationService authorizationService;
 
     @Override
     @Transactional(readOnly = true)
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public List<Card> getMyCards() {
-        User actingUser = authUtils.getAuthenticatedUser();
+        User actingUser = authorizationService.currentUser();
 
         return cardRepository.findAllByCardHolderAndDeletedFalse(actingUser);
     }
@@ -69,7 +67,7 @@ public class CardServiceImpl implements CardService {
     public Card create(CardCreateRequest request) {
         checkCardExpired(request.expMonth(), request.expYear());
 
-        User actingUser = authUtils.getAuthenticatedUser();
+        User actingUser = authorizationService.currentUser();
         CardTokenizationResult metaData = paymentService.tokenize(request);
 
         if (cardRepository.existsByFingerprintAndCardHolderAndDeletedFalse(metaData.fingerprint(), actingUser)) {
@@ -87,14 +85,10 @@ public class CardServiceImpl implements CardService {
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public void delete(Long cardId) {
-        User actingUser = authUtils.getAuthenticatedUser();
-
         Card card = cardRepository.findByIdAndDeletedFalse(cardId)
                 .orElseThrow(() -> new EntityNotFoundException("Card", "id", String.valueOf(cardId)));
 
-        if (!actingUser.equals(card.getCardHolder())) {
-            throw new AuthorizationException(NOT_ALLOWED_TO_DELETE_CARD);
-        }
+        authorizationService.assertOwnsCard(card);
 
         card.setDeleted(true);
         cardRepository.save(card);

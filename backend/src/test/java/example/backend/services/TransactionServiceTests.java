@@ -8,7 +8,7 @@ import example.backend.models.User;
 import example.backend.models.Wallet;
 import example.backend.repositories.TransactionRepository;
 import example.backend.services.implementations.TransactionServiceImpl;
-import example.backend.utils.AuthUtils;
+import example.backend.services.protocols.AuthorizationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 public class TransactionServiceTests {
 
     @Mock private TransactionRepository transactionRepository;
-    @Mock private AuthUtils authUtils;
+    @Mock private AuthorizationService authorizationService;
 
     @InjectMocks
     private TransactionServiceImpl transactionService;
@@ -70,7 +70,7 @@ public class TransactionServiceTests {
 
     @Test
     void getMyTransactions_Should_ReturnTransactionsForAuthenticatedUser() {
-        when(authUtils.getAuthenticatedUser()).thenReturn(owner);
+        when(authorizationService.currentUser()).thenReturn(owner);
 
         Transaction t1 = new Transaction();
         Transaction t2 = new Transaction();
@@ -91,7 +91,7 @@ public class TransactionServiceTests {
 
     @Test
     void getMyTransactionById_Should_ReturnTransaction_When_OwnerRequests() {
-        when(authUtils.getAuthenticatedUser()).thenReturn(owner);
+        when(authorizationService.currentUser()).thenReturn(owner);
 
         Transaction transaction = new Transaction();
         transaction.setId(1L);
@@ -117,7 +117,7 @@ public class TransactionServiceTests {
         User otherUser = new User();
         otherUser.setUsername("other");
 
-        when(authUtils.getAuthenticatedUser()).thenReturn(otherUser);
+        when(authorizationService.currentUser()).thenReturn(otherUser);
 
         Transaction transaction = new Transaction();
         transaction.setId(1L);
