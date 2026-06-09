@@ -11,8 +11,8 @@ import example.backend.models.Card;
 import example.backend.models.User;
 import example.backend.repositories.CardRepository;
 import example.backend.services.implementations.CardServiceImpl;
+import example.backend.services.protocols.AuthorizationService;
 import example.backend.services.protocols.PaymentService;
-import example.backend.utils.AuthUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,7 +33,7 @@ public class CardServiceTests {
 
     @Mock private CardRepository cardRepository;
     @Mock private PaymentService paymentService;
-    @Mock private AuthUtils authUtils;
+    @Mock private AuthorizationService authorizationService;
 
     @InjectMocks
     private CardServiceImpl cardService;
@@ -45,7 +45,7 @@ public class CardServiceTests {
         User user = new User();
         List<Card> cards = List.of(new Card(), new Card());
 
-        when(authUtils.getAuthenticatedUser()).thenReturn(user);
+        when(authorizationService.currentUser()).thenReturn(user);
         when(cardRepository.findAllByCardHolderAndDeletedFalse(user)).thenReturn(cards);
 
         List<Card> result = cardService.getMyCards();
@@ -111,7 +111,7 @@ public class CardServiceTests {
         CardCreateRequest request = new CardCreateRequest("4111111111111111", "John", "Doe", 1, futureYear, "123");
         CardTokenizationResult metaData = new CardTokenizationResult("tok_123", "fp_123", CardBrand.VISA, "1111", 1, futureYear);
 
-        when(authUtils.getAuthenticatedUser()).thenReturn(actingUser);
+        when(authorizationService.currentUser()).thenReturn(actingUser);
         when(paymentService.tokenize(request)).thenReturn(metaData);
         when(cardRepository.existsByFingerprintAndCardHolderAndDeletedFalse("fp_123", actingUser)).thenReturn(false);
         when(cardRepository.save(any(Card.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -133,7 +133,7 @@ public class CardServiceTests {
         CardCreateRequest request = new CardCreateRequest("4111111111111111", "John", "Doe", 1, futureYear, "123");
         CardTokenizationResult metaData = new CardTokenizationResult("tok_123", "fp_123", CardBrand.VISA, "1111", 1, futureYear);
 
-        when(authUtils.getAuthenticatedUser()).thenReturn(actingUser);
+        when(authorizationService.currentUser()).thenReturn(actingUser);
         when(paymentService.tokenize(request)).thenReturn(metaData);
         when(cardRepository.existsByFingerprintAndCardHolderAndDeletedFalse("fp_123", actingUser)).thenReturn(true);
 
@@ -169,14 +169,9 @@ public class CardServiceTests {
 
     @Test
     void delete_Should_DeleteCard_When_UserIsOwner() {
-        User actingUser = new User();
-        actingUser.setUsername("testUser");
-
         Card card = new Card();
         card.setId(5L);
-        card.setCardHolder(actingUser);
 
-        when(authUtils.getAuthenticatedUser()).thenReturn(actingUser);
         when(cardRepository.findByIdAndDeletedFalse(5L)).thenReturn(Optional.of(card));
 
         cardService.delete(5L);
@@ -188,18 +183,12 @@ public class CardServiceTests {
 
     @Test
     void delete_Should_Throw_When_UserIsNotOwner() {
-        User actingUser = new User();
-        actingUser.setUsername("actingUser");
-
-        User owner = new User();
-        owner.setUsername("owner");
-
         Card card = new Card();
         card.setId(5L);
-        card.setCardHolder(owner);
 
-        when(authUtils.getAuthenticatedUser()).thenReturn(actingUser);
         when(cardRepository.findByIdAndDeletedFalse(5L)).thenReturn(Optional.of(card));
+        doThrow(new AuthorizationException("not allowed"))
+                .when(authorizationService).assertOwnsCard(card);
 
         assertThrows(AuthorizationException.class, () -> cardService.delete(5L));
         verify(cardRepository, never()).delete(any());
@@ -208,7 +197,6 @@ public class CardServiceTests {
 
     @Test
     void delete_Should_Throw_When_CardNotFound() {
-        when(authUtils.getAuthenticatedUser()).thenReturn(new User());
         when(cardRepository.findByIdAndDeletedFalse(99L)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> cardService.delete(99L));

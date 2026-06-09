@@ -13,9 +13,9 @@ import example.backend.models.Wallet;
 import example.backend.repositories.CardRepository;
 import example.backend.repositories.WalletRepository;
 import example.backend.services.implementations.WalletServiceImpl;
+import example.backend.services.protocols.AuthorizationService;
 import example.backend.services.protocols.LedgerService;
 import example.backend.services.protocols.PaymentService;
-import example.backend.utils.AuthUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +39,7 @@ import static org.mockito.Mockito.*;
 public class WalletServiceTests {
 
     @Mock private WalletRepository walletRepository;
-    @Mock private AuthUtils authUtils;
+    @Mock private AuthorizationService authorizationService;
     @Mock private PaymentService paymentService;
     @Mock private LedgerService ledger;
     @Mock private CardRepository cardRepository;
@@ -67,7 +67,7 @@ public class WalletServiceTests {
         card.setId(5L);
         card.setToken("tok_test");
 
-        when(authUtils.getAuthenticatedUser()).thenReturn(owner);
+        when(authorizationService.currentUser()).thenReturn(owner);
     }
 
     // ───────────────────────── getMyWallets ─────────────────────────

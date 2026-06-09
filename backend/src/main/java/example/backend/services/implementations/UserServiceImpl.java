@@ -9,8 +9,8 @@ import example.backend.models.Role;
 import example.backend.models.User;
 import example.backend.repositories.RoleRepository;
 import example.backend.repositories.UserRepository;
+import example.backend.services.protocols.AuthorizationService;
 import example.backend.services.protocols.UserService;
-import example.backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthUtils authUtils;
+    private final AuthorizationService authorizationService;
 
     @Override
     @Transactional(readOnly = true)
@@ -122,7 +122,7 @@ public class UserServiceImpl implements UserService {
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public User edit(User user) {
-        User actingUser = authUtils.getAuthenticatedUser();
+        User actingUser = authorizationService.currentUser();
 
         validateEmailAndPhoneUniqueness(actingUser, user.getEmail(), user.getPhoneNumber());
 
@@ -138,7 +138,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @PreAuthorize("hasRole('USER')")
     public void delete() {
-        User actingUser = authUtils.getAuthenticatedUser();
+        User actingUser = authorizationService.currentUser();
 
         userRepository.delete(actingUser);
     }

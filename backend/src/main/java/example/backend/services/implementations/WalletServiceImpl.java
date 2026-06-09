@@ -10,10 +10,10 @@ import example.backend.models.User;
 import example.backend.models.Wallet;
 import example.backend.repositories.CardRepository;
 import example.backend.repositories.WalletRepository;
+import example.backend.services.protocols.AuthorizationService;
 import example.backend.services.protocols.LedgerService;
 import example.backend.services.protocols.PaymentService;
 import example.backend.services.protocols.WalletService;
-import example.backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ import static example.backend.utils.StringConstants.*;
 public class WalletServiceImpl implements WalletService {
 
     private final WalletRepository walletRepository;
-    private final AuthUtils authUtils;
+    private final AuthorizationService authorizationService;
     private final PaymentService paymentService;
     private final LedgerService ledger;
     private final CardRepository cardRepository;
@@ -39,7 +39,7 @@ public class WalletServiceImpl implements WalletService {
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public List<Wallet> getMyWallets() {
-        User actingUser = authUtils.getAuthenticatedUser();
+        User actingUser = authorizationService.currentUser();
 
         return walletRepository.findAllByOwnerAndDeletedFalse(actingUser);
     }
@@ -64,7 +64,7 @@ public class WalletServiceImpl implements WalletService {
     @RequiresVerifiedAccount
     @PreAuthorize("hasRole('USER')")
     public Wallet createWallet(Wallet wallet) {
-        User actingUser = authUtils.getAuthenticatedUser();
+        User actingUser = authorizationService.currentUser();
 
         wallet.setOwner(actingUser);
 
@@ -186,7 +186,7 @@ public class WalletServiceImpl implements WalletService {
     }
 
     private boolean isOwner(Wallet wallet) {
-        return wallet.getOwner().equals(authUtils.getAuthenticatedUser());
+        return wallet.getOwner().equals(authorizationService.currentUser());
     }
 
     private void enforceOneWalletPerCurrencyForOwner(Currency currency, User owner) {

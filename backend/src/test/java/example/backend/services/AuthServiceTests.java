@@ -9,9 +9,9 @@ import example.backend.models.Role;
 import example.backend.models.User;
 import example.backend.security.JwtUtils;
 import example.backend.services.implementations.AuthServiceImpl;
+import example.backend.services.protocols.AuthorizationService;
 import example.backend.services.protocols.UserService;
 import example.backend.services.protocols.VerificationService;
-import example.backend.utils.AuthUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,7 +31,7 @@ public class AuthServiceTests {
 
     @Mock private UserService userService;
     @Mock private VerificationService verificationService;
-    @Mock private AuthUtils authUtils;
+    @Mock private AuthorizationService authorizationService;
     @Mock private JwtUtils jwtUtils;
     @Mock private PasswordEncoder passwordEncoder;
 
@@ -99,7 +99,7 @@ public class AuthServiceTests {
     @Test
     void getMe_Should_ReturnAuthenticatedUser() {
         User user = new User();
-        when(authUtils.getAuthenticatedUser()).thenReturn(user);
+        when(authorizationService.currentUser()).thenReturn(user);
 
         User result = authService.getMe();
 

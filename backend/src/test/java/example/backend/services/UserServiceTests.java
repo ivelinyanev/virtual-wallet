@@ -8,7 +8,7 @@ import example.backend.models.User;
 import example.backend.repositories.RoleRepository;
 import example.backend.repositories.UserRepository;
 import example.backend.services.implementations.UserServiceImpl;
-import example.backend.utils.AuthUtils;
+import example.backend.services.protocols.AuthorizationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +34,7 @@ public class UserServiceTests {
     @Mock private UserRepository userRepository;
     @Mock private RoleRepository roleRepository;
     @Mock private PasswordEncoder passwordEncoder;
-    @Mock private AuthUtils authUtils;
+    @Mock private AuthorizationService authorizationService;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -197,7 +197,7 @@ public class UserServiceTests {
         update.setPassword("newPass");
         update.setPhotoUrl("https://photo.url/img.jpg");
 
-        when(authUtils.getAuthenticatedUser()).thenReturn(actingUser);
+        when(authorizationService.currentUser()).thenReturn(actingUser);
         when(userRepository.existsByEmail("new@mail.com")).thenReturn(false);
         when(userRepository.existsByPhoneNumber("+359888000002")).thenReturn(false);
         when(passwordEncoder.encode("newPass")).thenReturn("encodedNewPass");
@@ -220,7 +220,7 @@ public class UserServiceTests {
         User update = new User();
         update.setEmail("taken@mail.com");
 
-        when(authUtils.getAuthenticatedUser()).thenReturn(actingUser);
+        when(authorizationService.currentUser()).thenReturn(actingUser);
         when(userRepository.existsByEmail("taken@mail.com")).thenReturn(true);
 
         DuplicateException ex =
@@ -239,7 +239,7 @@ public class UserServiceTests {
         User update = new User();
         update.setPhoneNumber("+359888999999");
 
-        when(authUtils.getAuthenticatedUser()).thenReturn(actingUser);
+        when(authorizationService.currentUser()).thenReturn(actingUser);
         when(userRepository.existsByPhoneNumber("+359888999999")).thenReturn(true);
 
         DuplicateException ex =
@@ -260,7 +260,7 @@ public class UserServiceTests {
         update.setEmail("same@mail.com");
         update.setPhoneNumber("+359888000001");
 
-        when(authUtils.getAuthenticatedUser()).thenReturn(actingUser);
+        when(authorizationService.currentUser()).thenReturn(actingUser);
         when(userRepository.save(actingUser)).thenReturn(actingUser);
 
         userService.edit(update);
@@ -274,7 +274,7 @@ public class UserServiceTests {
 
     @Test
     void delete_Should_DeleteAuthenticatedUser() {
-        when(authUtils.getAuthenticatedUser()).thenReturn(user);
+        when(authorizationService.currentUser()).thenReturn(user);
 
         userService.delete();
 

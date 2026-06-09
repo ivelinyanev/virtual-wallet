@@ -4,10 +4,10 @@ import example.backend.dtos.user.*;
 import example.backend.mappers.UserMapper;
 import example.backend.models.User;
 import example.backend.security.JwtUtils;
+import example.backend.services.protocols.AuthorizationService;
 import example.backend.services.protocols.AuthService;
 import example.backend.services.protocols.UserService;
 import example.backend.services.protocols.VerificationService;
-import example.backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -25,7 +25,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserService userService;
     private final VerificationService verificationService;
-    private final AuthUtils authUtils;
+    private final AuthorizationService authorizationService;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
 
@@ -64,7 +64,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @PreAuthorize("hasRole('USER')")
     public User getMe() {
-        return authUtils.getAuthenticatedUser();
+        return authorizationService.currentUser();
     }
 
     private void validatePassword(String dtoPassword, String entityPassword) {
