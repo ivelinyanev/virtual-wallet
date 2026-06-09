@@ -72,7 +72,7 @@ public class CardServiceImpl implements CardService {
         User actingUser = authUtils.getAuthenticatedUser();
         CardTokenizationResult metaData = paymentService.tokenize(request);
 
-        if (cardRepository.existsByFingerprintAndCardHolder(metaData.fingerprint(), actingUser)) {
+        if (cardRepository.existsByFingerprintAndCardHolderAndDeletedFalse(metaData.fingerprint(), actingUser)) {
             throw new DuplicateException(CARD_ALREADY_ADDED);
         }
 

@@ -5,14 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(
-        name = "cards",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {
-                        "fingerprint", "user_id"
-                })
-        }
-)
+@Table(name = "cards")
 @Getter
 @Setter
 @AllArgsConstructor

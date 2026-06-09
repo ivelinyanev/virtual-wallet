@@ -17,5 +17,5 @@ public interface CardRepository extends JpaRepository<Card, Long> {
 
     Optional<Card> findByIdAndDeletedFalse(Long id);
 
-    boolean existsByFingerprintAndCardHolder(String fingerprint, User cardHolder);
+    boolean existsByFingerprintAndCardHolderAndDeletedFalse(String fingerprint, User cardHolder);
 }
