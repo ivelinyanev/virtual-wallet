@@ -5,14 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(
-        name = "cards",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {
-                        "fingerprint", "user_id"
-                })
-        }
-)
+@Table(name = "cards")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -47,6 +40,9 @@ public class Card {
 
     @Transient
     private String cvv;
+
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

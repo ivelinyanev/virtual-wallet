@@ -12,8 +12,8 @@ import example.backend.models.User;
 import example.backend.models.Wallet;
 import example.backend.repositories.CardRepository;
 import example.backend.repositories.WalletRepository;
-import example.backend.services.implementations.TransactionServiceImpl;
 import example.backend.services.implementations.WalletServiceImpl;
+import example.backend.services.protocols.LedgerService;
 import example.backend.services.protocols.PaymentService;
 import example.backend.utils.AuthUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +41,7 @@ public class WalletServiceTests {
     @Mock private WalletRepository walletRepository;
     @Mock private AuthUtils authUtils;
     @Mock private PaymentService paymentService;
-    @Mock private TransactionServiceImpl transactionService;
+    @Mock private LedgerService ledger;
     @Mock private CardRepository cardRepository;
 
     @InjectMocks
@@ -250,6 +250,7 @@ public class WalletServiceTests {
         assertEquals(new BigDecimal("150"), wallet.getBalance());
         verify(paymentService).charge("tok_test", new BigDecimal("50"));
         verify(walletRepository).save(wallet);
+        verify(ledger).recordTopUp(wallet, card, new BigDecimal("50"));
     }
 
     @Test
@@ -327,6 +328,7 @@ public class WalletServiceTests {
         assertEquals(new BigDecimal("120"), wallet.getBalance());
         verify(paymentService).withdraw("tok_test", new BigDecimal("80"));
         verify(walletRepository).save(wallet);
+        verify(ledger).recordWithdrawal(wallet, card, new BigDecimal("80"));
     }
 
     @Test

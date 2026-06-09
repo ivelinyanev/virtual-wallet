@@ -46,12 +46,12 @@ public class CardServiceTests {
         List<Card> cards = List.of(new Card(), new Card());
 
         when(authUtils.getAuthenticatedUser()).thenReturn(user);
-        when(cardRepository.findAllByCardHolder(user)).thenReturn(cards);
+        when(cardRepository.findAllByCardHolderAndDeletedFalse(user)).thenReturn(cards);
 
         List<Card> result = cardService.getMyCards();
 
         assertEquals(2, result.size());
-        verify(cardRepository, times(1)).findAllByCardHolder(user);
+        verify(cardRepository, times(1)).findAllByCardHolderAndDeletedFalse(user);
         verify(cardRepository, never()).findAll();
     }
 
@@ -68,7 +68,7 @@ public class CardServiceTests {
         card1.setCardHolder(user);
         card2.setCardHolder(user);
 
-        when(cardRepository.findAllByCardHolderId(userId)).thenReturn(List.of(card1, card2));
+        when(cardRepository.findAllByCardHolderIdAndDeletedFalse(userId)).thenReturn(List.of(card1, card2));
 
         List<Card> result = cardService.getCardsByUserId(userId);
 
@@ -177,11 +177,13 @@ public class CardServiceTests {
         card.setCardHolder(actingUser);
 
         when(authUtils.getAuthenticatedUser()).thenReturn(actingUser);
-        when(cardRepository.findById(5L)).thenReturn(Optional.of(card));
+        when(cardRepository.findByIdAndDeletedFalse(5L)).thenReturn(Optional.of(card));
 
         cardService.delete(5L);
 
-        verify(cardRepository, times(1)).delete(card);
+        assertTrue(card.isDeleted());
+        verify(cardRepository, times(1)).save(card);
+        verify(cardRepository, never()).delete(any());
     }
 
     @Test
@@ -197,16 +199,17 @@ public class CardServiceTests {
         card.setCardHolder(owner);
 
         when(authUtils.getAuthenticatedUser()).thenReturn(actingUser);
-        when(cardRepository.findById(5L)).thenReturn(Optional.of(card));
+        when(cardRepository.findByIdAndDeletedFalse(5L)).thenReturn(Optional.of(card));
 
         assertThrows(AuthorizationException.class, () -> cardService.delete(5L));
         verify(cardRepository, never()).delete(any());
+        verify(cardRepository, never()).save(any());
     }
 
     @Test
     void delete_Should_Throw_When_CardNotFound() {
         when(authUtils.getAuthenticatedUser()).thenReturn(new User());
-        when(cardRepository.findById(99L)).thenReturn(Optional.empty());
+        when(cardRepository.findByIdAndDeletedFalse(99L)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> cardService.delete(99L));
     }

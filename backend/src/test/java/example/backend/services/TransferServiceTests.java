@@ -9,10 +9,10 @@ import example.backend.exceptions.ImpossibleOperationException;
 import example.backend.models.User;
 import example.backend.models.Wallet;
 import example.backend.repositories.WalletRepository;
-import example.backend.services.implementations.TransactionServiceImpl;
 import example.backend.services.implementations.TransferServiceImpl;
 import example.backend.services.implementations.UserServiceImpl;
 import example.backend.services.protocols.ConversionService;
+import example.backend.services.protocols.LedgerService;
 import example.backend.utils.AuthUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.*;
 public class TransferServiceTests {
 
     @Mock private WalletRepository walletRepository;
-    @Mock private TransactionServiceImpl transactionService;
+    @Mock private LedgerService ledger;
     @Mock private ConversionService conversionService;
     @Mock private UserServiceImpl userService;
     @Mock private AuthUtils authUtils;
@@ -91,6 +91,7 @@ public class TransferServiceTests {
 
         assertEquals(new BigDecimal("900"), fromWallet.getBalance());
         assertEquals(new BigDecimal("600"), toWallet.getBalance());
+        verify(ledger).recordTransfer(fromWallet, toWallet, new BigDecimal("100"), new BigDecimal("100"));
     }
 
     @Test
@@ -221,6 +222,7 @@ public class TransferServiceTests {
 
         assertEquals(new BigDecimal("990"), fromWallet.getBalance());
         assertEquals(new BigDecimal("509"), toWallet.getBalance());
+        verify(ledger).recordTransfer(fromWallet, toWallet, BigDecimal.TEN, new BigDecimal("9"));
     }
 
     // ───────────────────────── internalTransfer ─────────────────────────
@@ -243,6 +245,7 @@ public class TransferServiceTests {
 
         assertEquals(new BigDecimal("900"), fromWallet.getBalance());
         assertEquals(new BigDecimal("300"), ownWallet.getBalance());
+        verify(ledger).recordTransfer(fromWallet, ownWallet, new BigDecimal("100"), new BigDecimal("100"));
     }
 
     @Test
@@ -264,6 +267,7 @@ public class TransferServiceTests {
 
         assertEquals(new BigDecimal("900"), fromWallet.getBalance());
         assertEquals(new BigDecimal("308"), usdWallet.getBalance());
+        verify(ledger).recordTransfer(fromWallet, usdWallet, new BigDecimal("100"), new BigDecimal("108"));
     }
 
     @Test

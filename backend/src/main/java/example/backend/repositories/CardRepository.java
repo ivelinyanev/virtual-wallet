@@ -11,9 +11,11 @@ import java.util.Optional;
 @Repository
 public interface CardRepository extends JpaRepository<Card, Long> {
 
-    List<Card> findAllByCardHolder(User cardHolder);
+    List<Card> findAllByCardHolderAndDeletedFalse(User cardHolder);
 
-    boolean existsByFingerprintAndCardHolder(String fingerprint, User cardHolder);
+    List<Card> findAllByCardHolderIdAndDeletedFalse(Long id);
 
-    List<Card> findAllByCardHolderId(Long id);
+    Optional<Card> findByIdAndDeletedFalse(Long id);
+
+    boolean existsByFingerprintAndCardHolderAndDeletedFalse(String fingerprint, User cardHolder);
 }
