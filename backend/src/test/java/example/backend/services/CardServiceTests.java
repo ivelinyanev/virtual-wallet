@@ -113,7 +113,7 @@ public class CardServiceTests {
 
         when(authUtils.getAuthenticatedUser()).thenReturn(actingUser);
         when(paymentService.tokenize(request)).thenReturn(metaData);
-        when(cardRepository.existsByFingerprintAndCardHolder("fp_123", actingUser)).thenReturn(false);
+        when(cardRepository.existsByFingerprintAndCardHolderAndDeletedFalse("fp_123", actingUser)).thenReturn(false);
         when(cardRepository.save(any(Card.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Card result = cardService.create(request);
@@ -135,7 +135,7 @@ public class CardServiceTests {
 
         when(authUtils.getAuthenticatedUser()).thenReturn(actingUser);
         when(paymentService.tokenize(request)).thenReturn(metaData);
-        when(cardRepository.existsByFingerprintAndCardHolder("fp_123", actingUser)).thenReturn(true);
+        when(cardRepository.existsByFingerprintAndCardHolderAndDeletedFalse("fp_123", actingUser)).thenReturn(true);
 
         assertThrows(DuplicateException.class, () -> cardService.create(request));
         verify(cardRepository, never()).save(any());
