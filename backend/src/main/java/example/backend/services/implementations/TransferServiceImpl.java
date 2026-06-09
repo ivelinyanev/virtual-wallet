@@ -4,7 +4,6 @@ import example.backend.annotations.RequiresVerifiedAccount;
 import example.backend.dtos.transfer.OwnWalletTransferRequest;
 import example.backend.dtos.transfer.TransferRequest;
 import example.backend.enums.Currency;
-import example.backend.enums.TransactionType;
 import example.backend.exceptions.AccountNotVerifiedException;
 import example.backend.exceptions.AuthorizationException;
 import example.backend.exceptions.EntityNotFoundException;
@@ -13,6 +12,7 @@ import example.backend.models.User;
 import example.backend.models.Wallet;
 import example.backend.repositories.WalletRepository;
 import example.backend.services.protocols.ConversionService;
+import example.backend.services.protocols.LedgerService;
 import example.backend.services.protocols.TransferService;
 import example.backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ import static example.backend.utils.StringConstants.*;
 public class TransferServiceImpl implements TransferService {
 
     private final WalletRepository walletRepository;
-    private final TransactionServiceImpl transactionService;
+    private final LedgerService ledger;
     private final ConversionService conversionService;
     private final UserServiceImpl userService;
     private final AuthUtils authUtils;
@@ -65,7 +65,7 @@ public class TransferServiceImpl implements TransferService {
         debit(from, amount);
         credit(toWallet, creditAmount);
 
-        recordTransaction(from, toWallet, amount, creditAmount);
+        ledger.recordTransfer(from, toWallet, amount, creditAmount);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class TransferServiceImpl implements TransferService {
         debit(from, request.amount());
         credit(to, creditAmount);
 
-        recordTransaction(from, to, request.amount(), creditAmount);
+        ledger.recordTransfer(from, to, request.amount(), creditAmount);
     }
 
     private void validateTransferRequest(Long fromId, Long toId, BigDecimal amount) {
@@ -158,22 +158,6 @@ public class TransferServiceImpl implements TransferService {
                 from.getCurrency(),
                 to.getCurrency(),
                 amount
-        );
-    }
-
-    private void recordTransaction(Wallet from, Wallet to, BigDecimal debitAmount, BigDecimal creditAmount) {
-        transactionService.recordTransaction(
-                from,
-                to,
-                debitAmount.negate(),
-                TransactionType.TRANSFER_OUT
-        );
-
-        transactionService.recordTransaction(
-                to,
-                from,
-                creditAmount,
-                TransactionType.TRANSFER_IN
         );
     }
 

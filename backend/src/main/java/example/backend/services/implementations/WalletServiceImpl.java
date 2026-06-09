@@ -4,13 +4,13 @@ import example.backend.annotations.RequiresVerifiedAccount;
 import example.backend.dtos.wallet.TopUpRequest;
 import example.backend.dtos.wallet.WithdrawRequest;
 import example.backend.enums.Currency;
-import example.backend.enums.TransactionType;
 import example.backend.exceptions.*;
 import example.backend.models.Card;
 import example.backend.models.User;
 import example.backend.models.Wallet;
 import example.backend.repositories.CardRepository;
 import example.backend.repositories.WalletRepository;
+import example.backend.services.protocols.LedgerService;
 import example.backend.services.protocols.PaymentService;
 import example.backend.services.protocols.WalletService;
 import example.backend.utils.AuthUtils;
@@ -31,7 +31,7 @@ public class WalletServiceImpl implements WalletService {
     private final WalletRepository walletRepository;
     private final AuthUtils authUtils;
     private final PaymentService paymentService;
-    private final TransactionServiceImpl transactionService;
+    private final LedgerService ledger;
     private final CardRepository cardRepository;
 
     @Override
@@ -111,9 +111,6 @@ public class WalletServiceImpl implements WalletService {
         walletRepository.save(wallet);
     }
 
-    /*
-        TODO: Missing checks for ownership, amount must be positive, etc.
-     */
     @Override
     @Transactional
     @RequiresVerifiedAccount
@@ -147,12 +144,7 @@ public class WalletServiceImpl implements WalletService {
 
         walletRepository.save(wallet);
 
-         transactionService.recordTransaction(
-                wallet,
-                null,
-                amount,
-                TransactionType.TOP_UP
-        );
+        ledger.recordTopUp(wallet, card, amount);
     }
 
     @Override
@@ -190,13 +182,7 @@ public class WalletServiceImpl implements WalletService {
 
         walletRepository.save(wallet);
 
-        transactionService.recordTransaction(
-                wallet,
-                null,
-                amount.negate(),
-                TransactionType.WITHDRAWAL,
-                card
-        );
+        ledger.recordWithdrawal(wallet, card, amount);
     }
 
     private boolean isOwner(Wallet wallet) {
